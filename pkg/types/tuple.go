@@ -21,8 +21,18 @@ type Tuple struct {
 	tupleType tupleType
 }
 
-// CreateVector returns a tuple object of type Vector
-func CreateVector(x, y, z float64) *Tuple {
+// GetX is a temporary function for testing
+func (t *Tuple) GetX() float64 {
+	return t.xAxis
+}
+
+// GetY is a temporary function for testing
+func (t *Tuple) GetY() float64 {
+	return t.yAxis
+}
+
+// NewVector returns a tuple object of type Vector
+func NewVector(x, y, z float64) *Tuple {
 	return &Tuple{
 		xAxis:     x,
 		yAxis:     y,
@@ -31,8 +41,8 @@ func CreateVector(x, y, z float64) *Tuple {
 	}
 }
 
-// CreatePoint returns a tuple object of type Point
-func CreatePoint(x, y, z float64) *Tuple {
+// NewPoint returns a tuple object of type Point
+func NewPoint(x, y, z float64) *Tuple {
 	return &Tuple{
 		xAxis:     x,
 		yAxis:     y,
@@ -157,5 +167,5 @@ func (t *Tuple) CrossProduct(t2 *Tuple) *Tuple {
 	newX := (t.yAxis * t2.zAxis) - (t.zAxis * t2.yAxis)
 	newY := (t.zAxis * t2.xAxis) - (t.xAxis * t2.zAxis)
 	newZ := (t.xAxis * t2.yAxis) - (t.yAxis * t2.xAxis)
-	return CreateVector(newX, newY, newZ)
+	return NewVector(newX, newY, newZ)
 }
