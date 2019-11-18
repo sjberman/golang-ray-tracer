@@ -1,4 +1,4 @@
-package types
+package base
 
 import (
 	"testing"
@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestTypes(t *testing.T) {
+func TestBase(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Controller Suite")
+	RunSpecs(t, "Base Suite")
 }
 
 var _ = Describe("tuple tests", func() {

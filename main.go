@@ -3,19 +3,21 @@ package main
 import (
 	"io"
 	"os"
+	"runtime/pprof"
 	"strings"
 
-	"github.com/sjberman/golang-ray-tracer/pkg/types"
+	"github.com/sjberman/golang-ray-tracer/pkg/image"
+	"github.com/sjberman/golang-ray-tracer/pkg/base"
 )
 
 type projectile struct {
-	position *types.Tuple
-	velocity *types.Tuple
+	position *base.Tuple
+	velocity *base.Tuple
 }
 
 type environment struct {
-	gravity *types.Tuple
-	wind    *types.Tuple
+	gravity *base.Tuple
+	wind    *base.Tuple
 }
 
 func tick(e *environment, p *projectile) *projectile {
@@ -30,21 +32,25 @@ func tick(e *environment, p *projectile) *projectile {
 
 // Test program
 func main() {
+	f1, _ := os.Create("perfFile")
+	pprof.StartCPUProfile(f1)
+	defer pprof.StopCPUProfile()
+
 	p := &projectile{
-		position: types.NewPoint(0, 1, 0),
-		velocity: types.NewVector(1, 5, 0).Normalize().Multiply(11.25),
+		position: base.NewPoint(0, 1, 0),
+		velocity: base.NewVector(1, 5, 0).Normalize().Multiply(11.25),
 	}
 	e := &environment{
-		gravity: types.NewVector(0, -0.1, 0),
-		wind:    types.NewVector(0, 0, 0),
+		gravity: base.NewVector(0, -0.1, 0),
+		wind:    base.NewVector(0, 0, 0),
 	}
 
-	canvas := types.NewCanvas(500, 550)
+	canvas := image.NewCanvas(500, 550)
 	for p.position.GetY() > 0 {
 		p = tick(e, p)
 		x := int(p.position.GetX())
 		y := int(900 - p.position.GetY())
-		canvas.WritePixel(x, y, types.NewColor(1, 0, 0))
+		canvas.WritePixel(x, y, image.NewColor(1, 0, 0))
 	}
 	ppm := canvas.ToPPM()
 	f, _ := os.Create("image.ppm")

@@ -1,4 +1,4 @@
-package types
+package image
 
 // Color is a tuple representing an rgb value
 type Color struct {

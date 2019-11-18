@@ -1,4 +1,4 @@
-package types
+package image
 
 import (
 	"fmt"
@@ -36,8 +36,10 @@ func (c *Canvas) WritePixel(x, y int, color *Color) {
 
 // PixelAt returns the Color of a Canvas's pixel
 func (c *Canvas) PixelAt(x, y int) *Color {
-	// TODO error check x,y coords are within range
-	return &c.pixels[x][y]
+	if !(x > c.width-1) && !(y > c.height-1) {
+		return &c.pixels[x][y]
+	}
+	return NewColor(0, 0, 0)
 }
 
 // ToPPM returns a PPM (portable pixelmap) string of the canvas

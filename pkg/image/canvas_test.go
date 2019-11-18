@@ -1,9 +1,16 @@
-package types
+package image
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
+
+func TestImage(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Image Suite")
+}
 
 var _ = Describe("canvas tests", func() {
 	It("creates a new canvas", func() {
