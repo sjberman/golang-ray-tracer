@@ -34,6 +34,7 @@ var _ = Describe("canvas tests", func() {
 		c.WritePixel(2, 3, color)
 		Expect(c.PixelAt(3, 2)).To(Equal(black))
 		Expect(c.PixelAt(2, 3)).To(Equal(color))
+		Expect(c.PixelAt(20, 20)).To(Equal(black))
 	})
 
 	It("builds a ppm string", func() {

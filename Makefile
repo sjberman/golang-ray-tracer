@@ -3,7 +3,7 @@ test:
 	go tool cover -func=test-coverage.out
 
 lint:
-	golangci-lint run --enable-all -D gochecknoglobals
+	golangci-lint run --enable-all -D gochecknoglobals -D wsl
 
 deps:
 	go mod tidy

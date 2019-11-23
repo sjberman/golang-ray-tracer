@@ -13,22 +13,32 @@ func TestBase(t *testing.T) {
 }
 
 var _ = Describe("tuple tests", func() {
+	It("creates tuples", func() {
+		expTuple := &Tuple{
+			xAxis: 1,
+			yAxis: 2,
+			zAxis: 3,
+			w:     4,
+		}
+		Expect(NewTuple(1, 2, 3, 4)).To(Equal(expTuple))
+	})
+
 	It("creates vectors", func() {
 		expVector := &Tuple{
-			xAxis:     1,
-			yAxis:     2,
-			zAxis:     3,
-			tupleType: vector,
+			xAxis: 1,
+			yAxis: 2,
+			zAxis: 3,
+			w:     vector,
 		}
 		Expect(NewVector(1, 2, 3)).To(Equal(expVector))
 	})
 
 	It("creates points", func() {
 		expPoint := &Tuple{
-			xAxis:     1,
-			yAxis:     2,
-			zAxis:     3,
-			tupleType: point,
+			xAxis: 1,
+			yAxis: 2,
+			zAxis: 3,
+			w:     point,
 		}
 		Expect(NewPoint(1, 2, 3)).To(Equal(expPoint))
 	})
@@ -129,7 +139,7 @@ var _ = Describe("tuple tests", func() {
 		Expect(p1.Equals(p2)).To(BeFalse())
 
 		p1 = NewPoint(-1, 2.5, 3.0000001)
-		p2 = NewPoint(-1, 2.500000000000001, 3.0000001)
+		p2 = NewPoint(-1, 2.50001, 3.0000001)
 		Expect(p1.Equals(p2)).To(BeFalse())
 
 		Expect(p1.Equals(v1)).To(BeFalse())
