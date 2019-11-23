@@ -2,6 +2,7 @@ package base
 
 import (
 	"errors"
+	"math"
 )
 
 // Matrix is a matrix of floating point numbers
@@ -59,8 +60,8 @@ func (m *Matrix) Equals(m2 *Matrix) bool {
 // Only applies to 4x4 matrices
 func (m *Matrix) Multiply(m2 *Matrix) *Matrix {
 	res := NewMatrix(newData(m.size))
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
+	for i := 0; i < m.size; i++ {
+		for j := 0; j < m.size; j++ {
 			iTuple := listToTuple(m.data[i])
 			jTuple := NewTuple(m2.data[0][j], m2.data[1][j], m2.data[2][j], m2.data[3][j])
 			res.data[i][j] = iTuple.DotProduct(jTuple)
@@ -72,7 +73,7 @@ func (m *Matrix) Multiply(m2 *Matrix) *Matrix {
 // MultiplyTuple multiples a matrix by a tuple and returns the resulting tuple.
 // Only applies to 4x4 matrices
 func (m *Matrix) MultiplyTuple(t *Tuple) *Tuple {
-	newVals := make([]float64, 4)
+	newVals := make([]float64, m.size)
 	for i, row := range m.data {
 		newVals[i] = listToTuple(row).DotProduct(t)
 	}
@@ -82,8 +83,8 @@ func (m *Matrix) MultiplyTuple(t *Tuple) *Tuple {
 // Transpose turns a matrix's rows into columns
 func (m *Matrix) Transpose() *Matrix {
 	res := NewMatrix(newData(m.size))
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
+	for i := 0; i < m.size; i++ {
+		for j := 0; j < m.size; j++ {
 			res.data[i][j] = m.data[j][i]
 		}
 	}
@@ -157,7 +158,69 @@ func (m *Matrix) cofactor(row, col int) float64 {
 	return -minor
 }
 
-// Converts a list of 4 values to a tuple
-func listToTuple(list []float64) *Tuple {
-	return NewTuple(list[0], list[1], list[2], list[3])
+// TranslationMatrix returns a translation matrix
+func TranslationMatrix(x, y, z float64) *Matrix {
+	data := [][]float64{
+		{1, 0, 0, x},
+		{0, 1, 0, y},
+		{0, 0, 1, z},
+		{0, 0, 0, 1},
+	}
+	return NewMatrix(data)
+}
+
+// ScalingMatrix returns a scaling matrix
+func ScalingMatrix(x, y, z float64) *Matrix {
+	data := [][]float64{
+		{x, 0, 0, 0},
+		{0, y, 0, 0},
+		{0, 0, z, 0},
+		{0, 0, 0, 1},
+	}
+	return NewMatrix(data)
+}
+
+// XRotationMatrix returns a x-axis rotation matrix
+func XRotationMatrix(radians float64) *Matrix {
+	data := [][]float64{
+		{1, 0, 0, 0},
+		{0, math.Cos(radians), -math.Sin(radians), 0},
+		{0, math.Sin(radians), math.Cos(radians), 0},
+		{0, 0, 0, 1},
+	}
+	return NewMatrix(data)
+}
+
+// YRotationMatrix returns a y-axis rotation matrix
+func YRotationMatrix(radians float64) *Matrix {
+	data := [][]float64{
+		{math.Cos(radians), 0, math.Sin(radians), 0},
+		{0, 1, 0, 0},
+		{-math.Sin(radians), 0, math.Cos(radians), 0},
+		{0, 0, 0, 1},
+	}
+	return NewMatrix(data)
+}
+
+// ZRotationMatrix returns a z-axis rotation matrix
+func ZRotationMatrix(radians float64) *Matrix {
+	data := [][]float64{
+		{math.Cos(radians), -math.Sin(radians), 0, 0},
+		{math.Sin(radians), math.Cos(radians), 0, 0},
+		{0, 0, 1, 0},
+		{0, 0, 0, 1},
+	}
+	return NewMatrix(data)
+}
+
+// ShearingMatrix returns a shearing (or skewing) matrix
+func ShearingMatrix(xy, xz, yx, yz, zx, zy float64) *Matrix {
+	// xy means "x moved in proportion to y" and so on for the rest
+	data := [][]float64{
+		{1, xy, xz, 0},
+		{yx, 1, yz, 0},
+		{zx, zy, 1, 0},
+		{0, 0, 0, 1},
+	}
+	return NewMatrix(data)
 }

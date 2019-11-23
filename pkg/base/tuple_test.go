@@ -53,6 +53,13 @@ var _ = Describe("tuple tests", func() {
 		Expect(v.IsPoint()).To(BeFalse())
 	})
 
+	It("returns each axis", func() {
+		t := NewTuple(1, 2, 3, 4)
+		Expect(t.GetX()).To(Equal(float64(1)))
+		Expect(t.GetY()).To(Equal(float64(2)))
+		Expect(t.GetZ()).To(Equal(float64(3)))
+	})
+
 	It("adds tuples", func() {
 		// vector + vector
 		v1 := NewVector(1, 2, 3)

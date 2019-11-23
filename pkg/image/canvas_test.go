@@ -50,7 +50,7 @@ var _ = Describe("canvas tests", func() {
 0 0 0 0 0 0 0 128 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 255
 `
-		Expect(c.ToPPM()).To(Equal(expPPM))
+		Expect(c.toPPM()).To(Equal(expPPM))
 
 		// Verify we don't have lines over 70 characters
 		c = NewCanvas(10, 2)
@@ -68,6 +68,6 @@ var _ = Describe("canvas tests", func() {
 255 204 153 255 204 153 255 204 153 255 204 153 255 204 153
 255 204 153 255 204 153 255 204 153 255 204 153 255 204 153
 `
-		Expect(c.ToPPM()).To(Equal(expPPM))
+		Expect(c.toPPM()).To(Equal(expPPM))
 	})
 })

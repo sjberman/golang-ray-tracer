@@ -18,16 +18,6 @@ type Tuple struct {
 	w     float64
 }
 
-// GetX is a temporary function for testing
-func (t *Tuple) GetX() float64 {
-	return t.xAxis
-}
-
-// GetY is a temporary function for testing
-func (t *Tuple) GetY() float64 {
-	return t.yAxis
-}
-
 // NewTuple returns a generic tuple
 func NewTuple(x, y, z, w float64) *Tuple {
 	return &Tuple{
@@ -66,6 +56,21 @@ func (t *Tuple) IsVector() bool {
 // IsPoint returns whether or not a tuple is a point
 func (t *Tuple) IsPoint() bool {
 	return t.w == point
+}
+
+// GetX() returns the x coordinate of the tuple
+func (t *Tuple) GetX() float64 {
+	return t.xAxis
+}
+
+// GetY() returns the y coordinate of the tuple
+func (t *Tuple) GetY() float64 {
+	return t.yAxis
+}
+
+// GetZ() returns the z coordinate of the tuple
+func (t *Tuple) GetZ() float64 {
+	return t.zAxis
 }
 
 // Add adds two tuples together and returns the result
@@ -174,4 +179,9 @@ func (t *Tuple) CrossProduct(t2 *Tuple) *Tuple {
 	newY := (t.zAxis * t2.xAxis) - (t.xAxis * t2.zAxis)
 	newZ := (t.xAxis * t2.yAxis) - (t.yAxis * t2.xAxis)
 	return NewVector(newX, newY, newZ)
+}
+
+// Converts a list of 4 values to a tuple
+func listToTuple(list []float64) *Tuple {
+	return NewTuple(list[0], list[1], list[2], list[3])
 }

@@ -1,6 +1,8 @@
 package base
 
 import (
+	"math"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -266,5 +268,143 @@ var _ = Describe("matrix tests", func() {
 
 		res := m3.Multiply(inverse)
 		Expect(res.Equals(m1)).To(BeTrue())
+	})
+
+	It("creates a translation matrix", func() {
+		t := TranslationMatrix(5, -3, 2)
+		p := NewPoint(-3, 4, 5)
+		expPoint := NewPoint(2, 1, 7)
+		Expect(t.MultiplyTuple(p)).To(Equal(expPoint))
+
+		inverse, err := t.Inverse()
+		Expect(err).ToNot(HaveOccurred())
+		expPoint = NewPoint(-8, 7, 3)
+		Expect(inverse.MultiplyTuple(p)).To(Equal(expPoint))
+
+		v := NewVector(-3, 4, 5)
+		Expect(t.MultiplyTuple(v)).To(Equal(v))
+	})
+
+	It("creates a scaling matrix", func() {
+		s := ScalingMatrix(2, 3, 4)
+		p := NewPoint(-4, 6, 8)
+		expPoint := NewPoint(-8, 18, 32)
+		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
+
+		v := NewVector(-4, 6, 8)
+		expVector := NewVector(-8, 18, 32)
+		Expect(s.MultiplyTuple(v)).To(Equal(expVector))
+
+		inverse, err := s.Inverse()
+		Expect(err).ToNot(HaveOccurred())
+		expVector = NewVector(-2, 2, 2)
+		Expect(inverse.MultiplyTuple(v)).To(Equal(expVector))
+
+		// reflection
+		s = ScalingMatrix(-1, 1, 1)
+		p = NewPoint(2, 3, 4)
+		expPoint = NewPoint(-2, 3, 4)
+		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
+	})
+
+	It("creates rotation matrices", func() {
+		// X axis
+		p := NewPoint(0, 1, 0)
+		rx := XRotationMatrix(math.Pi / 4)
+		expPoint := NewPoint(0, math.Sqrt(2)/2, math.Sqrt(2)/2)
+		res := rx.MultiplyTuple(p)
+		Expect(res.Equals(expPoint)).To(BeTrue())
+
+		rx = XRotationMatrix(math.Pi / 2)
+		expPoint = NewPoint(0, 0, 1)
+		res = rx.MultiplyTuple(p)
+		Expect(res.Equals(expPoint)).To(BeTrue())
+
+		// Y axis
+		p = NewPoint(0, 0, 1)
+		ry := YRotationMatrix(math.Pi / 4)
+		expPoint = NewPoint(math.Sqrt(2)/2, 0, math.Sqrt(2)/2)
+		res = ry.MultiplyTuple(p)
+		Expect(res.Equals(expPoint)).To(BeTrue())
+
+		ry = YRotationMatrix(math.Pi / 2)
+		expPoint = NewPoint(1, 0, 0)
+		res = ry.MultiplyTuple(p)
+		Expect(res.Equals(expPoint)).To(BeTrue())
+
+		// Z axis
+		p = NewPoint(0, 1, 0)
+		rz := ZRotationMatrix(math.Pi / 4)
+		expPoint = NewPoint(-math.Sqrt(2)/2, math.Sqrt(2)/2, 0)
+		res = rz.MultiplyTuple(p)
+		Expect(res.Equals(expPoint)).To(BeTrue())
+
+		rz = ZRotationMatrix(math.Pi / 2)
+		expPoint = NewPoint(-1, 0, 0)
+		res = rz.MultiplyTuple(p)
+		Expect(res.Equals(expPoint)).To(BeTrue())
+	})
+
+	It("creates a shearing matrix", func() {
+		// moves x in proportion to y
+		s := ShearingMatrix(1, 0, 0, 0, 0, 0)
+		p := NewPoint(2, 3, 4)
+		expPoint := NewPoint(5, 3, 4)
+		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
+
+		// moves x in proportion to z
+		s = ShearingMatrix(0, 1, 0, 0, 0, 0)
+		p = NewPoint(2, 3, 4)
+		expPoint = NewPoint(6, 3, 4)
+		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
+
+		// moves y in proportion to x
+		s = ShearingMatrix(0, 0, 1, 0, 0, 0)
+		p = NewPoint(2, 3, 4)
+		expPoint = NewPoint(2, 5, 4)
+		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
+
+		// moves y in proportion to z
+		s = ShearingMatrix(0, 0, 0, 1, 0, 0)
+		p = NewPoint(2, 3, 4)
+		expPoint = NewPoint(2, 7, 4)
+		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
+
+		// moves z in proportion to x
+		s = ShearingMatrix(0, 0, 0, 0, 1, 0)
+		p = NewPoint(2, 3, 4)
+		expPoint = NewPoint(2, 3, 6)
+		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
+
+		// moves z in proportion to y
+		s = ShearingMatrix(0, 0, 0, 0, 0, 1)
+		p = NewPoint(2, 3, 4)
+		expPoint = NewPoint(2, 3, 7)
+		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
+	})
+
+	It("chains transformations", func() {
+		// individual transformations applied in sequence
+		p := NewPoint(1, 0, 1)
+		rx := XRotationMatrix(math.Pi / 2)
+		s := ScalingMatrix(5, 5, 5)
+		t := TranslationMatrix(10, 5, 7)
+
+		p2 := rx.MultiplyTuple(p)
+		expPoint := NewPoint(1, -1, 0)
+		Expect(p2.Equals(expPoint)).To(BeTrue())
+
+		p3 := s.MultiplyTuple(p2)
+		expPoint = NewPoint(5, -5, 0)
+		Expect(p3.Equals(expPoint)).To(BeTrue())
+
+		p4 := t.MultiplyTuple(p3)
+		expPoint = NewPoint(15, 0, 7)
+		Expect(p4.Equals(expPoint)).To(BeTrue())
+
+		// chained transformations applied in reverse order
+		m := t.Multiply(s.Multiply(rx))
+		res := m.MultiplyTuple(p)
+		Expect(res.Equals(expPoint)).To(BeTrue())
 	})
 })

@@ -3,6 +3,7 @@ package image
 import (
 	"fmt"
 	"math"
+	"os"
 	"strings"
 )
 
@@ -42,8 +43,8 @@ func (c *Canvas) PixelAt(x, y int) *Color {
 	return NewColor(0, 0, 0)
 }
 
-// ToPPM returns a PPM (portable pixelmap) string of the canvas
-func (c *Canvas) ToPPM() string {
+// toPPM returns a PPM (portable pixelmap) string of the canvas
+func (c *Canvas) toPPM() string {
 	header := fmt.Sprintf("P3\n%d %d\n%d\n", c.width, c.height, 255)
 	var body string
 	for i := 0; i < c.height; i++ {
@@ -63,6 +64,18 @@ func (c *Canvas) ToPPM() string {
 	}
 	ppm := header + body
 	return ppm
+}
+
+// WriteToFile writes the canvas ppm to a file
+func (c *Canvas) WriteToFile(name string) error {
+	f, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(c.toPPM())
+	return err
 }
 
 // scales a color's values to be from 0 to 255
