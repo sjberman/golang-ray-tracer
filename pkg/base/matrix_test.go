@@ -16,8 +16,8 @@ var _ = Describe("matrix tests", func() {
 			{13.5, 14.5, 15.5, 16.5},
 		}
 		m := NewMatrix(data)
-		Expect(m.data[0][0]).To(Equal(float64(1)))
-		Expect(m.data[0][3]).To(Equal(float64(4)))
+		Expect(m.data[0][0]).To(Equal(1.0))
+		Expect(m.data[0][3]).To(Equal(4.0))
 		Expect(m.data[1][0]).To(Equal(5.5))
 		Expect(m.data[1][2]).To(Equal(7.5))
 		Expect(m.data[3][0]).To(Equal(13.5))
@@ -133,7 +133,7 @@ var _ = Describe("matrix tests", func() {
 			{-3, 2},
 		}
 		m := NewMatrix(data)
-		Expect(m.determinant()).To(Equal(float64(17)))
+		Expect(m.determinant()).To(Equal(17.0))
 	})
 
 	It("creates submatrices from larger matrices", func() {
@@ -177,7 +177,7 @@ var _ = Describe("matrix tests", func() {
 			{6, -1, 5},
 		}
 		m := NewMatrix(data)
-		Expect(m.minor(1, 0)).To(Equal(float64(25)))
+		Expect(m.minor(1, 0)).To(Equal(25.0))
 	})
 
 	It("computes the cofactor of a matrix", func() {
@@ -187,10 +187,10 @@ var _ = Describe("matrix tests", func() {
 			{6, -1, 5},
 		}
 		m := NewMatrix(data)
-		Expect(m.minor(0, 0)).To(Equal(float64(-12)))
-		Expect(m.cofactor(0, 0)).To(Equal(float64(-12)))
-		Expect(m.minor(1, 0)).To(Equal(float64(25)))
-		Expect(m.cofactor(1, 0)).To(Equal(float64(-25)))
+		Expect(m.minor(0, 0)).To(Equal(-12.0))
+		Expect(m.cofactor(0, 0)).To(Equal(-12.0))
+		Expect(m.minor(1, 0)).To(Equal(25.0))
+		Expect(m.cofactor(1, 0)).To(Equal(-25.0))
 	})
 
 	It("computes the determinant of a 3x3 matrix", func() {
@@ -200,7 +200,7 @@ var _ = Describe("matrix tests", func() {
 			{2, 6, 4},
 		}
 		m := NewMatrix(data)
-		Expect(m.determinant()).To(Equal(float64(-196)))
+		Expect(m.determinant()).To(Equal(-196.0))
 	})
 
 	It("computes the determinant of a 4x4 matrix", func() {
@@ -211,7 +211,7 @@ var _ = Describe("matrix tests", func() {
 			{-6, 7, 7, -9},
 		}
 		m := NewMatrix(data)
-		Expect(m.determinant()).To(Equal(float64(-4071)))
+		Expect(m.determinant()).To(Equal(-4071.0))
 	})
 
 	It("inverts a matrix", func() {

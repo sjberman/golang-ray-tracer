@@ -8,9 +8,9 @@ import (
 var _ = Describe("color tests", func() {
 	It("creates colors", func() {
 		color := NewColor(1, 2, 3)
-		Expect(color.red).To(Equal(float64(1)))
-		Expect(color.green).To(Equal(float64(2)))
-		Expect(color.blue).To(Equal(float64(3)))
+		Expect(color.red).To(Equal(1.0))
+		Expect(color.green).To(Equal(2.0))
+		Expect(color.blue).To(Equal(3.0))
 	})
 
 	It("adds colors", func() {

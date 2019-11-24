@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
+	"github.com/sjberman/golang-ray-tracer/pkg/ray"
 )
 
 // Test program
@@ -14,18 +14,28 @@ func main() {
 	// pprof.StartCPUProfile(f1)
 	// defer pprof.StopCPUProfile()
 
-	canvas := image.NewCanvas(500, 500)
-	clockRadius := float64((3.0 / 8.0) * 500.0)
-	originX, originY := 250, 250
-	twelve := base.NewPoint(0, 1, 0)
+	canvas := image.NewCanvas(100, 100)
+	sphere := ray.NewSphere()
+	sphere.SetTransform(base.ScalingMatrix(1, .5, 1))
+	rayOrigin := base.NewPoint(0, 0, -5)
+	wallZ := 10.0
+	wallSize := 7.0
+	pixelSize := wallSize / 100.0
+	half := wallSize / 2
+	red := image.NewColor(1, 0, 0)
 
-	for i := 1.0; i < 13.0; i++ {
-		rz := base.ZRotationMatrix(i * (math.Pi / 6))
-		iTime := rz.MultiplyTuple(twelve)
-
-		x := int(math.Round(iTime.GetX()*clockRadius)) + originX
-		y := int(math.Round(iTime.GetY()*clockRadius)) + originY
-		canvas.WritePixel(x, y, image.NewColor(1, 1, 1))
+	for y := 0; y < 99; y++ {
+		worldY := half - pixelSize*float64(y)
+		for x := 0; x < 99; x++ {
+			worldX := -half + pixelSize*float64(x)
+			position := base.NewPoint(worldX, worldY, wallZ)
+			sub, _ := position.Subtract(rayOrigin)
+			r := ray.NewRay(rayOrigin, sub.Normalize())
+			ints := r.Intersect(sphere)
+			if ray.Hit(ints) != nil {
+				canvas.WritePixel(x, y, red)
+			}
+		}
 	}
 
 	err := canvas.WriteToFile("image.ppm")

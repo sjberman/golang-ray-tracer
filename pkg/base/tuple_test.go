@@ -55,9 +55,9 @@ var _ = Describe("tuple tests", func() {
 
 	It("returns each axis", func() {
 		t := NewTuple(1, 2, 3, 4)
-		Expect(t.GetX()).To(Equal(float64(1)))
-		Expect(t.GetY()).To(Equal(float64(2)))
-		Expect(t.GetZ()).To(Equal(float64(3)))
+		Expect(t.GetX()).To(Equal(1.0))
+		Expect(t.GetY()).To(Equal(2.0))
+		Expect(t.GetZ()).To(Equal(3.0))
 	})
 
 	It("adds tuples", func() {
@@ -164,19 +164,19 @@ var _ = Describe("tuple tests", func() {
 
 	It("gets the magnitude of vectors", func() {
 		v := NewVector(1, 0, 0)
-		Expect(v.Magnitude()).To(Equal(float64(1)))
+		Expect(v.Magnitude()).To(Equal(1.0))
 
 		v = NewVector(0, 1, 0)
-		Expect(v.Magnitude()).To(Equal(float64(1)))
+		Expect(v.Magnitude()).To(Equal(1.0))
 
 		v = NewVector(0, 0, 1)
-		Expect(v.Magnitude()).To(Equal(float64(1)))
+		Expect(v.Magnitude()).To(Equal(1.0))
 
 		v = NewVector(2, 7, -4)
-		Expect(v.Magnitude()).To(Equal(float64(8.306623862918075)))
+		Expect(v.Magnitude()).To(Equal(8.306623862918075))
 
 		v = NewVector(2, 7, 4)
-		Expect(v.Magnitude()).To(Equal(float64(8.306623862918075)))
+		Expect(v.Magnitude()).To(Equal(8.306623862918075))
 	})
 
 	It("normalizes vectors", func() {
@@ -192,7 +192,7 @@ var _ = Describe("tuple tests", func() {
 	It("gets the dot product of two vectors", func() {
 		v1 := NewVector(1, 2, 3)
 		v2 := NewVector(2, 3, 4)
-		Expect(v1.DotProduct(v2)).To(Equal(float64(20)))
+		Expect(v1.DotProduct(v2)).To(Equal(20.0))
 	})
 
 	It("gets the cross product of two vectors", func() {

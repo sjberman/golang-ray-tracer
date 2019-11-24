@@ -18,6 +18,14 @@ type Tuple struct {
 	w     float64
 }
 
+// Origin represents the origin point
+var Origin = &Tuple{
+	xAxis: 0,
+	yAxis: 0,
+	zAxis: 0,
+	w:     1,
+}
+
 // NewTuple returns a generic tuple
 func NewTuple(x, y, z, w float64) *Tuple {
 	return &Tuple{
