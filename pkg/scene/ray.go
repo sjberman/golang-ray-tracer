@@ -1,4 +1,4 @@
-package ray
+package scene
 
 import (
 	"math"
@@ -12,17 +12,6 @@ type Ray struct {
 	direction *base.Tuple
 }
 
-// Sphere is a sphere object for ray intersection
-type Sphere struct {
-	transform *base.Matrix
-}
-
-// Intersection keeps track of the value and object of an intersection
-type Intersection struct {
-	value  float64
-	object *Sphere
-}
-
 // NewRay returns a new Ray object
 func NewRay(point *base.Tuple, vector *base.Tuple) *Ray {
 	return &Ray{
@@ -31,24 +20,9 @@ func NewRay(point *base.Tuple, vector *base.Tuple) *Ray {
 	}
 }
 
-// NewSphere returns a new Sphere object
-func NewSphere() *Sphere {
-	return &Sphere{
-		transform: base.Identity,
-	}
-}
-
-// SetTransform sets the sphere's transform to the supplied matrix
-func (s *Sphere) SetTransform(matrix *base.Matrix) {
-	s.transform = matrix
-}
-
-// NewIntersection returns a new Intersection object
-func NewIntersection(value float64, object *Sphere) *Intersection {
-	return &Intersection{
-		value:  value,
-		object: object,
-	}
+// GetDirection returns the ray's direction
+func (r *Ray) GetDirection() *base.Tuple {
+	return r.direction
 }
 
 // Position returns the point at a given distance along the ray
@@ -79,31 +53,6 @@ func (r *Ray) Intersect(s *Sphere) []*Intersection {
 	t2 := (-b + math.Sqrt(discriminant)) / (2 * a)
 
 	return intersections(NewIntersection(t1, s), NewIntersection(t2, s))
-}
-
-// returns a combined list of the supplied intersections
-func intersections(intersections ...*Intersection) []*Intersection {
-	return intersections
-}
-
-// Hit returns the closest intersection to the origin
-func Hit(intersections []*Intersection) *Intersection {
-	if len(intersections) == 0 {
-		return nil
-	}
-
-	var min *Intersection
-	for _, i := range intersections {
-		// set initial value of min
-		if min == nil && i.value > 0 {
-			min = i
-		}
-		// update min if new value is less
-		if i.value > 0 && i.value < min.value {
-			min = i
-		}
-	}
-	return min
 }
 
 // Transform applies the transformation matrix to the ray

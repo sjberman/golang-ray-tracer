@@ -11,7 +11,8 @@ type Matrix struct {
 	data [][]float64
 }
 
-var Identity = &Matrix{
+// Identity is the identity matrix
+var Identity = Matrix{
 	size: 4,
 	data: [][]float64{
 		{1, 0, 0, 0},
@@ -48,7 +49,7 @@ func (m *Matrix) Equals(m2 *Matrix) bool {
 	}
 	for i, row := range m.data {
 		for j := range row {
-			if !equalFloats(m.data[i][j], m2.data[i][j]) {
+			if !EqualFloats(m.data[i][j], m2.data[i][j]) {
 				return false
 			}
 		}

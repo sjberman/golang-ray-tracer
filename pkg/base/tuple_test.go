@@ -1,6 +1,7 @@
 package base
 
 import (
+	"math"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -58,6 +59,13 @@ var _ = Describe("tuple tests", func() {
 		Expect(t.GetX()).To(Equal(1.0))
 		Expect(t.GetY()).To(Equal(2.0))
 		Expect(t.GetZ()).To(Equal(3.0))
+	})
+
+	It("sets the w field", func() {
+		t := NewTuple(1, 2, 3, 4)
+		Expect(t.w).To(Equal(4.0))
+		t.SetW(5)
+		Expect(t.w).To(Equal(5.0))
 	})
 
 	It("adds tuples", func() {
@@ -203,5 +211,19 @@ var _ = Describe("tuple tests", func() {
 
 		expVector = NewVector(1, -2, 1)
 		Expect(v2.CrossProduct(v1)).To(Equal(expVector))
+	})
+
+	It("reflects vectors around a normal", func() {
+		// reflecting a vector approaching at 45 degrees
+		v := NewVector(1, -1, 0)
+		normal := NewVector(0, 1, 0)
+		expVector := NewVector(1, 1, 0)
+		Expect(v.Reflect(normal).Equals(expVector)).To(BeTrue())
+
+		// reflecting a vector off a slanted surface
+		v = NewVector(0, -1, 0)
+		normal = NewVector(math.Sqrt(2)/2, math.Sqrt(2)/2, 0)
+		expVector = NewVector(1, 0, 0)
+		Expect(v.Reflect(normal).Equals(expVector)).To(BeTrue())
 	})
 })

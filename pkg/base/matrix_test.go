@@ -100,7 +100,7 @@ var _ = Describe("matrix tests", func() {
 			{4, 8, 16, 32},
 		}
 		m := NewMatrix(data)
-		Expect(m.Multiply(Identity)).To(Equal(m))
+		Expect(m.Multiply(&Identity)).To(Equal(m))
 
 		t := NewTuple(1, 2, 3, 4)
 		Expect(Identity.MultiplyTuple(t)).To(Equal(t))
@@ -124,7 +124,7 @@ var _ = Describe("matrix tests", func() {
 		expMatrix := NewMatrix(data)
 		Expect(m.Transpose()).To(Equal(expMatrix))
 
-		Expect(Identity.Transpose()).To(Equal(Identity))
+		Expect(Identity.Transpose()).To(Equal(&Identity))
 	})
 
 	It("computes the determinant of a 2x2 matrix", func() {

@@ -1,10 +1,11 @@
-package ray
+package scene
 
 import (
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 )
 
@@ -19,22 +20,7 @@ var _ = Describe("ray tests", func() {
 		d := base.NewVector(4, 5, 6)
 		ray := NewRay(o, d)
 		Expect(ray.origin).To(Equal(o))
-		Expect(ray.direction).To(Equal(d))
-	})
-
-	It("creates spheres", func() {
-		s := NewSphere()
-		Expect(s.transform).To(Equal(base.Identity))
-		t := base.TranslationMatrix(2, 3, 4)
-		s.SetTransform(t)
-		Expect(s.transform).To(Equal(t))
-	})
-
-	It("creates intersections", func() {
-		s := NewSphere()
-		i := NewIntersection(3.5, s)
-		Expect(i.value).To(Equal(3.5))
-		Expect(i.object).To(Equal(s))
+		Expect(ray.GetDirection()).To(Equal(d))
 	})
 
 	It("computes the position of a point on the ray", func() {
@@ -111,45 +97,6 @@ var _ = Describe("ray tests", func() {
 		s.SetTransform(base.TranslationMatrix(5, 0, 0))
 		ints = r.Intersect(s)
 		Expect(len(ints)).To(Equal(0))
-	})
-
-	It("returns a list of intersections", func() {
-		s := NewSphere()
-		i1 := NewIntersection(1, s)
-		i2 := NewIntersection(2, s)
-		ints := intersections(i1, i2)
-		Expect(len(ints)).To(Equal(2))
-		Expect(ints[0].value).To(Equal(1.0))
-		Expect(ints[1].value).To(Equal(2.0))
-	})
-
-	It("identifies a hit", func() {
-		s := NewSphere()
-		i1 := NewIntersection(1, s)
-		i2 := NewIntersection(2, s)
-		ints := intersections(i1, i2)
-		i := Hit(ints)
-		Expect(i).To(Equal(i1))
-
-		i1 = NewIntersection(-1, s)
-		i2 = NewIntersection(1, s)
-		ints = intersections(i1, i2)
-		i = Hit(ints)
-		Expect(i).To(Equal(i2))
-
-		i1 = NewIntersection(-2, s)
-		i2 = NewIntersection(-1, s)
-		ints = intersections(i1, i2)
-		i = Hit(ints)
-		Expect(i).To(BeNil())
-
-		i1 = NewIntersection(5, s)
-		i2 = NewIntersection(7, s)
-		i3 := NewIntersection(-3, s)
-		i4 := NewIntersection(2, s)
-		ints = intersections(i1, i2, i3, i4)
-		i = Hit(ints)
-		Expect(i).To(Equal(i4))
 	})
 
 	It("transforms a ray", func() {

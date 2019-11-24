@@ -38,8 +38,26 @@ var _ = Describe("color tests", func() {
 	It("multiplies colors by colors", func() {
 		c1 := NewColor(1, 0.2, 0.4)
 		c2 := NewColor(0.9, 1, 0.1)
-		// Floating point precision...
-		expColor := NewColor(0.9, 0.2, 0.04000000000000001)
-		Expect(c1.MultiplyColor(c2)).To(Equal(expColor))
+		expColor := NewColor(0.9, 0.2, 0.04)
+		res := c1.MultiplyColor(c2)
+		Expect(res.Equals(expColor)).To(BeTrue())
+	})
+
+	It("checks the equivalence of colors", func() {
+		c1 := NewColor(1.001, 2, -3.345)
+		c2 := NewColor(1.001, 2, -3.345)
+		Expect(c1.Equals(c2)).To(BeTrue())
+
+		c1 = NewColor(1.002, 2, -3.346)
+		c2 = NewColor(2, 2, -3.346)
+		Expect(c1.Equals(c2)).To(BeFalse())
+
+		c1 = NewColor(1.002, 2, -3.346)
+		c2 = NewColor(1.002, 2.0001, -3.346)
+		Expect(c1.Equals(c2)).To(BeFalse())
+
+		c1 = NewColor(1.002, 2, -3.346)
+		c2 = NewColor(1.002, 2, -3.345)
+		Expect(c1.Equals(c2)).To(BeFalse())
 	})
 })

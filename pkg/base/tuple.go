@@ -81,6 +81,11 @@ func (t *Tuple) GetZ() float64 {
 	return t.zAxis
 }
 
+// SetW() sets the w value
+func (t *Tuple) SetW(val float64) {
+	t.w = val
+}
+
 // Add adds two tuples together and returns the result
 func (t *Tuple) Add(t2 *Tuple) (*Tuple, error) {
 	if t.IsPoint() && t2.IsPoint() {
@@ -130,19 +135,20 @@ func (t *Tuple) Divide(val float64) *Tuple {
 // var epsilon = math.Nextafter(1, 2) - 1
 var epsilon = 0.000000001
 
-func equalFloats(one, two float64) bool {
+// EqualFloats uses approximation to determine if two floats are equivalent
+func EqualFloats(one, two float64) bool {
 	return math.Abs(one-two) <= epsilon
 }
 
 // Equals returns whether or not two tuples are equal to each other
 func (t *Tuple) Equals(t2 *Tuple) bool {
-	if !equalFloats(t.xAxis, t2.xAxis) {
+	if !EqualFloats(t.xAxis, t2.xAxis) {
 		return false
 	}
-	if !equalFloats(t.yAxis, t2.yAxis) {
+	if !EqualFloats(t.yAxis, t2.yAxis) {
 		return false
 	}
-	if !equalFloats(t.zAxis, t2.zAxis) {
+	if !EqualFloats(t.zAxis, t2.zAxis) {
 		return false
 	}
 	return t.w == t2.w
@@ -187,6 +193,12 @@ func (t *Tuple) CrossProduct(t2 *Tuple) *Tuple {
 	newY := (t.zAxis * t2.xAxis) - (t.xAxis * t2.zAxis)
 	newZ := (t.xAxis * t2.yAxis) - (t.yAxis * t2.xAxis)
 	return NewVector(newX, newY, newZ)
+}
+
+// Reflect returns the reflection vector around a normal vector
+func (t *Tuple) Reflect(normal *Tuple) *Tuple {
+	reflection, _ := t.Subtract(normal.Multiply(2).Multiply(t.DotProduct(normal)))
+	return reflection
 }
 
 // Converts a list of 4 values to a tuple
