@@ -1,5 +1,7 @@
 package scene
 
+import "sort"
+
 // Intersection keeps track of the value and object of an intersection
 type Intersection struct {
 	value  float64
@@ -44,7 +46,15 @@ func Hit(intersections []*Intersection) *Intersection {
 	return min
 }
 
+// sorts a list of intersections based on value
+func sortIntersections(ints []*Intersection) []*Intersection {
+	sort.Slice(ints, func(i, j int) bool {
+		return ints[i].value < ints[j].value
+	})
+	return ints
+}
+
 // returns a combined list of the supplied intersections
 func intersections(intersections ...*Intersection) []*Intersection {
-	return intersections
+	return sortIntersections(intersections)
 }

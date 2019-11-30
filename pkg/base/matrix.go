@@ -225,3 +225,23 @@ func ShearingMatrix(xy, xz, yx, yz, zx, zy float64) *Matrix {
 	}
 	return NewMatrix(data)
 }
+
+// ViewTransform returns a transformation matrix to move the world.
+// from is the camera, to is where we look, and up is
+// the vector indicating which direction is up
+func ViewTransform(from, to, up *Tuple) *Matrix {
+	diff, _ := to.Subtract(from)
+	forward := diff.Normalize()
+	upNormal := up.Normalize()
+	left := forward.CrossProduct(upNormal)
+	trueUp := left.CrossProduct(forward)
+
+	data := [][]float64{
+		{left.xAxis, left.yAxis, left.zAxis, 0},
+		{trueUp.xAxis, trueUp.yAxis, trueUp.zAxis, 0},
+		{-forward.xAxis, -forward.yAxis, -forward.zAxis, 0},
+		{0, 0, 0, 1},
+	}
+	orientation := NewMatrix(data)
+	return orientation.Multiply(TranslationMatrix(-from.xAxis, -from.yAxis, -from.zAxis))
+}

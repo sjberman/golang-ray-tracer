@@ -14,7 +14,6 @@ func TestImage(t *testing.T) {
 
 var _ = Describe("canvas tests", func() {
 	It("creates a new canvas", func() {
-		black := NewColor(0, 0, 0)
 		c := NewCanvas(10, 20)
 		Expect(c.width).To(Equal(10))
 		Expect(c.height).To(Equal(20))
@@ -22,19 +21,18 @@ var _ = Describe("canvas tests", func() {
 		for _, column := range c.pixels {
 			Expect(len(column)).To(Equal(20))
 			for _, row := range column {
-				Expect(row).To(Equal(*black))
+				Expect(row).To(Equal(Black))
 			}
 		}
 	})
 
 	It("sets the color of a pixel", func() {
 		c := NewCanvas(10, 10)
-		black := NewColor(0, 0, 0)
 		color := NewColor(1, 0.5, 0.2)
 		c.WritePixel(2, 3, color)
-		Expect(c.PixelAt(3, 2)).To(Equal(black))
+		Expect(c.PixelAt(3, 2)).To(Equal(&Black))
 		Expect(c.PixelAt(2, 3)).To(Equal(color))
-		Expect(c.PixelAt(20, 20)).To(Equal(black))
+		Expect(c.PixelAt(20, 20)).To(Equal(&Black))
 	})
 
 	It("builds a ppm string", func() {

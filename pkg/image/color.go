@@ -9,6 +9,12 @@ type Color struct {
 	blue  float64
 }
 
+var Black = Color{
+	red:   0,
+	green: 0,
+	blue:  0,
+}
+
 // NewColor returns a new Color object
 func NewColor(r, g, b float64) *Color {
 	return &Color{

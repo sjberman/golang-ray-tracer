@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
@@ -14,38 +15,52 @@ func main() {
 	// pprof.StartCPUProfile(f1)
 	// defer pprof.StopCPUProfile()
 
-	canvasSize := 300
-	canvas := image.NewCanvas(canvasSize, canvasSize)
-	sphere := scene.NewSphere()
-	// sphere.SetTransform(base.ScalingMatrix(1, .5, 1))
-	sphere.GetMaterial().SetColor(image.NewColor(1, 0.2, 1))
-	rayOrigin := base.NewPoint(0, 0, -5)
-	wallZ := 10.0
-	wallSize := 7.0
-	pixelSize := wallSize / float64(canvasSize)
-	half := wallSize / 2
+	floor := scene.NewSphere()
+	floor.SetTransform(base.ScalingMatrix(10, 0.01, 10))
+	floor.GetMaterial().SetColor(image.NewColor(1, 0.9, 0.9))
+	floor.GetMaterial().SetSpecular(0)
 
-	light := scene.NewPointLight(base.NewPoint(0, 10, -10), image.NewColor(1, 1, 1))
+	leftWall := scene.NewSphere()
+	transform := base.TranslationMatrix(0, 0, 5).Multiply(
+		base.YRotationMatrix(-math.Pi / 4).Multiply(
+			base.XRotationMatrix(math.Pi / 2).Multiply(
+				base.ScalingMatrix(10, 0.01, 10))))
+	leftWall.SetTransform(transform)
+	leftWall.SetMaterial(floor.GetMaterial())
 
-	for y := 0; y < canvasSize-1; y++ {
-		worldY := half - pixelSize*float64(y)
-		for x := 0; x < canvasSize-1; x++ {
-			worldX := -half + pixelSize*float64(x)
-			position := base.NewPoint(worldX, worldY, wallZ)
-			sub, _ := position.Subtract(rayOrigin)
-			r := scene.NewRay(rayOrigin, sub.Normalize())
-			ints := r.Intersect(sphere)
-			hit := scene.Hit(ints)
-			if hit != nil {
-				point := r.Position(hit.GetValue())
-				normal := hit.GetObject().NormalAt(point)
-				eye := r.GetDirection().Negate()
+	rightWall := scene.NewSphere()
+	transform = base.TranslationMatrix(0, 0, 5).Multiply(
+		base.YRotationMatrix(math.Pi / 4).Multiply(
+			base.XRotationMatrix(math.Pi / 2).Multiply(
+				base.ScalingMatrix(10, 0.01, 10))))
+	rightWall.SetTransform(transform)
+	rightWall.SetMaterial(floor.GetMaterial())
 
-				color := scene.Lighting(light, sphere.GetMaterial(), point, eye, normal)
-				canvas.WritePixel(x, y, color)
-			}
-		}
-	}
+	middle := scene.NewSphere()
+	middle.SetTransform(base.TranslationMatrix(-0.5, 1, 0.5))
+	middle.GetMaterial().SetColor(image.NewColor(0.1, 1, 0.5))
+	middle.GetMaterial().SetDiffuse(0.7)
+	middle.GetMaterial().SetSpecular(0.3)
+
+	right := scene.NewSphere()
+	right.SetTransform(base.TranslationMatrix(1.5, 0.5, -0.5).Multiply(base.ScalingMatrix(0.5, 0.5, 0.5)))
+	right.GetMaterial().SetColor(image.NewColor(0.5, 1, 0.1))
+	right.GetMaterial().SetDiffuse(0.7)
+	right.GetMaterial().SetSpecular(0.3)
+
+	left := scene.NewSphere()
+	left.SetTransform(base.TranslationMatrix(-1.5, 0.33, -0.75).Multiply(base.ScalingMatrix(0.33, 0.33, 0.33)))
+	left.GetMaterial().SetColor(image.NewColor(1, 0.8, 0.1))
+	left.GetMaterial().SetDiffuse(0.7)
+	left.GetMaterial().SetSpecular(0.3)
+
+	light := scene.NewPointLight(base.NewPoint(-10, 10, -10), image.NewColor(1, 1, 1))
+	world := scene.NewWorld(light, []*scene.Sphere{floor, leftWall, rightWall, middle, right, left})
+	camera := scene.NewCamera(300, 300, math.Pi/3)
+
+	camera.SetTransform(base.ViewTransform(base.NewPoint(0, 1.5, -5), base.NewPoint(0, 1, 0), base.NewVector(0, 1, 0)))
+
+	canvas := scene.Render(camera, world)
 
 	err := canvas.WriteToFile("image.ppm")
 	if err != nil {

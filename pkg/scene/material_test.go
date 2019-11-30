@@ -20,8 +20,8 @@ var _ = Describe("material tests", func() {
 	It("sets fields", func() {
 		m := NewMaterial(image.NewColor(1, 1, 1), 1, 2, 3, 100)
 
-		m.SetColor(image.NewColor(0, 0, 0))
-		Expect(m.color).To(Equal(image.NewColor(0, 0, 0)))
+		m.SetColor(&image.Black)
+		Expect(m.color).To(Equal(&image.Black))
 
 		m.SetAmbient(5)
 		Expect(m.ambient).To(Equal(5.0))

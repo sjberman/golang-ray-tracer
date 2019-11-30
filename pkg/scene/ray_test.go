@@ -66,7 +66,7 @@ var _ = Describe("ray tests", func() {
 		Expect(len(ints)).To(Equal(0))
 
 		// ray starts within the sphere
-		r = NewRay(base.NewPoint(0, 0, 0), base.NewVector(0, 0, 1))
+		r = NewRay(base.Origin, base.NewVector(0, 0, 1))
 		s = NewSphere()
 
 		ints = r.Intersect(s)

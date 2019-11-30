@@ -23,8 +23,7 @@ func NewPointLight(pos *base.Tuple, intensity *image.Color) *PointLight {
 
 // Lighting returns the color at a point based on the light, material, and the eye/normal vectors
 func Lighting(light *PointLight, material *Material, point, eyev, normalv *base.Tuple) *image.Color {
-	black := image.NewColor(0, 0, 0)
-	diffuse, specular := black, black
+	diffuse, specular := &image.Black, &image.Black
 	// combine surface color with light's color
 	effectiveColor := material.color.MultiplyColor(light.intensity)
 

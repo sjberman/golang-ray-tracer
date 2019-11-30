@@ -407,4 +407,39 @@ var _ = Describe("matrix tests", func() {
 		res := m.MultiplyTuple(p)
 		Expect(res.Equals(expPoint)).To(BeTrue())
 	})
+
+	It("creates a view transform matrix", func() {
+		// default orientation
+		from := Origin
+		to := NewPoint(0, 0, -1)
+		up := NewVector(0, 1, 0)
+		m := ViewTransform(from, to, up)
+		Expect(m).To(Equal(&Identity))
+
+		// positive z direction (mirror of default)
+		to = NewPoint(0, 0, 1)
+		m = ViewTransform(from, to, up)
+		Expect(m).To(Equal(ScalingMatrix(-1, 1, -1)))
+
+		// moves the world
+		from = NewPoint(0, 0, 8)
+		to = Origin
+		up = NewVector(0, 1, 0)
+		m = ViewTransform(from, to, up)
+		Expect(m).To(Equal(TranslationMatrix(0, 0, -8)))
+
+		// arbitrary view
+		from = NewPoint(1, 3, 2)
+		to = NewPoint(4, -2, 8)
+		up = NewVector(1, 1, 0)
+		m = ViewTransform(from, to, up)
+		data := [][]float64{
+			{-0.5070925528371099, 0.5070925528371099, 0.6761234037828132, -2.366431913239846},
+			{0.7677159338596801, 0.6060915267313263, 0.12121830534626524, -2.8284271247461894},
+			{-0.35856858280031806, 0.5976143046671968, -0.7171371656006361, 0},
+			{0, 0, 0, 1},
+		}
+		expMatrix := NewMatrix(data)
+		Expect(m).To(Equal(expMatrix))
+	})
 })

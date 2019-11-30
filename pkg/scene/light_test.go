@@ -13,7 +13,7 @@ import (
 
 var _ = Describe("light tests", func() {
 	It("creates point lights", func() {
-		point := base.NewPoint(0, 0, 0)
+		point := base.Origin
 		color := image.NewColor(1, 1, 1)
 		p := NewPointLight(point, color)
 		Expect(p.position).To(Equal(point))
@@ -22,7 +22,7 @@ var _ = Describe("light tests", func() {
 
 	It("calculates the lighting", func() {
 		m := &defaultMaterial
-		position := base.NewPoint(0, 0, 0)
+		position := base.Origin
 
 		// lighting with eye between light and surface
 		eyev := base.NewVector(0, 0, -1)
