@@ -132,12 +132,12 @@ func (t *Tuple) Divide(val float64) *Tuple {
 	}
 }
 
-// var epsilon = math.Nextafter(1, 2) - 1
-var epsilon = 0.000000001
+// Epsilon is the +/- value for floating point algebra to be considered equal
+var Epsilon = 0.000000001
 
 // EqualFloats uses approximation to determine if two floats are equivalent
 func EqualFloats(one, two float64) bool {
-	return math.Abs(one-two) <= epsilon
+	return math.Abs(one-two) <= Epsilon
 }
 
 // Equals returns whether or not two tuples are equal to each other

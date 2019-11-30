@@ -29,8 +29,13 @@ var _ = Describe("light tests", func() {
 		normalv := base.NewVector(0, 0, -1)
 		light := NewPointLight(base.NewPoint(0, 0, -10), image.NewColor(1, 1, 1))
 
-		result := Lighting(light, m, position, eyev, normalv)
+		result := Lighting(light, m, position, eyev, normalv, false)
 		expColor := image.NewColor(1.9, 1.9, 1.9)
+		Expect(result.Equals(expColor)).To(BeTrue(), fmt.Sprintf("%v", result))
+
+		// lighting with surface in shadow
+		result = Lighting(light, m, position, eyev, normalv, true)
+		expColor = image.NewColor(0.1, 0.1, 0.1)
 		Expect(result.Equals(expColor)).To(BeTrue(), fmt.Sprintf("%v", result))
 
 		// lighting with eye between light and surface, eye offset 45 degrees
@@ -38,7 +43,7 @@ var _ = Describe("light tests", func() {
 		normalv = base.NewVector(0, 0, -1)
 		light = NewPointLight(base.NewPoint(0, 0, -10), image.NewColor(1, 1, 1))
 
-		result = Lighting(light, m, position, eyev, normalv)
+		result = Lighting(light, m, position, eyev, normalv, false)
 		expColor = image.NewColor(1.0, 1.0, 1.0)
 		Expect(result.Equals(expColor)).To(BeTrue(), fmt.Sprintf("%v", result))
 
@@ -47,7 +52,7 @@ var _ = Describe("light tests", func() {
 		normalv = base.NewVector(0, 0, -1)
 		light = NewPointLight(base.NewPoint(0, 10, -10), image.NewColor(1, 1, 1))
 
-		result = Lighting(light, m, position, eyev, normalv)
+		result = Lighting(light, m, position, eyev, normalv, false)
 		expColor = image.NewColor(0.7363961030678927, 0.7363961030678927, 0.7363961030678927)
 		Expect(result.Equals(expColor)).To(BeTrue(), fmt.Sprintf("%v", result))
 
@@ -56,7 +61,7 @@ var _ = Describe("light tests", func() {
 		normalv = base.NewVector(0, 0, -1)
 		light = NewPointLight(base.NewPoint(0, 10, -10), image.NewColor(1, 1, 1))
 
-		result = Lighting(light, m, position, eyev, normalv)
+		result = Lighting(light, m, position, eyev, normalv, false)
 		expColor = image.NewColor(1.6363961030678928, 1.6363961030678928, 1.6363961030678928)
 		Expect(result.Equals(expColor)).To(BeTrue(), fmt.Sprintf("%v", result))
 
@@ -65,7 +70,7 @@ var _ = Describe("light tests", func() {
 		normalv = base.NewVector(0, 0, -1)
 		light = NewPointLight(base.NewPoint(0, 0, 10), image.NewColor(1, 1, 1))
 
-		result = Lighting(light, m, position, eyev, normalv)
+		result = Lighting(light, m, position, eyev, normalv, false)
 		expColor = image.NewColor(0.1, 0.1, 0.1)
 		Expect(result.Equals(expColor)).To(BeTrue(), fmt.Sprintf("%v", result))
 	})

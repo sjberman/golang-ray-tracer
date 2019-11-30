@@ -27,7 +27,23 @@ func (w *World) ColorAt(r *Ray) *image.Color {
 		return &image.Black
 	}
 	hd := prepareComputations(hit, r)
-	return Lighting(w.light, hd.object.GetMaterial(), hd.point, hd.eyev, hd.normalv)
+	shadowed := w.isShadowed(hd.overPoint)
+	return Lighting(w.light, hd.object.GetMaterial(), hd.point, hd.eyev, hd.normalv, shadowed)
+}
+
+// isShadowed returns if a point is in a shadow
+func (w *World) isShadowed(point *base.Tuple) bool {
+	v, _ := w.light.position.Subtract(point)
+	distance := v.Magnitude()
+	direction := v.Normalize()
+
+	ray := NewRay(point, direction)
+	ints := w.intersect(ray)
+	hit := Hit(ints)
+	if hit != nil && hit.GetValue() < distance {
+		return true
+	}
+	return false
 }
 
 // intersect returns all the intersections between a ray and the objects in the world
@@ -41,12 +57,13 @@ func (w *World) intersect(r *Ray) []*Intersection {
 
 // hitData contains information about a hit intersection
 type hitData struct {
-	value   float64
-	object  *Sphere
-	point   *base.Tuple
-	eyev    *base.Tuple
-	normalv *base.Tuple
-	inside  bool
+	value     float64
+	object    *Sphere
+	point     *base.Tuple
+	overPoint *base.Tuple
+	eyev      *base.Tuple
+	normalv   *base.Tuple
+	inside    bool
 }
 
 // Uses an intersection and ray to build up the hit data
@@ -64,6 +81,9 @@ func prepareComputations(intersection *Intersection, ray *Ray) *hitData {
 		hd.inside = true
 		hd.normalv = hd.normalv.Negate()
 	}
+	// have a point just above normal point to account for accidental shadow calculation when
+	// a ray hits the sphere it's leaving
+	hd.overPoint, _ = hd.point.Add(hd.normalv.Multiply(base.Epsilon))
 	return hd
 }
 

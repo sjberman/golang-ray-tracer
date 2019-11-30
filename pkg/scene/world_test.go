@@ -66,6 +66,25 @@ var _ = Describe("world tests", func() {
 		Expect(color).To(Equal(inner.GetMaterial().color))
 	})
 
+	It("determines if a point is shadowed", func() {
+		// nothing collinear with point and light
+		w := NewWorld(light, objects)
+		p := base.NewPoint(0, 10, 0)
+		Expect(w.isShadowed(p)).To(BeFalse())
+
+		// object between point and light
+		p = base.NewPoint(10, -10, 10)
+		Expect(w.isShadowed(p)).To(BeTrue())
+
+		// object is behind the light
+		p = base.NewPoint(-20, 20, -20)
+		Expect(w.isShadowed(p)).To(BeFalse())
+
+		// object is behind the point
+		p = base.NewPoint(-2, 2, -2)
+		Expect(w.isShadowed(p)).To(BeFalse())
+	})
+
 	It("creates useful hit data", func() {
 		ray := NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
 		intersection := NewIntersection(4, NewSphere())
@@ -76,6 +95,14 @@ var _ = Describe("world tests", func() {
 		Expect(hd.eyev).To(Equal(base.NewVector(0, 0, -1)))
 		Expect(hd.normalv).To(Equal(base.NewVector(0, 0, -1)))
 		Expect(hd.inside).To(BeFalse())
+
+		// hit should offset the point
+		s := NewSphere()
+		s.SetTransform(base.TranslationMatrix(0, 0, 1))
+		intersection = NewIntersection(5, s)
+		hd = prepareComputations(intersection, ray)
+		Expect(hd.overPoint.GetZ()).To(BeNumerically("<", -base.Epsilon/2))
+		Expect(hd.point.GetZ()).To(BeNumerically(">", hd.overPoint.GetZ()))
 
 		// intersection occurs on inside
 		ray = NewRay(base.Origin, base.NewVector(0, 0, 1))

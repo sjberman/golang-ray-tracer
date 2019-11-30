@@ -22,7 +22,12 @@ func NewPointLight(pos *base.Tuple, intensity *image.Color) *PointLight {
 }
 
 // Lighting returns the color at a point based on the light, material, and the eye/normal vectors
-func Lighting(light *PointLight, material *Material, point, eyev, normalv *base.Tuple) *image.Color {
+func Lighting(
+	light *PointLight,
+	material *Material,
+	point, eyev, normalv *base.Tuple,
+	inShadow bool,
+) *image.Color {
 	diffuse, specular := &image.Black, &image.Black
 	// combine surface color with light's color
 	effectiveColor := material.color.MultiplyColor(light.intensity)
@@ -33,6 +38,9 @@ func Lighting(light *PointLight, material *Material, point, eyev, normalv *base.
 
 	// compute the ambient contribution
 	ambient := effectiveColor.Multiply(material.ambient)
+	if inShadow {
+		return ambient
+	}
 
 	// lightDotNormal represents the cosine of the angle between the light vector
 	// and the normal vector. A negative number means the light is on the
