@@ -8,11 +8,11 @@ import (
 // World represents the collection of all objects in a scene
 type World struct {
 	light   *PointLight
-	objects []*Sphere
+	objects []Object
 }
 
 // NewWorld returns a new World object
-func NewWorld(light *PointLight, objects []*Sphere) *World {
+func NewWorld(light *PointLight, objects []Object) *World {
 	return &World{
 		light:   light,
 		objects: objects,
@@ -50,7 +50,7 @@ func (w *World) isShadowed(point *base.Tuple) bool {
 func (w *World) intersect(r *Ray) []*Intersection {
 	ints := make([]*Intersection, 0, 2*len(w.objects))
 	for _, o := range w.objects {
-		ints = append(ints, r.Intersect(o)...)
+		ints = append(ints, o.intersect(r)...)
 	}
 	return sortIntersections(ints)
 }
@@ -58,7 +58,7 @@ func (w *World) intersect(r *Ray) []*Intersection {
 // hitData contains information about a hit intersection
 type hitData struct {
 	value     float64
-	object    *Sphere
+	object    Object
 	point     *base.Tuple
 	overPoint *base.Tuple
 	eyev      *base.Tuple
@@ -74,7 +74,7 @@ func prepareComputations(intersection *Intersection, ray *Ray) *hitData {
 		eyev:   ray.GetDirection().Negate(),
 	}
 	hd.point = ray.Position(hd.value)
-	hd.normalv = hd.object.NormalAt(hd.point)
+	hd.normalv = hd.object.normalAt(hd.point)
 
 	if hd.normalv.DotProduct(hd.eyev) < 0 {
 		// Hit occurs inside the shape (normal points away from eye)

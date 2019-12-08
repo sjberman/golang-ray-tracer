@@ -4,15 +4,15 @@ import "sort"
 
 // Intersection keeps track of the value and object of an intersection
 type Intersection struct {
-	value  float64
-	object *Sphere
+	value float64
+	obj   Object
 }
 
 // NewIntersection returns a new Intersection object
-func NewIntersection(value float64, object *Sphere) *Intersection {
+func NewIntersection(value float64, object Object) *Intersection {
 	return &Intersection{
-		value:  value,
-		object: object,
+		value: value,
+		obj:   object,
 	}
 }
 
@@ -22,8 +22,8 @@ func (i *Intersection) GetValue() float64 {
 }
 
 // GetObject returns the intersection's object
-func (i *Intersection) GetObject() *Sphere {
-	return i.object
+func (i *Intersection) GetObject() Object {
+	return i.obj
 }
 
 // Hit returns the closest intersection to the origin

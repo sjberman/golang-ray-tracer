@@ -55,7 +55,7 @@ func main() {
 	left.GetMaterial().SetSpecular(0.3)
 
 	light := scene.NewPointLight(base.NewPoint(-10, 10, -10), image.NewColor(1, 1, 1))
-	world := scene.NewWorld(light, []*scene.Sphere{floor, leftWall, rightWall, middle, right, left})
+	world := scene.NewWorld(light, []scene.Object{floor, leftWall, rightWall, middle, right, left})
 	camera := scene.NewCamera(300, 300, math.Pi/3)
 
 	camera.SetTransform(base.ViewTransform(base.NewPoint(0, 1.5, -5), base.NewPoint(0, 1, 0), base.NewVector(0, 1, 0)))

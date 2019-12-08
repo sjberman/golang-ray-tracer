@@ -9,9 +9,9 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 )
 
-func TestRay(t *testing.T) {
+func TestScene(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Ray Suite")
+	RunSpecs(t, "Scene Suite")
 }
 
 var _ = Describe("ray tests", func() {
@@ -36,67 +36,6 @@ var _ = Describe("ray tests", func() {
 
 		expPoint = base.NewPoint(4.5, 3, 4)
 		Expect(r.Position(2.5)).To(Equal(expPoint))
-	})
-
-	It("computes the intersection points of a ray and sphere", func() {
-		r := NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
-		s := NewSphere()
-
-		ints := r.Intersect(s)
-		Expect(len(ints)).To(Equal(2))
-		Expect(ints[0].value).To(Equal(4.0))
-		Expect(ints[1].value).To(Equal(6.0))
-		Expect(ints[0].object).To(Equal(s))
-		Expect(ints[1].object).To(Equal(s))
-
-		// tangent
-		r = NewRay(base.NewPoint(0, 1, -5), base.NewVector(0, 0, 1))
-		s = NewSphere()
-
-		ints = r.Intersect(s)
-		Expect(len(ints)).To(Equal(2))
-		Expect(ints[0].value).To(Equal(5.0))
-		Expect(ints[1].value).To(Equal(5.0))
-
-		// too high, no intersection
-		r = NewRay(base.NewPoint(0, 2, -5), base.NewVector(0, 0, 1))
-		s = NewSphere()
-
-		ints = r.Intersect(s)
-		Expect(len(ints)).To(Equal(0))
-
-		// ray starts within the sphere
-		r = NewRay(base.Origin, base.NewVector(0, 0, 1))
-		s = NewSphere()
-
-		ints = r.Intersect(s)
-		Expect(len(ints)).To(Equal(2))
-		Expect(ints[0].value).To(Equal(-1.0))
-		Expect(ints[1].value).To(Equal(1.0))
-
-		// ray starts past the sphere
-		r = NewRay(base.NewPoint(0, 0, 5), base.NewVector(0, 0, 1))
-		s = NewSphere()
-
-		ints = r.Intersect(s)
-		Expect(len(ints)).To(Equal(2))
-		Expect(ints[0].value).To(Equal(-6.0))
-		Expect(ints[1].value).To(Equal(-4.0))
-
-		// intersect a scaled sphere
-		r = NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
-		s = NewSphere()
-		s.SetTransform(base.ScalingMatrix(2, 2, 2))
-		ints = r.Intersect(s)
-		Expect(len(ints)).To(Equal(2))
-		Expect(ints[0].value).To(Equal(3.0))
-		Expect(ints[1].value).To(Equal(7.0))
-
-		r = NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
-		s = NewSphere()
-		s.SetTransform(base.TranslationMatrix(5, 0, 0))
-		ints = r.Intersect(s)
-		Expect(len(ints)).To(Equal(0))
 	})
 
 	It("transforms a ray", func() {

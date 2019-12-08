@@ -12,7 +12,7 @@ import (
 
 var _ = Describe("world tests", func() {
 	var light *PointLight
-	var objects []*Sphere
+	var objects []Object
 
 	BeforeEach(func() {
 		light = NewPointLight(base.NewPoint(-10, 10, -10), image.NewColor(1, 1, 1))
@@ -22,7 +22,7 @@ var _ = Describe("world tests", func() {
 		s1.GetMaterial().SetSpecular(0.2)
 		s2 := NewSphere()
 		s2.SetTransform(base.ScalingMatrix(0.5, 0.5, 0.5))
-		objects = []*Sphere{s1, s2}
+		objects = []Object{s1, s2}
 	})
 
 	It("creates worlds", func() {
