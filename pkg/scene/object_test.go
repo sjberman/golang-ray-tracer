@@ -10,35 +10,29 @@ import (
 )
 
 var _ = Describe("object tests", func() {
-	It("creates objects", func() {
-		o := newObject(nil, nil)
+	testNewObject := func(o Object) {
 		Expect(o.GetTransform()).To(Equal(&base.Identity))
 		Expect(o.GetMaterial()).To(Equal(&defaultMaterial))
 
 		t := base.TranslationMatrix(2, 3, 4)
 		o.SetTransform(t)
-		Expect(o.transform).To(Equal(*t))
+		Expect(o.GetTransform()).To(Equal(t))
 
 		m := defaultMaterial
 		m.ambient = 1
 		o.SetMaterial(&m)
 		Expect(o.GetMaterial()).To(Equal(&m))
+	}
+
+	It("creates objects", func() {
+		o := newObject(nil, nil)
+		testNewObject(o)
 	})
 
 	Context("spheres", func() {
 		It("creates spheres", func() {
 			s := NewSphere()
-			Expect(s.GetTransform()).To(Equal(&base.Identity))
-			Expect(s.GetMaterial()).To(Equal(&defaultMaterial))
-
-			t := base.TranslationMatrix(2, 3, 4)
-			s.SetTransform(t)
-			Expect(s.transform).To(Equal(*t))
-
-			m := defaultMaterial
-			m.ambient = 1
-			s.SetMaterial(&m)
-			Expect(s.GetMaterial()).To(Equal(&m))
+			testNewObject(s)
 		})
 
 		It("calculates a sphere intersection", func() {
@@ -99,7 +93,7 @@ var _ = Describe("object tests", func() {
 			s = NewSphere()
 			s.SetTransform(base.TranslationMatrix(5, 0, 0))
 			ints = s.intersect(r)
-			Expect(len(ints)).To(Equal(0))
+			Expect(len(ints)).To(BeZero())
 		})
 
 		It("computes the surface normal", func() {
@@ -133,6 +127,52 @@ var _ = Describe("object tests", func() {
 			s.SetTransform(m)
 			n = s.normalAt(base.NewPoint(0, math.Sqrt(2)/2, -math.Sqrt(2)/2))
 			Expect(n).To(Equal(base.NewVector(0, 0.9701425001453319, -0.24253562503633294)))
+		})
+	})
+
+	Context("planes", func() {
+		It("creates planes", func() {
+			p := NewPlane()
+			testNewObject(p)
+		})
+
+		It("calculates a plane intersection", func() {
+			// ray parallel to plane
+			p := NewPlane()
+			r := NewRay(base.NewPoint(0, 10, 0), base.NewVector(0, 0, 1))
+			ints := p.intersect(r)
+			Expect(len(ints)).To(BeZero())
+
+			// coplanar ray
+			r = NewRay(base.NewPoint(0, 0, 0), base.NewVector(0, 0, 1))
+			ints = p.intersect(r)
+			Expect(len(ints)).To(BeZero())
+
+			// intersects plane from above
+			r = NewRay(base.NewPoint(0, 1, 0), base.NewVector(0, -1, 0))
+			ints = p.intersect(r)
+			Expect(len(ints)).To(Equal(1))
+			Expect(ints[0].value).To(Equal(1.0))
+			Expect(ints[0].GetObject()).To(Equal(p.object))
+
+			// intersects plane from below
+			r = NewRay(base.NewPoint(0, -1, 0), base.NewVector(0, 1, 0))
+			ints = p.intersect(r)
+			Expect(len(ints)).To(Equal(1))
+			Expect(ints[0].value).To(Equal(1.0))
+			Expect(ints[0].GetObject()).To(Equal(p.object))
+		})
+
+		It("computes the surface normal", func() {
+			p := NewPlane()
+			constVector := base.NewVector(0, 1, 0)
+
+			n := p.normalAt(base.NewPoint(0, 0, 0))
+			Expect(n).To(Equal(constVector))
+			n = p.normalAt(base.NewPoint(10, 0, -10))
+			Expect(n).To(Equal(constVector))
+			n = p.normalAt(base.NewPoint(-5, 0, 150))
+			Expect(n).To(Equal(constVector))
 		})
 	})
 })

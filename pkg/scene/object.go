@@ -119,3 +119,31 @@ func sphereObjectNormal(objectPoint *base.Tuple) *base.Tuple {
 	normal, _ := objectPoint.Subtract(base.Origin)
 	return normal
 }
+
+// Plane is a plane object
+type Plane struct {
+	*object
+}
+
+// NewPlane returns a new Plane object
+func NewPlane() *Plane {
+	return &Plane{
+		object: newObject(planeIntersect, planeObjectNormal),
+	}
+}
+
+// calculates where a ray intersects a plane
+func planeIntersect(r *Ray, o *object) []*Intersection {
+	// parallel to plane (y == 0)
+	if math.Abs(r.GetDirection().GetY()) < base.Epsilon {
+		return []*Intersection{}
+	}
+
+	t := -r.origin.GetY() / r.GetDirection().GetY()
+	return intersections(NewIntersection(t, o))
+}
+
+// computes the object normal for a plane
+func planeObjectNormal(objectPoint *base.Tuple) *base.Tuple {
+	return base.NewVector(0, 1, 0)
+}

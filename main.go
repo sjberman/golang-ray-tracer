@@ -15,26 +15,16 @@ func main() {
 	// pprof.StartCPUProfile(f1)
 	// defer pprof.StopCPUProfile()
 
-	floor := scene.NewSphere()
+	floor := scene.NewPlane()
 	floor.SetTransform(base.ScalingMatrix(10, 0.01, 10))
 	floor.GetMaterial().SetColor(image.NewColor(1, 0.9, 0.9))
 	floor.GetMaterial().SetSpecular(0)
 
-	leftWall := scene.NewSphere()
-	transform := base.TranslationMatrix(0, 0, 5).Multiply(
-		base.YRotationMatrix(-math.Pi / 4).Multiply(
-			base.XRotationMatrix(math.Pi / 2).Multiply(
-				base.ScalingMatrix(10, 0.01, 10))))
-	leftWall.SetTransform(transform)
-	leftWall.SetMaterial(floor.GetMaterial())
-
-	rightWall := scene.NewSphere()
-	transform = base.TranslationMatrix(0, 0, 5).Multiply(
-		base.YRotationMatrix(math.Pi / 4).Multiply(
-			base.XRotationMatrix(math.Pi / 2).Multiply(
-				base.ScalingMatrix(10, 0.01, 10))))
-	rightWall.SetTransform(transform)
-	rightWall.SetMaterial(floor.GetMaterial())
+	// backdrop := scene.NewPlane()
+	// transform := base.TranslationMatrix(0, 0, 4).Multiply(
+	// 	base.XRotationMatrix(math.Pi / 2))
+	// backdrop.SetTransform(transform)
+	// backdrop.SetMaterial(floor.GetMaterial())
 
 	middle := scene.NewSphere()
 	middle.SetTransform(base.TranslationMatrix(-0.5, 1, 0.5))
@@ -55,7 +45,7 @@ func main() {
 	left.GetMaterial().SetSpecular(0.3)
 
 	light := scene.NewPointLight(base.NewPoint(-10, 10, -10), image.NewColor(1, 1, 1))
-	world := scene.NewWorld(light, []scene.Object{floor, leftWall, rightWall, middle, right, left})
+	world := scene.NewWorld(light, []scene.Object{floor, middle, right, left})
 	camera := scene.NewCamera(300, 300, math.Pi/3)
 
 	camera.SetTransform(base.ViewTransform(base.NewPoint(0, 1.5, -5), base.NewPoint(0, 1, 0), base.NewVector(0, 1, 0)))
