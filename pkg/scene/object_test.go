@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
+	"github.com/sjberman/golang-ray-tracer/pkg/image"
 )
 
 var _ = Describe("object tests", func() {
@@ -27,6 +28,30 @@ var _ = Describe("object tests", func() {
 	It("creates objects", func() {
 		o := newObject(nil, nil)
 		testNewObject(o)
+	})
+
+	It("returns the stripe pattern at a point", func() {
+		// with object transformation
+		s := NewSphere()
+		s.SetTransform(base.ScalingMatrix(2, 2, 2))
+		p := image.NewStripePattern(image.White, image.Black)
+		c := s.patternAt(base.NewPoint(1.5, 0, 0), p)
+		Expect(c).To(Equal(image.White))
+
+		// with pattern transformation
+		s = NewSphere()
+		p = image.NewStripePattern(image.White, image.Black)
+		p.SetTransform(base.ScalingMatrix(2, 2, 2))
+		c = s.patternAt(base.NewPoint(1.5, 0, 0), p)
+		Expect(c).To(Equal(image.White))
+
+		// with both object and pattern transformation
+		s = NewSphere()
+		s.SetTransform(base.ScalingMatrix(2, 2, 2))
+		p = image.NewStripePattern(image.White, image.Black)
+		p.SetTransform(base.TranslationMatrix(0.5, 0, 0))
+		c = s.patternAt(base.NewPoint(2.5, 0, 0), p)
+		Expect(c).To(Equal(image.White))
 	})
 
 	Context("spheres", func() {

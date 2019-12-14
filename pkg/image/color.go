@@ -1,6 +1,8 @@
 package image
 
-import "github.com/sjberman/golang-ray-tracer/pkg/base"
+import (
+	"github.com/sjberman/golang-ray-tracer/pkg/base"
+)
 
 // Color is a tuple representing an rgb value
 type Color struct {
@@ -9,10 +11,16 @@ type Color struct {
 	blue  float64
 }
 
-var Black = Color{
+var Black = &Color{
 	red:   0,
 	green: 0,
 	blue:  0,
+}
+
+var White = &Color{
+	red:   1,
+	green: 1,
+	blue:  1,
 }
 
 // NewColor returns a new Color object

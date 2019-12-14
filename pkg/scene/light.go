@@ -24,13 +24,19 @@ func NewPointLight(pos *base.Tuple, intensity *image.Color) *PointLight {
 // Lighting returns the color at a point based on the light, material, and the eye/normal vectors
 func Lighting(
 	light *PointLight,
+	object Object,
 	material *Material,
 	point, eyev, normalv *base.Tuple,
 	inShadow bool,
 ) *image.Color {
-	diffuse, specular := &image.Black, &image.Black
+	color := material.color
+	if material.pattern != nil {
+		//color = material.pattern.StripeAt(point)
+		color = object.patternAt(point, material.pattern)
+	}
+	diffuse, specular := image.Black, image.Black
 	// combine surface color with light's color
-	effectiveColor := material.color.MultiplyColor(light.intensity)
+	effectiveColor := color.MultiplyColor(light.intensity)
 
 	// find the direction to the light source
 	diff, _ := light.position.Subtract(point)

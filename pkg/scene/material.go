@@ -5,6 +5,7 @@ import "github.com/sjberman/golang-ray-tracer/pkg/image"
 // Material contains the attributes of a surface material
 type Material struct {
 	color     *image.Color
+	pattern   image.Pattern
 	ambient   float64
 	diffuse   float64
 	specular  float64
@@ -12,7 +13,7 @@ type Material struct {
 }
 
 var defaultMaterial = Material{
-	color:     image.NewColor(1, 1, 1),
+	color:     image.White,
 	ambient:   0.1,
 	diffuse:   0.9,
 	specular:  0.9,
@@ -20,9 +21,14 @@ var defaultMaterial = Material{
 }
 
 // NewMaterial returns a new Material object
-func NewMaterial(color *image.Color, ambient, diffuse, specular, shininess float64) *Material {
+func NewMaterial(
+	color *image.Color,
+	pattern image.Pattern,
+	ambient, diffuse, specular, shininess float64,
+) *Material {
 	return &Material{
 		color:     color,
+		pattern:   pattern,
 		ambient:   ambient,
 		diffuse:   diffuse,
 		specular:  specular,
@@ -33,6 +39,11 @@ func NewMaterial(color *image.Color, ambient, diffuse, specular, shininess float
 // SetColor sets the material's color field
 func (m *Material) SetColor(color *image.Color) {
 	m.color = color
+}
+
+// SetPattern sets the material's color pattern
+func (m *Material) SetPattern(pattern image.Pattern) {
+	m.pattern = pattern
 }
 
 // SetAmbient sets the material's ambient field

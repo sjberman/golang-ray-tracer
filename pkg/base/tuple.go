@@ -28,6 +28,15 @@ var Origin = &Tuple{
 
 // NewTuple returns a generic tuple
 func NewTuple(x, y, z, w float64) *Tuple {
+	if x < Epsilon && x > -Epsilon {
+		x = 0
+	}
+	if y < Epsilon && y > -Epsilon {
+		y = 0
+	}
+	if z < Epsilon && z > -Epsilon {
+		z = 0
+	}
 	return &Tuple{
 		xAxis: x,
 		yAxis: y,
@@ -38,22 +47,12 @@ func NewTuple(x, y, z, w float64) *Tuple {
 
 // NewVector returns a tuple object of type Vector
 func NewVector(x, y, z float64) *Tuple {
-	return &Tuple{
-		xAxis: x,
-		yAxis: y,
-		zAxis: z,
-		w:     vector,
-	}
+	return NewTuple(x, y, z, vector)
 }
 
 // NewPoint returns a tuple object of type Point
 func NewPoint(x, y, z float64) *Tuple {
-	return &Tuple{
-		xAxis: x,
-		yAxis: y,
-		zAxis: z,
-		w:     point,
-	}
+	return NewTuple(x, y, z, point)
 }
 
 // IsVector returns whether or not a tuple is a vector
@@ -133,7 +132,7 @@ func (t *Tuple) Divide(val float64) *Tuple {
 }
 
 // Epsilon is the +/- value for floating point algebra to be considered equal
-var Epsilon = 0.000000001
+var Epsilon = 0.00001
 
 // EqualFloats uses approximation to determine if two floats are equivalent
 func EqualFloats(one, two float64) bool {

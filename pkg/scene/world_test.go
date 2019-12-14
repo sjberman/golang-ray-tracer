@@ -15,7 +15,7 @@ var _ = Describe("world tests", func() {
 	var objects []Object
 
 	BeforeEach(func() {
-		light = NewPointLight(base.NewPoint(-10, 10, -10), image.NewColor(1, 1, 1))
+		light = NewPointLight(base.NewPoint(-10, 10, -10), image.White)
 		s1 := NewSphere()
 		s1.GetMaterial().SetColor(image.NewColor(0.8, 1.0, 0.6))
 		s1.GetMaterial().SetDiffuse(0.7)
@@ -48,7 +48,7 @@ var _ = Describe("world tests", func() {
 		w := NewWorld(light, objects)
 		ray := NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 1, 0))
 		color := w.ColorAt(ray)
-		Expect(color).To(Equal(&image.Black))
+		Expect(color).To(Equal(image.Black))
 
 		// when ray hits
 		ray = NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))

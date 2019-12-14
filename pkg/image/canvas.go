@@ -40,7 +40,7 @@ func (c *Canvas) PixelAt(x, y int) *Color {
 	if !(x > c.width-1) && !(y > c.height-1) {
 		return &c.pixels[x][y]
 	}
-	return &Black
+	return Black
 }
 
 // toPPM returns a PPM (portable pixelmap) string of the canvas

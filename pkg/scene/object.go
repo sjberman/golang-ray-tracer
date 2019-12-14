@@ -4,16 +4,18 @@ import (
 	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
+	"github.com/sjberman/golang-ray-tracer/pkg/image"
 )
 
 // Object is a generic object in a scene
 type Object interface {
 	GetMaterial() *Material
 	GetTransform() *base.Matrix
-	SetTransform(matrix *base.Matrix)
-	SetMaterial(material *Material)
+	SetTransform(*base.Matrix)
+	SetMaterial(*Material)
+	patternAt(*base.Tuple, image.Pattern) *image.Color
 	intersect(*Ray) []*Intersection
-	normalAt(worldPoint *base.Tuple) *base.Tuple
+	normalAt(*base.Tuple) *base.Tuple
 }
 
 // object is the base implementation of the Object interface
@@ -21,7 +23,7 @@ type object struct {
 	transform        base.Matrix
 	material         Material
 	intersectFunc    func(*Ray, *object) []*Intersection
-	objectNormalFunc func(point *base.Tuple) *base.Tuple
+	objectNormalFunc func(*base.Tuple) *base.Tuple
 }
 
 // newObject returns a new Object
@@ -55,6 +57,19 @@ func (o *object) SetTransform(matrix *base.Matrix) {
 // SetMaterial sets the Object's material
 func (o *object) SetMaterial(material *Material) {
 	o.material = *material
+}
+
+// patternAt returns the pattern at a point on the object
+func (o *object) patternAt(worldPoint *base.Tuple, pattern image.Pattern) *image.Color {
+	// convert the point from world space to object space
+	objInverse, _ := o.GetTransform().Inverse()
+	objectPoint := objInverse.MultiplyTuple(worldPoint)
+
+	// convert point to pattern space
+	patternInverse, _ := pattern.GetTransform().Inverse()
+	patternPoint := patternInverse.MultiplyTuple(objectPoint)
+
+	return pattern.PatternAt(patternPoint)
 }
 
 // calculates where a ray intersects the object

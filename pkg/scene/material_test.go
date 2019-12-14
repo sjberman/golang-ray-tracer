@@ -9,8 +9,10 @@ import (
 
 var _ = Describe("material tests", func() {
 	It("creates materials", func() {
-		m := NewMaterial(image.NewColor(1, 1, 1), 1, 2, 3, 100)
-		Expect(m.color).To(Equal(image.NewColor(1, 1, 1)))
+		pattern := image.NewStripePattern(image.White, image.Black)
+		m := NewMaterial(image.White, pattern, 1, 2, 3, 100)
+		Expect(m.color).To(Equal(image.White))
+		Expect(m.pattern).To(Equal(pattern))
 		Expect(m.ambient).To(Equal(1.0))
 		Expect(m.diffuse).To(Equal(2.0))
 		Expect(m.specular).To(Equal(3.0))
@@ -18,10 +20,15 @@ var _ = Describe("material tests", func() {
 	})
 
 	It("sets fields", func() {
-		m := NewMaterial(image.NewColor(1, 1, 1), 1, 2, 3, 100)
+		pattern := image.NewStripePattern(image.White, image.Black)
+		m := NewMaterial(image.White, pattern, 1, 2, 3, 100)
 
-		m.SetColor(&image.Black)
-		Expect(m.color).To(Equal(&image.Black))
+		m.SetColor(image.Black)
+		Expect(m.color).To(Equal(image.Black))
+
+		newPattern := image.NewStripePattern(image.Black, image.White)
+		m.SetPattern(newPattern)
+		Expect(m.pattern).To(Equal(newPattern))
 
 		m.SetAmbient(5)
 		Expect(m.ambient).To(Equal(5.0))

@@ -1,6 +1,8 @@
 package scene
 
 import (
+	"sync"
+
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
 )
@@ -24,11 +26,11 @@ func (w *World) ColorAt(r *Ray) *image.Color {
 	intersections := w.intersect(r)
 	hit := Hit(intersections)
 	if hit == nil {
-		return &image.Black
+		return image.Black
 	}
 	hd := prepareComputations(hit, r)
 	shadowed := w.isShadowed(hd.overPoint)
-	return Lighting(w.light, hd.object.GetMaterial(), hd.point, hd.eyev, hd.normalv, shadowed)
+	return Lighting(w.light, hd.object, hd.object.GetMaterial(), hd.point, hd.eyev, hd.normalv, shadowed)
 }
 
 // isShadowed returns if a point is in a shadow
@@ -91,11 +93,17 @@ func Render(c *Camera, w *World) *image.Canvas {
 	canvas := image.NewCanvas(c.hsize, c.vsize)
 
 	for y := 0; y < c.vsize-1; y++ {
+		var wg sync.WaitGroup
+		wg.Add(c.hsize - 1)
 		for x := 0; x < c.hsize-1; x++ {
-			ray := c.RayForPixel(x, y)
-			color := w.ColorAt(ray)
-			canvas.WritePixel(x, y, color)
+			go func(x, y int) {
+				defer wg.Done()
+				ray := c.RayForPixel(x, y)
+				color := w.ColorAt(ray)
+				canvas.WritePixel(x, y, color)
+			}(x, y)
 		}
+		wg.Wait()
 	}
 	return canvas
 }
