@@ -159,8 +159,8 @@ func (m *Matrix) cofactor(row, col int) float64 {
 	return -minor
 }
 
-// TranslationMatrix returns a translation matrix
-func TranslationMatrix(x, y, z float64) *Matrix {
+// Translate returns a translation matrix
+func Translate(x, y, z float64) *Matrix {
 	data := [][]float64{
 		{1, 0, 0, x},
 		{0, 1, 0, y},
@@ -170,8 +170,8 @@ func TranslationMatrix(x, y, z float64) *Matrix {
 	return NewMatrix(data)
 }
 
-// ScalingMatrix returns a scaling matrix
-func ScalingMatrix(x, y, z float64) *Matrix {
+// Scale returns a scaling matrix
+func Scale(x, y, z float64) *Matrix {
 	data := [][]float64{
 		{x, 0, 0, 0},
 		{0, y, 0, 0},
@@ -181,8 +181,8 @@ func ScalingMatrix(x, y, z float64) *Matrix {
 	return NewMatrix(data)
 }
 
-// XRotationMatrix returns a x-axis rotation matrix
-func XRotationMatrix(radians float64) *Matrix {
+// RotateX returns an x-axis rotation matrix
+func RotateX(radians float64) *Matrix {
 	data := [][]float64{
 		{1, 0, 0, 0},
 		{0, math.Cos(radians), -math.Sin(radians), 0},
@@ -192,8 +192,8 @@ func XRotationMatrix(radians float64) *Matrix {
 	return NewMatrix(data)
 }
 
-// YRotationMatrix returns a y-axis rotation matrix
-func YRotationMatrix(radians float64) *Matrix {
+// RotateY returns a y-axis rotation matrix
+func RotateY(radians float64) *Matrix {
 	data := [][]float64{
 		{math.Cos(radians), 0, math.Sin(radians), 0},
 		{0, 1, 0, 0},
@@ -203,8 +203,8 @@ func YRotationMatrix(radians float64) *Matrix {
 	return NewMatrix(data)
 }
 
-// ZRotationMatrix returns a z-axis rotation matrix
-func ZRotationMatrix(radians float64) *Matrix {
+// RotateZ returns a z-axis rotation matrix
+func RotateZ(radians float64) *Matrix {
 	data := [][]float64{
 		{math.Cos(radians), -math.Sin(radians), 0, 0},
 		{math.Sin(radians), math.Cos(radians), 0, 0},
@@ -214,8 +214,8 @@ func ZRotationMatrix(radians float64) *Matrix {
 	return NewMatrix(data)
 }
 
-// ShearingMatrix returns a shearing (or skewing) matrix
-func ShearingMatrix(xy, xz, yx, yz, zx, zy float64) *Matrix {
+// Shear returns a shearing (or skewing) matrix
+func Shear(xy, xz, yx, yz, zx, zy float64) *Matrix {
 	// xy means "x moved in proportion to y" and so on for the rest
 	data := [][]float64{
 		{1, xy, xz, 0},
@@ -243,5 +243,5 @@ func ViewTransform(from, to, up *Tuple) *Matrix {
 		{0, 0, 0, 1},
 	}
 	orientation := NewMatrix(data)
-	return orientation.Multiply(TranslationMatrix(-from.xAxis, -from.yAxis, -from.zAxis))
+	return orientation.Multiply(Translate(-from.xAxis, -from.yAxis, -from.zAxis))
 }

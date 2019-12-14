@@ -21,7 +21,7 @@ var _ = Describe("world tests", func() {
 		s1.GetMaterial().SetDiffuse(0.7)
 		s1.GetMaterial().SetSpecular(0.2)
 		s2 := NewSphere()
-		s2.SetTransform(base.ScalingMatrix(0.5, 0.5, 0.5))
+		s2.SetTransform(base.Scale(0.5, 0.5, 0.5))
 		objects = []Object{s1, s2}
 	})
 
@@ -98,7 +98,7 @@ var _ = Describe("world tests", func() {
 
 		// hit should offset the point
 		s := NewSphere()
-		s.SetTransform(base.TranslationMatrix(0, 0, 1))
+		s.SetTransform(base.Translate(0, 0, 1))
 		intersection = NewIntersection(5, s)
 		hd = prepareComputations(intersection, ray)
 		Expect(hd.overPoint.GetZ()).To(BeNumerically("<", -base.Epsilon/2))

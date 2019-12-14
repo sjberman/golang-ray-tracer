@@ -11,7 +11,7 @@ import (
 type Object interface {
 	GetMaterial() *Material
 	GetTransform() *base.Matrix
-	SetTransform(*base.Matrix)
+	SetTransform(...*base.Matrix)
 	SetMaterial(*Material)
 	patternAt(*base.Tuple, image.Pattern) *image.Color
 	intersect(*Ray) []*Intersection
@@ -20,8 +20,8 @@ type Object interface {
 
 // object is the base implementation of the Object interface
 type object struct {
+	Material
 	transform        base.Matrix
-	material         Material
 	intersectFunc    func(*Ray, *object) []*Intersection
 	objectNormalFunc func(*base.Tuple) *base.Tuple
 }
@@ -33,7 +33,7 @@ func newObject(
 ) *object {
 	return &object{
 		transform:        base.Identity,
-		material:         defaultMaterial,
+		Material:         defaultMaterial,
 		intersectFunc:    intersectFunc,
 		objectNormalFunc: objectNormalFunc,
 	}
@@ -46,17 +46,21 @@ func (o *object) GetTransform() *base.Matrix {
 
 // GetMaterial gets the Object's material
 func (o *object) GetMaterial() *Material {
-	return &o.material
+	return &o.Material
 }
 
 // SetTransform sets the Object's transform to the supplied matrix
-func (o *object) SetTransform(matrix *base.Matrix) {
-	o.transform = *matrix
+func (o *object) SetTransform(matrix ...*base.Matrix) {
+	t := base.Identity
+	for _, m := range matrix {
+		t = *t.Multiply(m)
+	}
+	o.transform = t
 }
 
 // SetMaterial sets the Object's material
 func (o *object) SetMaterial(material *Material) {
-	o.material = *material
+	o.Material = *material
 }
 
 // patternAt returns the pattern at a point on the object

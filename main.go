@@ -5,9 +5,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/sjberman/golang-ray-tracer/pkg/base"
-	"github.com/sjberman/golang-ray-tracer/pkg/image"
-	"github.com/sjberman/golang-ray-tracer/pkg/scene"
+	. "github.com/sjberman/golang-ray-tracer/pkg/base"
+	. "github.com/sjberman/golang-ray-tracer/pkg/image"
+	. "github.com/sjberman/golang-ray-tracer/pkg/scene"
 )
 
 // Test program
@@ -17,57 +17,70 @@ func main() {
 	// pprof.StartCPUProfile(f1)
 	// defer pprof.StopCPUProfile()
 
-	floor := scene.NewPlane()
-	floor.SetTransform(base.YRotationMatrix(math.Sqrt(2) / 2).Multiply(
-		base.ScalingMatrix(2, 2, 2)))
-	cp := image.NewCheckerPattern(image.Black, image.White)
-	// cp.SetTransform(base.ScalingMatrix(0.25, 0.25, 0.25))
-	floor.GetMaterial().SetPattern(cp)
+	// Floor
+	cp := NewCheckerPattern(Black, White)
+	floor := NewPlane()
+	floor.SetTransform(
+		RotateY(math.Sqrt(2)/2),
+		Scale(2, 2, 2),
+	)
+	floor.SetPattern(cp)
 
-	backdrop := scene.NewPlane()
-	transform := base.TranslationMatrix(0, 0, 5).Multiply(
-		base.XRotationMatrix(math.Pi / 2))
-	backdrop.SetTransform(transform)
-	rp := image.NewRingPattern(image.NewColor(1, 0, 0), image.White)
-	// sp.SetTransform(base.ScalingMatrix(0.5, 0.5, 0.5))
-	backdrop.GetMaterial().SetPattern(rp)
+	// Backdrop
+	rp := NewRingPattern(NewColor(1, 0, 0), White)
+	backdrop := NewPlane()
+	backdrop.SetTransform(
+		Translate(0, 0, 5),
+		RotateX(math.Pi/2),
+	)
+	backdrop.SetPattern(rp)
 
-	middle := scene.NewSphere()
-	middle.SetTransform(base.TranslationMatrix(1.5, 0, 0).Multiply(
-		base.ScalingMatrix(0.5, 4.5, 0.5)))
-	sp := image.NewStripePattern(image.NewColor(1, 0.5, 0), image.NewColor(1, 0.3, 0))
-	sp.SetTransform(base.ScalingMatrix(0.05, 0.05, 0.05).Multiply(base.ZRotationMatrix(math.Pi / 2)))
-	middle.GetMaterial().SetPattern(sp)
-	middle.GetMaterial().SetAmbient(0.15)
+	// Middle object
+	sp := NewStripePattern(NewColor(1, 0.5, 0), NewColor(1, 0.3, 0))
+	sp.SetTransform(
+		Scale(0.05, 0.05, 0.05),
+		RotateZ(math.Pi/2),
+	)
+	middle := NewSphere()
+	middle.SetTransform(
+		Translate(1.5, 0, 0),
+		Scale(0.5, 4.5, 0.5),
+	)
+	middle.SetPattern(sp)
+	middle.SetAmbient(0.15)
 
-	// right := scene.NewSphere()
-	// right.SetTransform(base.TranslationMatrix(1.5, 0.5, -0.5).Multiply(base.ScalingMatrix(0.5, 0.5, 0.5)))
-	// // right.GetMaterial().SetColor(image.NewColor(0.5, 1, 0.1))
-	// right.GetMaterial().SetDiffuse(0.7)
-	// right.GetMaterial().SetSpecular(0.3)
-	// gp := image.NewGradientPattern(image.NewColor(0.5, 0.5, 0.5), image.NewColor(0.7, 0.8, 0.2))
-	// // gp.SetTransform(base.ScalingMatrix(0.5, 0.5, 0.5))
-	// right.GetMaterial().SetPattern(gp)
+	// Right object
+	right := NewSphere()
+	right.SetTransform(
+		Translate(0.2, 1, -1.5),
+		Scale(0.3, 0.3, 0.3),
+	)
+	right.SetColor(NewColor(0, 1, 0))
 
-	// left := scene.NewSphere()
-	// left.SetTransform(base.TranslationMatrix(-1.5, 0.33, -0.75).Multiply(base.ScalingMatrix(0.33, 0.33, 0.33)))
-	// left.GetMaterial().SetColor(image.NewColor(1, 0.8, 0.1))
-	// left.GetMaterial().SetDiffuse(0.7)
-	// left.GetMaterial().SetSpecular(0.3)
+	// Left object
+	left := NewSphere()
+	left.SetTransform(
+		Translate(-1.5, 2, 2.5),
+		Scale(0.7, 0.7, 0.7),
+	)
+	left.SetColor(NewColor(1, 0.8, 0.1))
 
-	light := scene.NewPointLight(base.NewPoint(-3, 6, -8), image.White.Multiply(1.2))
-	world := scene.NewWorld(light, []scene.Object{
+	// World
+	light := NewPointLight(NewPoint(-3, 6, -8), White.Multiply(1.2))
+	world := NewWorld(light, []Object{
 		floor,
 		backdrop,
 		middle,
-		//right,
-		//left,
+		right,
+		left,
 	})
-	camera := scene.NewCamera(400, 400, math.Pi/3)
 
-	camera.SetTransform(base.ViewTransform(base.NewPoint(-5, 2, -4), base.NewPoint(0, 2, 0), base.NewVector(0, 1, 0)))
+	// Camera
+	camera := NewCamera(300, 300, math.Pi/3)
+	camera.SetTransform(ViewTransform(NewPoint(-5, 2, -4), NewPoint(0, 2, 0), NewVector(0, 1, 0)))
 
-	canvas := scene.Render(camera, world)
+	// Canvas
+	canvas := Render(camera, world)
 
 	err := canvas.WriteToFile("image.ppm")
 	if err != nil {

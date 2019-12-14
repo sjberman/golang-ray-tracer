@@ -271,7 +271,7 @@ var _ = Describe("matrix tests", func() {
 	})
 
 	It("creates a translation matrix", func() {
-		t := TranslationMatrix(5, -3, 2)
+		t := Translate(5, -3, 2)
 		p := NewPoint(-3, 4, 5)
 		expPoint := NewPoint(2, 1, 7)
 		Expect(t.MultiplyTuple(p)).To(Equal(expPoint))
@@ -286,7 +286,7 @@ var _ = Describe("matrix tests", func() {
 	})
 
 	It("creates a scaling matrix", func() {
-		s := ScalingMatrix(2, 3, 4)
+		s := Scale(2, 3, 4)
 		p := NewPoint(-4, 6, 8)
 		expPoint := NewPoint(-8, 18, 32)
 		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
@@ -301,7 +301,7 @@ var _ = Describe("matrix tests", func() {
 		Expect(inverse.MultiplyTuple(v)).To(Equal(expVector))
 
 		// reflection
-		s = ScalingMatrix(-1, 1, 1)
+		s = Scale(-1, 1, 1)
 		p = NewPoint(2, 3, 4)
 		expPoint = NewPoint(-2, 3, 4)
 		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
@@ -310,36 +310,36 @@ var _ = Describe("matrix tests", func() {
 	It("creates rotation matrices", func() {
 		// X axis
 		p := NewPoint(0, 1, 0)
-		rx := XRotationMatrix(math.Pi / 4)
+		rx := RotateX(math.Pi / 4)
 		expPoint := NewPoint(0, math.Sqrt(2)/2, math.Sqrt(2)/2)
 		res := rx.MultiplyTuple(p)
 		Expect(res.Equals(expPoint)).To(BeTrue())
 
-		rx = XRotationMatrix(math.Pi / 2)
+		rx = RotateX(math.Pi / 2)
 		expPoint = NewPoint(0, 0, 1)
 		res = rx.MultiplyTuple(p)
 		Expect(res.Equals(expPoint)).To(BeTrue())
 
 		// Y axis
 		p = NewPoint(0, 0, 1)
-		ry := YRotationMatrix(math.Pi / 4)
+		ry := RotateY(math.Pi / 4)
 		expPoint = NewPoint(math.Sqrt(2)/2, 0, math.Sqrt(2)/2)
 		res = ry.MultiplyTuple(p)
 		Expect(res.Equals(expPoint)).To(BeTrue())
 
-		ry = YRotationMatrix(math.Pi / 2)
+		ry = RotateY(math.Pi / 2)
 		expPoint = NewPoint(1, 0, 0)
 		res = ry.MultiplyTuple(p)
 		Expect(res.Equals(expPoint)).To(BeTrue())
 
 		// Z axis
 		p = NewPoint(0, 1, 0)
-		rz := ZRotationMatrix(math.Pi / 4)
+		rz := RotateZ(math.Pi / 4)
 		expPoint = NewPoint(-math.Sqrt(2)/2, math.Sqrt(2)/2, 0)
 		res = rz.MultiplyTuple(p)
 		Expect(res.Equals(expPoint)).To(BeTrue())
 
-		rz = ZRotationMatrix(math.Pi / 2)
+		rz = RotateZ(math.Pi / 2)
 		expPoint = NewPoint(-1, 0, 0)
 		res = rz.MultiplyTuple(p)
 		Expect(res.Equals(expPoint)).To(BeTrue())
@@ -347,37 +347,37 @@ var _ = Describe("matrix tests", func() {
 
 	It("creates a shearing matrix", func() {
 		// moves x in proportion to y
-		s := ShearingMatrix(1, 0, 0, 0, 0, 0)
+		s := Shear(1, 0, 0, 0, 0, 0)
 		p := NewPoint(2, 3, 4)
 		expPoint := NewPoint(5, 3, 4)
 		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
 
 		// moves x in proportion to z
-		s = ShearingMatrix(0, 1, 0, 0, 0, 0)
+		s = Shear(0, 1, 0, 0, 0, 0)
 		p = NewPoint(2, 3, 4)
 		expPoint = NewPoint(6, 3, 4)
 		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
 
 		// moves y in proportion to x
-		s = ShearingMatrix(0, 0, 1, 0, 0, 0)
+		s = Shear(0, 0, 1, 0, 0, 0)
 		p = NewPoint(2, 3, 4)
 		expPoint = NewPoint(2, 5, 4)
 		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
 
 		// moves y in proportion to z
-		s = ShearingMatrix(0, 0, 0, 1, 0, 0)
+		s = Shear(0, 0, 0, 1, 0, 0)
 		p = NewPoint(2, 3, 4)
 		expPoint = NewPoint(2, 7, 4)
 		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
 
 		// moves z in proportion to x
-		s = ShearingMatrix(0, 0, 0, 0, 1, 0)
+		s = Shear(0, 0, 0, 0, 1, 0)
 		p = NewPoint(2, 3, 4)
 		expPoint = NewPoint(2, 3, 6)
 		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
 
 		// moves z in proportion to y
-		s = ShearingMatrix(0, 0, 0, 0, 0, 1)
+		s = Shear(0, 0, 0, 0, 0, 1)
 		p = NewPoint(2, 3, 4)
 		expPoint = NewPoint(2, 3, 7)
 		Expect(s.MultiplyTuple(p)).To(Equal(expPoint))
@@ -386,9 +386,9 @@ var _ = Describe("matrix tests", func() {
 	It("chains transformations", func() {
 		// individual transformations applied in sequence
 		p := NewPoint(1, 0, 1)
-		rx := XRotationMatrix(math.Pi / 2)
-		s := ScalingMatrix(5, 5, 5)
-		t := TranslationMatrix(10, 5, 7)
+		rx := RotateX(math.Pi / 2)
+		s := Scale(5, 5, 5)
+		t := Translate(10, 5, 7)
 
 		p2 := rx.MultiplyTuple(p)
 		expPoint := NewPoint(1, -1, 0)
@@ -419,14 +419,14 @@ var _ = Describe("matrix tests", func() {
 		// positive z direction (mirror of default)
 		to = NewPoint(0, 0, 1)
 		m = ViewTransform(from, to, up)
-		Expect(m).To(Equal(ScalingMatrix(-1, 1, -1)))
+		Expect(m).To(Equal(Scale(-1, 1, -1)))
 
 		// moves the world
 		from = NewPoint(0, 0, 8)
 		to = Origin
 		up = NewVector(0, 1, 0)
 		m = ViewTransform(from, to, up)
-		Expect(m).To(Equal(TranslationMatrix(0, 0, -8)))
+		Expect(m).To(Equal(Translate(0, 0, -8)))
 
 		// arbitrary view
 		from = NewPoint(1, 3, 2)

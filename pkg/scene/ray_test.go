@@ -40,12 +40,12 @@ var _ = Describe("ray tests", func() {
 
 	It("transforms a ray", func() {
 		r := NewRay(base.NewPoint(1, 2, 3), base.NewVector(0, 1, 0))
-		m := base.TranslationMatrix(3, 4, 5)
+		m := base.Translate(3, 4, 5)
 		r2 := r.Transform(m)
 		Expect(r2.origin).To(Equal(base.NewPoint(4, 6, 8)))
 		Expect(r2.direction).To(Equal(base.NewVector(0, 1, 0)))
 
-		m = base.ScalingMatrix(2, 3, 4)
+		m = base.Scale(2, 3, 4)
 		r2 = r.Transform(m)
 		Expect(r2.origin).To(Equal(base.NewPoint(2, 6, 12)))
 		Expect(r2.direction).To(Equal(base.NewVector(0, 3, 0)))

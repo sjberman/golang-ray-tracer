@@ -10,7 +10,7 @@ import (
 type Pattern interface {
 	GetColors() []*Color
 	GetTransform() *base.Matrix
-	SetTransform(*base.Matrix)
+	SetTransform(...*base.Matrix)
 	PatternAt(*base.Tuple) *Color
 }
 
@@ -18,7 +18,7 @@ type Pattern interface {
 type PatternObject struct {
 	color1        *Color
 	color2        *Color
-	transform     *base.Matrix
+	transform     base.Matrix
 	patternAtFunc func(*base.Tuple, *PatternObject) *Color
 }
 
@@ -31,7 +31,7 @@ func newPattern(
 		color1:        color1,
 		color2:        color2,
 		patternAtFunc: patternFunc,
-		transform:     &base.Identity,
+		transform:     base.Identity,
 	}
 }
 
@@ -42,12 +42,16 @@ func (p *PatternObject) GetColors() []*Color {
 
 // GetTransform returns the pattern's transform matrix
 func (p *PatternObject) GetTransform() *base.Matrix {
-	return p.transform
+	return &p.transform
 }
 
 // SetTransform sets the pattern's transform matrix
-func (p *PatternObject) SetTransform(matrix *base.Matrix) {
-	p.transform = matrix
+func (p *PatternObject) SetTransform(matrix ...*base.Matrix) {
+	t := base.Identity
+	for _, m := range matrix {
+		t = *t.Multiply(m)
+	}
+	p.transform = t
 }
 
 // PatternAt returns the color at a specific point, based on the pattern

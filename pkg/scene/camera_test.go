@@ -18,8 +18,8 @@ var _ = Describe("camera tests", func() {
 		Expect(c.fieldOfView).To(Equal(math.Pi / 2))
 		Expect(c.transform).To(Equal(&base.Identity))
 
-		c.SetTransform(base.ScalingMatrix(1, 2, 3))
-		Expect(c.transform).To(Equal(base.ScalingMatrix(1, 2, 3)))
+		c.SetTransform(base.Scale(1, 2, 3))
+		Expect(c.transform).To(Equal(base.Scale(1, 2, 3)))
 
 		c = NewCamera(200, 125, math.Pi/2)
 		Expect(c.pixelSize).To(Equal(0.01))
@@ -42,7 +42,7 @@ var _ = Describe("camera tests", func() {
 		Expect(ray.direction).To(Equal(expVector))
 
 		// when camera is transformed
-		c.SetTransform(base.YRotationMatrix(math.Pi / 4).Multiply(base.TranslationMatrix(0, -2, 5)))
+		c.SetTransform(base.RotateY(math.Pi / 4).Multiply(base.Translate(0, -2, 5)))
 		ray = c.RayForPixel(100, 50)
 		Expect(ray.origin).To(Equal(base.NewPoint(0, 2, -5)))
 		expVector = base.NewVector(math.Sqrt(2)/2, 0, -math.Sqrt(2)/2)

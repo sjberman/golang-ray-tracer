@@ -13,7 +13,7 @@ var _ = Describe("pattern tests", func() {
 		Expect(p.GetColors()[1]).To(Equal(Black))
 		Expect(p.GetTransform()).To(Equal(&base.Identity))
 
-		t := base.TranslationMatrix(2, 3, 4)
+		t := base.Translate(2, 3, 4)
 		p.SetTransform(t)
 		Expect(p.GetTransform()).To(Equal(t))
 	}

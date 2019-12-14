@@ -15,7 +15,7 @@ var _ = Describe("object tests", func() {
 		Expect(o.GetTransform()).To(Equal(&base.Identity))
 		Expect(o.GetMaterial()).To(Equal(&defaultMaterial))
 
-		t := base.TranslationMatrix(2, 3, 4)
+		t := base.Translate(2, 3, 4)
 		o.SetTransform(t)
 		Expect(o.GetTransform()).To(Equal(t))
 
@@ -33,7 +33,7 @@ var _ = Describe("object tests", func() {
 	It("returns the stripe pattern at a point", func() {
 		// with object transformation
 		s := NewSphere()
-		s.SetTransform(base.ScalingMatrix(2, 2, 2))
+		s.SetTransform(base.Scale(2, 2, 2))
 		p := image.NewStripePattern(image.White, image.Black)
 		c := s.patternAt(base.NewPoint(1.5, 0, 0), p)
 		Expect(c).To(Equal(image.White))
@@ -41,15 +41,15 @@ var _ = Describe("object tests", func() {
 		// with pattern transformation
 		s = NewSphere()
 		p = image.NewStripePattern(image.White, image.Black)
-		p.SetTransform(base.ScalingMatrix(2, 2, 2))
+		p.SetTransform(base.Scale(2, 2, 2))
 		c = s.patternAt(base.NewPoint(1.5, 0, 0), p)
 		Expect(c).To(Equal(image.White))
 
 		// with both object and pattern transformation
 		s = NewSphere()
-		s.SetTransform(base.ScalingMatrix(2, 2, 2))
+		s.SetTransform(base.Scale(2, 2, 2))
 		p = image.NewStripePattern(image.White, image.Black)
-		p.SetTransform(base.TranslationMatrix(0.5, 0, 0))
+		p.SetTransform(base.Translate(0.5, 0, 0))
 		c = s.patternAt(base.NewPoint(2.5, 0, 0), p)
 		Expect(c).To(Equal(image.White))
 	})
@@ -108,7 +108,7 @@ var _ = Describe("object tests", func() {
 			//  intersect a scaled sphere
 			r = NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
 			s = NewSphere()
-			s.SetTransform(base.ScalingMatrix(2, 2, 2))
+			s.SetTransform(base.Scale(2, 2, 2))
 			ints = s.intersect(r)
 			Expect(len(ints)).To(Equal(2))
 			Expect(ints[0].value).To(Equal(3.0))
@@ -116,7 +116,7 @@ var _ = Describe("object tests", func() {
 
 			r = NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
 			s = NewSphere()
-			s.SetTransform(base.TranslationMatrix(5, 0, 0))
+			s.SetTransform(base.Translate(5, 0, 0))
 			ints = s.intersect(r)
 			Expect(len(ints)).To(BeZero())
 		})
@@ -143,12 +143,12 @@ var _ = Describe("object tests", func() {
 			Expect(n).To(Equal(n.Normalize()))
 
 			// translated sphere
-			s.SetTransform(base.TranslationMatrix(0, 1, 0))
+			s.SetTransform(base.Translate(0, 1, 0))
 			n = s.normalAt(base.NewPoint(0, 1.70711, -0.70711))
 			Expect(n).To(Equal(base.NewVector(0, 0.7071067811865475, -0.7071067811865476)))
 
 			// scaled/rotated sphere
-			m := base.ScalingMatrix(1, 0.5, 1).Multiply(base.ZRotationMatrix(math.Pi / 5))
+			m := base.Scale(1, 0.5, 1).Multiply(base.RotateZ(math.Pi / 5))
 			s.SetTransform(m)
 			n = s.normalAt(base.NewPoint(0, math.Sqrt(2)/2, -math.Sqrt(2)/2))
 			Expect(n).To(Equal(base.NewVector(0, 0.9701425001453319, -0.24253562503633294)))
