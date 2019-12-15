@@ -19,7 +19,7 @@ var _ = Describe("pattern tests", func() {
 	}
 
 	It("creates patterns", func() {
-		p := newPattern(White, Black, nil)
+		p := NewPattern(White, Black, nil)
 		testNewPattern(p)
 	})
 

@@ -139,6 +139,14 @@ func sphereObjectNormal(objectPoint *base.Tuple) *base.Tuple {
 	return normal
 }
 
+// GlassSphere creates a glass sphere object
+func GlassSphere() *Sphere {
+	s := NewSphere()
+	s.SetTransparency(1)
+	s.SetRefractiveIndex(1.5)
+	return s
+}
+
 // Plane is a plane object
 type Plane struct {
 	*object

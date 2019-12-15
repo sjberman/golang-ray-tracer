@@ -28,19 +28,10 @@ var Origin = &Tuple{
 
 // NewTuple returns a generic tuple
 func NewTuple(x, y, z, w float64) *Tuple {
-	if x < Epsilon && x > -Epsilon {
-		x = 0
-	}
-	if y < Epsilon && y > -Epsilon {
-		y = 0
-	}
-	if z < Epsilon && z > -Epsilon {
-		z = 0
-	}
 	return &Tuple{
-		xAxis: x,
-		yAxis: y,
-		zAxis: z,
+		xAxis: roundValue(x),
+		yAxis: roundValue(y),
+		zAxis: roundValue(z),
 		w:     w,
 	}
 }
@@ -90,12 +81,7 @@ func (t *Tuple) Add(t2 *Tuple) (*Tuple, error) {
 	if t.IsPoint() && t2.IsPoint() {
 		return nil, errors.New("cannot add two points together")
 	}
-	return &Tuple{
-		xAxis: t.xAxis + t2.xAxis,
-		yAxis: t.yAxis + t2.yAxis,
-		zAxis: t.zAxis + t2.zAxis,
-		w:     t.w + t2.w,
-	}, nil
+	return NewTuple(t.xAxis+t2.xAxis, t.yAxis+t2.yAxis, t.zAxis+t2.zAxis, t.w+t2.w), nil
 }
 
 // Subtract returns the difference between two tuples
@@ -103,32 +89,17 @@ func (t *Tuple) Subtract(t2 *Tuple) (*Tuple, error) {
 	if t.IsVector() && t2.IsPoint() {
 		return nil, errors.New("cannot subtract a point from a vector")
 	}
-	return &Tuple{
-		xAxis: t.xAxis - t2.xAxis,
-		yAxis: t.yAxis - t2.yAxis,
-		zAxis: t.zAxis - t2.zAxis,
-		w:     t.w - t2.w,
-	}, nil
+	return NewTuple(t.xAxis-t2.xAxis, t.yAxis-t2.yAxis, t.zAxis-t2.zAxis, t.w-t2.w), nil
 }
 
 // Multiply returns a tuple multiplied by a value
 func (t *Tuple) Multiply(val float64) *Tuple {
-	return &Tuple{
-		xAxis: t.xAxis * val,
-		yAxis: t.yAxis * val,
-		zAxis: t.zAxis * val,
-		w:     t.w,
-	}
+	return NewTuple(t.xAxis*val, t.yAxis*val, t.zAxis*val, t.w)
 }
 
 // Divide returns a tuple divided by a value
 func (t *Tuple) Divide(val float64) *Tuple {
-	return &Tuple{
-		xAxis: t.xAxis / val,
-		yAxis: t.yAxis / val,
-		zAxis: t.zAxis / val,
-		w:     t.w,
-	}
+	return NewTuple(t.xAxis/val, t.yAxis/val, t.zAxis/val, t.w)
 }
 
 // Epsilon is the +/- value for floating point algebra to be considered equal
@@ -155,12 +126,7 @@ func (t *Tuple) Equals(t2 *Tuple) bool {
 
 // Negate returns the calling tuple with its fields negated
 func (t *Tuple) Negate() *Tuple {
-	return &Tuple{
-		xAxis: -t.xAxis,
-		yAxis: -t.yAxis,
-		zAxis: -t.zAxis,
-		w:     t.w,
-	}
+	return NewTuple(-t.xAxis, -t.yAxis, -t.zAxis, t.w)
 }
 
 // Magnitude returns the length of a vector (using Euclidean distance formula)
@@ -203,4 +169,15 @@ func (t *Tuple) Reflect(normal *Tuple) *Tuple {
 // Converts a list of 4 values to a tuple
 func listToTuple(list []float64) *Tuple {
 	return NewTuple(list[0], list[1], list[2], list[3])
+}
+
+// if value is within epsilon of its floor or ceiling, round it
+func roundValue(val float64) float64 {
+	ret := val
+	if val-math.Floor(val) <= Epsilon {
+		ret = math.Floor(val)
+	} else if math.Ceil(val)-val <= Epsilon {
+		ret = math.Ceil(val)
+	}
+	return ret
 }

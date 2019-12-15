@@ -153,7 +153,7 @@ func (m *Matrix) minor(row, col int) float64 {
 // Returns the cofactor of a matrix
 func (m *Matrix) cofactor(row, col int) float64 {
 	minor := m.minor(row, col)
-	if (row+col)%2 == 0 {
+	if minor == 0 || (row+col)%2 == 0 {
 		return minor
 	}
 	return -minor

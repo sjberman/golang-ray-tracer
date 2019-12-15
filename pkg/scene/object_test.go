@@ -10,6 +10,20 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
 )
 
+type MockPattern struct {
+	*image.PatternObject
+}
+
+func NewMockPattern() *MockPattern {
+	return &MockPattern{
+		PatternObject: image.NewPattern(nil, nil, mockFunc),
+	}
+}
+
+func mockFunc(point *base.Tuple, p *image.PatternObject) *image.Color {
+	return image.NewColor(point.GetX(), point.GetY(), point.GetZ())
+}
+
 var _ = Describe("object tests", func() {
 	testNewObject := func(o Object) {
 		Expect(o.GetTransform()).To(Equal(&base.Identity))
@@ -30,34 +44,38 @@ var _ = Describe("object tests", func() {
 		testNewObject(o)
 	})
 
-	It("returns the stripe pattern at a point", func() {
+	It("returns the pattern at a point", func() {
 		// with object transformation
 		s := NewSphere()
 		s.SetTransform(base.Scale(2, 2, 2))
-		p := image.NewStripePattern(image.White, image.Black)
-		c := s.patternAt(base.NewPoint(1.5, 0, 0), p)
-		Expect(c).To(Equal(image.White))
+		p := NewMockPattern()
+		c := s.patternAt(base.NewPoint(2, 3, 4), p)
+		Expect(c).To(Equal(image.NewColor(1, 1.5, 2)))
 
 		// with pattern transformation
 		s = NewSphere()
-		p = image.NewStripePattern(image.White, image.Black)
+		p = NewMockPattern()
 		p.SetTransform(base.Scale(2, 2, 2))
-		c = s.patternAt(base.NewPoint(1.5, 0, 0), p)
-		Expect(c).To(Equal(image.White))
+		c = s.patternAt(base.NewPoint(2, 3, 4), p)
+		Expect(c).To(Equal(image.NewColor(1, 1.5, 2)))
 
 		// with both object and pattern transformation
 		s = NewSphere()
 		s.SetTransform(base.Scale(2, 2, 2))
-		p = image.NewStripePattern(image.White, image.Black)
-		p.SetTransform(base.Translate(0.5, 0, 0))
-		c = s.patternAt(base.NewPoint(2.5, 0, 0), p)
-		Expect(c).To(Equal(image.White))
+		p = NewMockPattern()
+		p.SetTransform(base.Translate(0.5, 1, 1.5))
+		c = s.patternAt(base.NewPoint(2.5, 3, 3.5), p)
+		Expect(c).To(Equal(image.NewColor(0.75, 0.5, 0.25)))
 	})
 
 	Context("spheres", func() {
 		It("creates spheres", func() {
 			s := NewSphere()
 			testNewObject(s)
+
+			s = GlassSphere()
+			Expect(s.transparency).To(Equal(1.0))
+			Expect(s.refractiveIndex).To(Equal(1.5))
 		})
 
 		It("calculates a sphere intersection", func() {

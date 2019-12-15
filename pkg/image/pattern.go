@@ -22,8 +22,8 @@ type PatternObject struct {
 	patternAtFunc func(*base.Tuple, *PatternObject) *Color
 }
 
-// newPattern returns a new pattern object
-func newPattern(
+// NewPattern returns a new pattern object
+func NewPattern(
 	color1, color2 *Color,
 	patternFunc func(*base.Tuple, *PatternObject) *Color,
 ) *PatternObject {
@@ -67,7 +67,7 @@ type StripePattern struct {
 // NewStripePattern returns a new StripePattern object
 func NewStripePattern(color1, color2 *Color) *StripePattern {
 	return &StripePattern{
-		PatternObject: newPattern(color1, color2, stripeAt),
+		PatternObject: NewPattern(color1, color2, stripeAt),
 	}
 }
 
@@ -88,7 +88,7 @@ type GradientPattern struct {
 // NewGradientPattern returns a new GradientPattern object
 func NewGradientPattern(color1, color2 *Color) *GradientPattern {
 	return &GradientPattern{
-		PatternObject: newPattern(color1, color2, gradientAt),
+		PatternObject: NewPattern(color1, color2, gradientAt),
 	}
 }
 
@@ -108,7 +108,7 @@ type RingPattern struct {
 // NewRingPattern returns a new RingPattern object
 func NewRingPattern(color1, color2 *Color) *RingPattern {
 	return &RingPattern{
-		PatternObject: newPattern(color1, color2, ringAt),
+		PatternObject: NewPattern(color1, color2, ringAt),
 	}
 }
 
@@ -129,7 +129,7 @@ type CheckerPattern struct {
 // NewCheckerPattern returns a new CheckerPattern object
 func NewCheckerPattern(color1, color2 *Color) *CheckerPattern {
 	return &CheckerPattern{
-		PatternObject: newPattern(color1, color2, checkerAt),
+		PatternObject: NewPattern(color1, color2, checkerAt),
 	}
 }
 
