@@ -19,8 +19,8 @@ var _ = Describe("ray tests", func() {
 		o := base.NewPoint(1, 2, 3)
 		d := base.NewVector(4, 5, 6)
 		ray := NewRay(o, d)
-		Expect(ray.origin).To(Equal(o))
-		Expect(ray.GetDirection()).To(Equal(d))
+		Expect(ray.Origin).To(Equal(o))
+		Expect(ray.Direction).To(Equal(d))
 	})
 
 	It("computes the position of a point on the ray", func() {
@@ -42,12 +42,12 @@ var _ = Describe("ray tests", func() {
 		r := NewRay(base.NewPoint(1, 2, 3), base.NewVector(0, 1, 0))
 		m := base.Translate(3, 4, 5)
 		r2 := r.Transform(m)
-		Expect(r2.origin).To(Equal(base.NewPoint(4, 6, 8)))
-		Expect(r2.direction).To(Equal(base.NewVector(0, 1, 0)))
+		Expect(r2.Origin).To(Equal(base.NewPoint(4, 6, 8)))
+		Expect(r2.Direction).To(Equal(base.NewVector(0, 1, 0)))
 
 		m = base.Scale(2, 3, 4)
 		r2 = r.Transform(m)
-		Expect(r2.origin).To(Equal(base.NewPoint(2, 6, 12)))
-		Expect(r2.direction).To(Equal(base.NewVector(0, 3, 0)))
+		Expect(r2.Origin).To(Equal(base.NewPoint(2, 6, 12)))
+		Expect(r2.Direction).To(Equal(base.NewVector(0, 3, 0)))
 	})
 })

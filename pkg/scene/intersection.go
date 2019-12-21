@@ -54,7 +54,7 @@ func sortIntersections(ints []*Intersection) []*Intersection {
 	return ints
 }
 
-// returns a combined list of the supplied intersections
+// intersections returns a combined list of the supplied intersections
 func intersections(intersections ...*Intersection) []*Intersection {
 	return sortIntersections(intersections)
 }

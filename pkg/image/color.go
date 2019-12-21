@@ -34,38 +34,22 @@ func NewColor(r, g, b float64) *Color {
 
 // Add adds two colors together and returns the result
 func (c *Color) Add(c2 *Color) *Color {
-	return &Color{
-		red:   c.red + c2.red,
-		green: c.green + c2.green,
-		blue:  c.blue + c2.blue,
-	}
+	return NewColor(c.red+c2.red, c.green+c2.green, c.blue+c2.blue)
 }
 
 // Subtract returns the difference between two colors
 func (c *Color) Subtract(c2 *Color) *Color {
-	return &Color{
-		red:   c.red - c2.red,
-		green: c.green - c2.green,
-		blue:  c.blue - c2.blue,
-	}
+	return NewColor(c.red-c2.red, c.green-c2.green, c.blue-c2.blue)
 }
 
 // Multiply returns a color multiplied by a value
 func (c *Color) Multiply(val float64) *Color {
-	return &Color{
-		red:   c.red * val,
-		green: c.green * val,
-		blue:  c.blue * val,
-	}
+	return NewColor(c.red*val, c.green*val, c.blue*val)
 }
 
 // MultiplyColor multiplies two colors by each other and returns the result
 func (c *Color) MultiplyColor(c2 *Color) *Color {
-	return &Color{
-		red:   c.red * c2.red,
-		green: c.green * c2.green,
-		blue:  c.blue * c2.blue,
-	}
+	return NewColor(c.red*c2.red, c.green*c2.green, c.blue*c2.blue)
 }
 
 // Equals returns whether or not two colors are equal to each other

@@ -17,9 +17,9 @@ var _ = Describe("world tests", func() {
 	BeforeEach(func() {
 		light = NewPointLight(base.NewPoint(-10, 10, -10), image.White)
 		s1 := NewSphere()
-		s1.GetMaterial().SetColor(image.NewColor(0.8, 1.0, 0.6))
-		s1.GetMaterial().SetDiffuse(0.7)
-		s1.GetMaterial().SetSpecular(0.2)
+		s1.GetMaterial().Color = image.NewColor(0.8, 1.0, 0.6)
+		s1.GetMaterial().Diffuse = 0.7
+		s1.GetMaterial().Specular = 0.2
 		s2 := NewSphere()
 		s2.SetTransform(base.Scale(0.5, 0.5, 0.5))
 		objects = []Object{s1, s2}
@@ -57,21 +57,21 @@ var _ = Describe("world tests", func() {
 
 		// intersection behind the ray
 		outer := w.objects[0]
-		outer.GetMaterial().SetAmbient(1)
+		outer.GetMaterial().Ambient = 1
 		inner := w.objects[1]
-		inner.GetMaterial().SetAmbient(1)
+		inner.GetMaterial().Ambient = 1
 
 		ray = NewRay(base.NewPoint(0, 0, 0.75), base.NewVector(0, 0, -1))
 		color = w.ColorAt(ray, remainingReflections)
-		Expect(color).To(Equal(inner.GetMaterial().color))
+		Expect(color).To(Equal(inner.GetMaterial().Color))
 
 		// with mutally reflective surfaces (assume no infinite recursion)
 		lower := NewPlane()
-		lower.SetReflective(1)
+		lower.Reflective = 1
 		lower.SetTransform(base.Translate(0, -1, 0))
 
 		upper := NewPlane()
-		upper.SetReflective(1)
+		upper.Reflective = 1
 		upper.SetTransform(base.Translate(0, 1, 0))
 
 		w.objects = []Object{lower, upper}
@@ -105,7 +105,7 @@ var _ = Describe("world tests", func() {
 		w := NewWorld(light, objects)
 		ray := NewRay(base.NewPoint(0, 0, 0), base.NewVector(0, 0, 1))
 		s := w.objects[1]
-		s.GetMaterial().SetAmbient(1)
+		s.GetMaterial().Ambient = 1
 		intersection := NewIntersection(1, s)
 		hd := prepareComputations(intersection, ray, intersections(intersection))
 		color := w.reflectedColor(hd, 1)
@@ -113,7 +113,7 @@ var _ = Describe("world tests", func() {
 
 		// reflective material with max recursive depth
 		p := NewPlane()
-		p.SetReflective(0.5)
+		p.Reflective = 0.5
 		p.SetTransform(base.Translate(0, -1, 0))
 		w.objects = append(w.objects, p)
 		ray = NewRay(base.NewPoint(0, 0, -3), base.NewVector(0, -math.Sqrt(2)/2, math.Sqrt(2)/2))
@@ -145,8 +145,8 @@ var _ = Describe("world tests", func() {
 		Specify("refracted color with max recursive depth", func() {
 			w := NewWorld(light, objects)
 			s := w.objects[0]
-			s.GetMaterial().SetTransparency(1)
-			s.GetMaterial().SetRefractiveIndex(1.5)
+			s.GetMaterial().Transparency = 1
+			s.GetMaterial().RefractiveIndex = 1.5
 			ray := NewRay(base.NewPoint(0, 0, 0), base.NewVector(0, 0, 1))
 			ints := intersections(NewIntersection(4, s), NewIntersection(6, s))
 			hd := prepareComputations(ints[0], ray, ints)
@@ -170,11 +170,11 @@ var _ = Describe("world tests", func() {
 		Specify("refracted color with a refracted ray", func() {
 			w := NewWorld(light, objects)
 			s1 := w.objects[0]
-			s1.GetMaterial().SetAmbient(1)
-			s1.GetMaterial().SetPattern(NewMockPattern())
+			s1.GetMaterial().Ambient = 1
+			s1.GetMaterial().Pattern = NewMockPattern()
 			s2 := w.objects[1]
-			s2.GetMaterial().SetTransparency(1)
-			s2.GetMaterial().SetRefractiveIndex(1.5)
+			s2.GetMaterial().Transparency = 1
+			s2.GetMaterial().RefractiveIndex = 1.5
 			ray := NewRay(base.NewPoint(0, 0, 0.1), base.NewVector(0, 1, 0))
 			ints := intersections(
 				NewIntersection(-0.9899, s1), NewIntersection(-0.4899, s2),
@@ -190,11 +190,11 @@ var _ = Describe("world tests", func() {
 		w := NewWorld(light, objects)
 		floor := NewPlane()
 		floor.SetTransform(base.Translate(0, -1, 0))
-		floor.SetTransparency(0.5)
-		floor.SetRefractiveIndex(1.5)
+		floor.Transparency = 0.5
+		floor.RefractiveIndex = 1.5
 		ball := NewSphere()
-		ball.SetColor(image.NewColor(1, 0, 0))
-		ball.SetAmbient(0.5)
+		ball.Color = image.NewColor(1, 0, 0)
+		ball.Ambient = 0.5
 		ball.SetTransform(base.Translate(0, -3.5, -0.5))
 		w.objects = append(w.objects, floor, ball)
 
@@ -256,11 +256,11 @@ var _ = Describe("world tests", func() {
 
 		s2 := GlassSphere()
 		s2.SetTransform(base.Translate(0, 0, -0.25))
-		s2.SetRefractiveIndex(2)
+		s2.RefractiveIndex = 2
 
 		s3 := GlassSphere()
 		s3.SetTransform(base.Translate(0, 0, 0.25))
-		s3.SetRefractiveIndex(2.5)
+		s3.RefractiveIndex = 2.5
 
 		ray := NewRay(base.NewPoint(0, 0, -4), base.NewVector(0, 0, 1))
 		ints := intersections(

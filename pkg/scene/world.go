@@ -39,13 +39,13 @@ func (w *World) ColorAt(r *Ray, remaining int) *image.Color {
 // shadeHit returns the color at the intersection encapsulated by hitData
 func (w *World) shadeHit(hd *hitData, remaining int) *image.Color {
 	shadowed := w.isShadowed(hd.overPoint)
-	surface := Lighting(
+	surface := lighting(
 		w.light, hd.object, hd.object.GetMaterial(), hd.point, hd.eyev, hd.normalv, shadowed)
 	reflected := w.reflectedColor(hd, remaining)
 	refracted := w.refractedColor(hd, remaining)
 
 	material := hd.object.GetMaterial()
-	if material.reflective > 0 && material.transparency > 0 {
+	if material.Reflective > 0 && material.Transparency > 0 {
 		reflectance := schlick(hd)
 		reflect := reflected.Multiply(reflectance)
 		refract := refracted.Multiply(1 - reflectance)
@@ -80,18 +80,18 @@ func (w *World) intersect(r *Ray) []*Intersection {
 
 // reflectedColor returns the color from a reflected ray
 func (w *World) reflectedColor(hd *hitData, remaining int) *image.Color {
-	if remaining < 1 || hd.object.GetMaterial().reflective == 0 {
+	if remaining < 1 || hd.object.GetMaterial().Reflective == 0 {
 		return image.Black
 	}
 	remaining--
 	reflectRay := NewRay(hd.overPoint, hd.reflectv)
 	color := w.ColorAt(reflectRay, remaining)
-	return color.Multiply(hd.object.GetMaterial().reflective)
+	return color.Multiply(hd.object.GetMaterial().Reflective)
 }
 
 // refractedColor returns the color from a refracted ray
 func (w *World) refractedColor(hd *hitData, remaining int) *image.Color {
-	if remaining < 1 || hd.object.GetMaterial().transparency == 0 {
+	if remaining < 1 || hd.object.GetMaterial().Transparency == 0 {
 		return image.Black
 	}
 	remaining--
@@ -111,7 +111,7 @@ func (w *World) refractedColor(hd *hitData, remaining int) *image.Color {
 	direction, _ := hd.normalv.Multiply((nRatio*cosI - cosT)).Subtract(hd.eyev.Multiply(nRatio))
 	refractRay := NewRay(hd.underPoint, direction)
 	color := w.ColorAt(refractRay, remaining)
-	return color.Multiply(hd.object.GetMaterial().transparency)
+	return color.Multiply(hd.object.GetMaterial().Transparency)
 }
 
 // hitData contains information about a hit intersection
@@ -137,7 +137,7 @@ func prepareComputations(
 	hd := &hitData{
 		value:  intersection.GetValue(),
 		object: intersection.GetObject(),
-		eyev:   ray.GetDirection().Negate(),
+		eyev:   ray.Direction.Negate(),
 	}
 	hd.point = ray.Position(hd.value)
 	hd.normalv = hd.object.normalAt(hd.point)
@@ -147,7 +147,7 @@ func prepareComputations(
 		hd.inside = true
 		hd.normalv = hd.normalv.Negate()
 	}
-	hd.reflectv = ray.GetDirection().Reflect(hd.normalv)
+	hd.reflectv = ray.Direction.Reflect(hd.normalv)
 	// have a point just above normal point to account for accidental shadow calculation when
 	// a ray hits the object it's leaving
 	hd.overPoint, _ = hd.point.Add(hd.normalv.Multiply(base.Epsilon * 2))
@@ -163,7 +163,7 @@ func prepareComputations(
 			if len(containers) == 0 {
 				hd.n1 = 1
 			} else {
-				hd.n1 = containers[len(containers)-1].GetMaterial().refractiveIndex
+				hd.n1 = containers[len(containers)-1].GetMaterial().RefractiveIndex
 			}
 		}
 
@@ -181,7 +181,7 @@ func prepareComputations(
 			if len(containers) == 0 {
 				hd.n2 = 1
 			} else {
-				hd.n2 = containers[len(containers)-1].GetMaterial().refractiveIndex
+				hd.n2 = containers[len(containers)-1].GetMaterial().RefractiveIndex
 			}
 			break
 		}

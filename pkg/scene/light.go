@@ -21,18 +21,17 @@ func NewPointLight(pos *base.Tuple, intensity *image.Color) *PointLight {
 	}
 }
 
-// Lighting returns the color at a point based on the light, material, and the eye/normal vectors
-func Lighting(
+// lighting returns the color at a point based on the light, material, and the eye/normal vectors
+func lighting(
 	light *PointLight,
 	object Object,
 	material *Material,
 	point, eyev, normalv *base.Tuple,
 	inShadow bool,
 ) *image.Color {
-	color := material.color
-	if material.pattern != nil {
-		//color = material.pattern.StripeAt(point)
-		color = object.patternAt(point, material.pattern)
+	color := material.Color
+	if material.Pattern != nil {
+		color = object.patternAt(point, material.Pattern)
 	}
 	diffuse, specular := image.Black, image.Black
 	// combine surface color with light's color
@@ -43,7 +42,7 @@ func Lighting(
 	lightv := diff.Normalize()
 
 	// compute the ambient contribution
-	ambient := effectiveColor.Multiply(material.ambient)
+	ambient := effectiveColor.Multiply(material.Ambient)
 	if inShadow {
 		return ambient
 	}
@@ -54,7 +53,7 @@ func Lighting(
 	lightDotNormal := lightv.DotProduct(normalv)
 	if lightDotNormal >= 0 {
 		// compute the diffuse contribution
-		diffuse = effectiveColor.Multiply(material.diffuse).Multiply(lightDotNormal)
+		diffuse = effectiveColor.Multiply(material.Diffuse).Multiply(lightDotNormal)
 
 		// reflectDotEye represents the cosine of the angle between the reflection vector
 		// and the eye vector. A negative number means the light reflects away from the eye.
@@ -62,8 +61,8 @@ func Lighting(
 		reflectDotEye := reflectv.DotProduct(eyev)
 		if reflectDotEye > 0 {
 			// compute the specular contribution
-			factor := math.Pow(reflectDotEye, material.shininess)
-			specular = light.intensity.Multiply(material.specular).Multiply(factor)
+			factor := math.Pow(reflectDotEye, material.Shininess)
+			specular = light.intensity.Multiply(material.Specular).Multiply(factor)
 		}
 	}
 	// Add the three contributions together to get the final shading
