@@ -140,7 +140,11 @@ func (t *Tuple) Magnitude() float64 {
 
 // Normalize converts a vector into a unit vector (magnitude of 1)
 func (t *Tuple) Normalize() *Tuple {
-	return t.Divide(t.Magnitude())
+	magnitude := t.Magnitude()
+	if magnitude > 1 {
+		return t.Divide(magnitude)
+	}
+	return t
 }
 
 // DotProduct returns the dot product of two tuples

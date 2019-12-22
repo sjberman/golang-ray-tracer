@@ -1,8 +1,6 @@
-package scene
+package ray
 
-import (
-	"github.com/sjberman/golang-ray-tracer/pkg/base"
-)
+import "github.com/sjberman/golang-ray-tracer/pkg/base"
 
 // Ray is a light ray with an origin and direction
 type Ray struct {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
+	"github.com/sjberman/golang-ray-tracer/pkg/scene/object"
 )
 
 // PointLight is a light with no size, existing at a single point
@@ -24,14 +25,14 @@ func NewPointLight(pos *base.Tuple, intensity *image.Color) *PointLight {
 // lighting returns the color at a point based on the light, material, and the eye/normal vectors
 func lighting(
 	light *PointLight,
-	object Object,
-	material *Material,
+	obj object.Object,
+	material *object.Material,
 	point, eyev, normalv *base.Tuple,
 	inShadow bool,
 ) *image.Color {
 	color := material.Color
 	if material.Pattern != nil {
-		color = object.patternAt(point, material.Pattern)
+		color = obj.PatternAt(point, material.Pattern)
 	}
 	diffuse, specular := image.Black, image.Black
 	// combine surface color with light's color

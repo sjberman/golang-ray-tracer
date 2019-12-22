@@ -1,4 +1,4 @@
-package scene
+package ray
 
 import (
 	"testing"
@@ -9,9 +9,9 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 )
 
-func TestScene(t *testing.T) {
+func TestRay(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Scene Suite")
+	RunSpecs(t, "Ray Suite")
 }
 
 var _ = Describe("ray tests", func() {

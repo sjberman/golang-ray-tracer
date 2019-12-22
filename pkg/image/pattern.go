@@ -142,3 +142,19 @@ func checkerAt(point *base.Tuple, p *PatternObject) *Color {
 	}
 	return p.color2
 }
+
+// MockPattern is a mock pattern object for unit testing
+type MockPattern struct {
+	*PatternObject
+}
+
+// NewMockPattern returns a new MockPattern object
+func NewMockPattern() *MockPattern {
+	return &MockPattern{
+		PatternObject: NewPattern(nil, nil, mockFunc),
+	}
+}
+
+func mockFunc(point *base.Tuple, p *PatternObject) *Color {
+	return NewColor(point.GetX(), point.GetY(), point.GetZ())
+}

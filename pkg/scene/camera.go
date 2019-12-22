@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
+	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
 // Camera is the viewpoint of a scene
@@ -44,7 +45,7 @@ func (c *Camera) SetTransform(matrix *base.Matrix) {
 }
 
 // RayForPixel returns a ray starting at the camera and going to x,y on the canvas
-func (c *Camera) RayForPixel(x, y int) *Ray {
+func (c *Camera) RayForPixel(x, y int) *ray.Ray {
 	// the offset from the edge of the canvas to the pixel's center
 	xOffset := (float64(x) + 0.5) * c.pixelSize
 	yOffset := (float64(y) + 0.5) * c.pixelSize
@@ -63,5 +64,5 @@ func (c *Camera) RayForPixel(x, y int) *Ray {
 	diff, _ := pixel.Subtract(origin)
 	direction := diff.Normalize()
 
-	return NewRay(origin, direction)
+	return ray.NewRay(origin, direction)
 }

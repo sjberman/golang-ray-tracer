@@ -8,6 +8,7 @@ import (
 	. "github.com/sjberman/golang-ray-tracer/pkg/base"
 	. "github.com/sjberman/golang-ray-tracer/pkg/image"
 	. "github.com/sjberman/golang-ray-tracer/pkg/scene"
+	. "github.com/sjberman/golang-ray-tracer/pkg/scene/object"
 )
 
 // Test program

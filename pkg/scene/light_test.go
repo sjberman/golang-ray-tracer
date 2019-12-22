@@ -9,6 +9,7 @@ import (
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
+	"github.com/sjberman/golang-ray-tracer/pkg/scene/object"
 )
 
 var _ = Describe("light tests", func() {
@@ -21,8 +22,8 @@ var _ = Describe("light tests", func() {
 	})
 
 	It("calculates the lighting", func() {
-		s := NewSphere()
-		m := DefaultMaterial
+		s := object.NewSphere()
+		m := object.DefaultMaterial
 		position := base.Origin
 
 		// lighting with eye between light and surface

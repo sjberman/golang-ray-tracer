@@ -3,12 +3,18 @@ package scene
 import (
 	"fmt"
 	"math"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 )
+
+func TestScene(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Scene Suite")
+}
 
 var _ = Describe("camera tests", func() {
 	It("creates cameras", func() {

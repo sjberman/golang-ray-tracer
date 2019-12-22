@@ -1,4 +1,4 @@
-package scene
+package object
 
 import "github.com/sjberman/golang-ray-tracer/pkg/image"
 

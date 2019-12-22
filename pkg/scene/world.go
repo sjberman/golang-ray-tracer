@@ -6,6 +6,8 @@ import (
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
+	"github.com/sjberman/golang-ray-tracer/pkg/scene/object"
+	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
 // The total number of recursive reflection traces allowed
@@ -14,11 +16,11 @@ const remainingReflections = 4
 // World represents the collection of all objects in a scene
 type World struct {
 	light   *PointLight
-	objects []Object
+	objects []object.Object
 }
 
 // NewWorld returns a new World object
-func NewWorld(light *PointLight, objects []Object) *World {
+func NewWorld(light *PointLight, objects []object.Object) *World {
 	return &World{
 		light:   light,
 		objects: objects,
@@ -26,9 +28,9 @@ func NewWorld(light *PointLight, objects []Object) *World {
 }
 
 // ColorAt returns the color of a specific ray intersection in the world
-func (w *World) ColorAt(r *Ray, remaining int) *image.Color {
+func (w *World) ColorAt(r *ray.Ray, remaining int) *image.Color {
 	intersections := w.intersect(r)
-	hit := Hit(intersections)
+	hit := object.Hit(intersections)
 	if hit == nil {
 		return image.Black
 	}
@@ -60,22 +62,22 @@ func (w *World) isShadowed(point *base.Tuple) bool {
 	distance := v.Magnitude()
 	direction := v.Normalize()
 
-	ray := NewRay(point, direction)
+	ray := ray.NewRay(point, direction)
 	ints := w.intersect(ray)
-	hit := Hit(ints)
-	if hit != nil && hit.GetValue() < distance {
+	hit := object.Hit(ints)
+	if hit != nil && hit.Value < distance {
 		return true
 	}
 	return false
 }
 
 // intersect returns all the intersections between a ray and the objects in the world
-func (w *World) intersect(r *Ray) []*Intersection {
-	ints := make([]*Intersection, 0, 2*len(w.objects))
+func (w *World) intersect(r *ray.Ray) []*object.Intersection {
+	ints := make([]*object.Intersection, 0, 2*len(w.objects))
 	for _, o := range w.objects {
-		ints = append(ints, o.intersect(r)...)
+		ints = append(ints, o.Intersect(r)...)
 	}
-	return sortIntersections(ints)
+	return object.Intersections(ints...)
 }
 
 // reflectedColor returns the color from a reflected ray
@@ -84,7 +86,7 @@ func (w *World) reflectedColor(hd *hitData, remaining int) *image.Color {
 		return image.Black
 	}
 	remaining--
-	reflectRay := NewRay(hd.overPoint, hd.reflectv)
+	reflectRay := ray.NewRay(hd.overPoint, hd.reflectv)
 	color := w.ColorAt(reflectRay, remaining)
 	return color.Multiply(hd.object.GetMaterial().Reflective)
 }
@@ -109,7 +111,7 @@ func (w *World) refractedColor(hd *hitData, remaining int) *image.Color {
 	cosT := math.Sqrt(1 - sin2t)
 	// compute direction of refracted ray
 	direction, _ := hd.normalv.Multiply((nRatio*cosI - cosT)).Subtract(hd.eyev.Multiply(nRatio))
-	refractRay := NewRay(hd.underPoint, direction)
+	refractRay := ray.NewRay(hd.underPoint, direction)
 	color := w.ColorAt(refractRay, remaining)
 	return color.Multiply(hd.object.GetMaterial().Transparency)
 }
@@ -117,7 +119,7 @@ func (w *World) refractedColor(hd *hitData, remaining int) *image.Color {
 // hitData contains information about a hit intersection
 type hitData struct {
 	value      float64
-	object     Object
+	object     object.Object
 	point      *base.Tuple
 	overPoint  *base.Tuple
 	underPoint *base.Tuple
@@ -130,17 +132,17 @@ type hitData struct {
 
 // Uses an intersection and ray to build up the hit data
 func prepareComputations(
-	intersection *Intersection,
-	ray *Ray,
-	allIntersections []*Intersection,
+	intersection *object.Intersection,
+	ray *ray.Ray,
+	allIntersections []*object.Intersection,
 ) *hitData {
 	hd := &hitData{
-		value:  intersection.GetValue(),
-		object: intersection.GetObject(),
+		value:  intersection.Value,
+		object: intersection.Object,
 		eyev:   ray.Direction.Negate(),
 	}
 	hd.point = ray.Position(hd.value)
-	hd.normalv = hd.object.normalAt(hd.point)
+	hd.normalv = hd.object.NormalAt(hd.point)
 
 	if hd.normalv.DotProduct(hd.eyev) < 0 {
 		// Hit occurs inside the object (normal points away from eye)
@@ -156,7 +158,7 @@ func prepareComputations(
 	hd.underPoint, _ = hd.point.Subtract(hd.normalv.Multiply(base.Epsilon * 2))
 
 	// containers is a list of objects that we've intersected, but haven't yet exited
-	containers := []Object{}
+	containers := []object.Object{}
 	for _, iSection := range allIntersections {
 		// if intersection is the hit, n1 is the refractive index of the last object in containers list
 		if iSection == intersection {
@@ -169,11 +171,10 @@ func prepareComputations(
 
 		// if intersection's object is already in containers list, then this intersection must
 		// be exiting the object; otherwise, the intersection is entering the object
-		intObject := iSection.GetObject()
-		if contains(containers, intObject) {
-			containers = remove(containers, intObject)
+		if contains(containers, iSection.Object) {
+			containers = remove(containers, iSection.Object)
 		} else {
-			containers = append(containers, intObject)
+			containers = append(containers, iSection.Object)
 		}
 
 		// if intersection is the hit, n2 is the refractive index of the last object in containers list
@@ -226,8 +227,8 @@ func Render(c *Camera, w *World) *image.Canvas {
 	return canvas
 }
 
-// returns if an Object slice contains an object
-func contains(s []Object, o Object) bool {
+// returns if an object.Object slice contains an object
+func contains(s []object.Object, o object.Object) bool {
 	for _, e := range s {
 		if o == e {
 			return true
@@ -236,8 +237,8 @@ func contains(s []Object, o Object) bool {
 	return false
 }
 
-// removes an Object from a slice of Objects
-func remove(s []Object, o Object) []Object {
+// removes an object.Object from a slice of Objects
+func remove(s []object.Object, o object.Object) []object.Object {
 	for i, obj := range s {
 		if obj == o {
 			copy(s[i:], s[i+1:])
