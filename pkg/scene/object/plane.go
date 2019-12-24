@@ -19,6 +19,14 @@ func NewPlane() *Plane {
 	}
 }
 
+// Bounds returns the untransformed bounds of a plane
+func (p *Plane) Bounds() *bounds {
+	return &bounds{
+		minimum: base.NewPoint(math.Inf(-1), 0, math.Inf(-1)),
+		maximum: base.NewPoint(math.Inf(1), 0, math.Inf(1)),
+	}
+}
+
 // calculates where a ray intersects a plane
 func (p *Plane) Intersect(ray *ray.Ray) []*Intersection {
 	r := p.transformRay(ray)

@@ -1,6 +1,8 @@
 package object
 
 import (
+	"math"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -12,6 +14,9 @@ var _ = Describe("plane tests", func() {
 	It("creates planes", func() {
 		p := NewPlane()
 		testNewObject(p)
+		Expect(p.Bounds()).To(Equal(&bounds{
+			minimum: base.NewPoint(math.Inf(-1), 0, math.Inf(-1)),
+			maximum: base.NewPoint(math.Inf(1), 0, math.Inf(1))}))
 	})
 
 	It("calculates a plane intersection", func() {

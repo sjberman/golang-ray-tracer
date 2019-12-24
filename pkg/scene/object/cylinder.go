@@ -19,8 +19,16 @@ func NewCylinder() *Cylinder {
 	return &Cylinder{
 		object:  newObject(),
 		Minimum: math.Inf(-1),
-		Maximum: math.Inf(0),
+		Maximum: math.Inf(1),
 		Closed:  false,
+	}
+}
+
+// Bounds returns the untransformed bounds of a cylinder
+func (cyl *Cylinder) Bounds() *bounds {
+	return &bounds{
+		minimum: base.NewPoint(-1, cyl.Minimum, -1),
+		maximum: base.NewPoint(1, cyl.Maximum, 1),
 	}
 }
 

@@ -14,6 +14,9 @@ var _ = Describe("cube tests", func() {
 	It("creates cubes", func() {
 		c := NewCube()
 		testNewObject(c)
+		Expect(c.Bounds()).To(Equal(&bounds{
+			minimum: base.NewPoint(-1, -1, -1),
+			maximum: base.NewPoint(1, 1, 1)}))
 	})
 
 	It("calculates a cube intersection", func() {

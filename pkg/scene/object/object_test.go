@@ -1,6 +1,7 @@
 package object
 
 import (
+	"math"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -28,6 +29,9 @@ func testNewObject(o Object) {
 	m.Ambient = 1
 	o.SetMaterial(&m)
 	Expect(o.GetMaterial()).To(Equal(&m))
+
+	o.SetParent(&Group{})
+	Expect(o.GetParent()).To(Equal(&Group{}))
 }
 
 type data struct {
@@ -41,6 +45,7 @@ var _ = Describe("object tests", func() {
 		o := newObject()
 		Expect(o.GetTransform()).To(Equal(&base.Identity))
 		Expect(o.GetMaterial()).To(Equal(&DefaultMaterial))
+		Expect(o.parent).To(BeNil())
 
 		t := base.Translate(2, 3, 4)
 		o.SetTransform(t)
@@ -50,6 +55,9 @@ var _ = Describe("object tests", func() {
 		m.Ambient = 1
 		o.SetMaterial(&m)
 		Expect(o.GetMaterial()).To(Equal(&m))
+
+		o.SetParent(&Group{})
+		Expect(o.parent).To(Equal(&Group{}))
 	})
 
 	It("returns the pattern at a point", func() {
@@ -74,5 +82,50 @@ var _ = Describe("object tests", func() {
 		p.SetTransform(base.Translate(0.5, 1, 1.5))
 		c = s.PatternAt(base.NewPoint(2.5, 3, 3.5), p)
 		Expect(c).To(Equal(image.NewColor(0.75, 0.5, 0.25)))
+	})
+
+	It("converts a point in world space to object space", func() {
+		g1 := NewGroup()
+		g1.SetTransform(base.RotateY(math.Pi / 2))
+		g2 := NewGroup()
+		g2.SetTransform(base.Scale(2, 2, 2))
+		g1.Add(g2)
+
+		s := NewSphere()
+		s.SetTransform(base.Translate(5, 0, 0))
+		g2.Add(s)
+
+		p := s.worldToObject(base.NewPoint(-2, 0, -10))
+		Expect(p).To(Equal(base.NewPoint(0, 0, -1)))
+	})
+
+	It("converts a normal from object space to world space", func() {
+		g1 := NewGroup()
+		g1.SetTransform(base.RotateY(math.Pi / 2))
+		g2 := NewGroup()
+		g2.SetTransform(base.Scale(1, 2, 3))
+		g1.Add(g2)
+
+		s := NewSphere()
+		s.SetTransform(base.Translate(5, 0, 0))
+		g2.Add(s)
+
+		v := s.normalToWorld(base.NewVector(math.Sqrt(3)/3, math.Sqrt(3)/3, math.Sqrt(3)/3))
+		Expect(v).To(Equal(base.NewVector(0.28571428571428575, 0.4285714285714286, -0.8571428571428572)))
+	})
+
+	It("calculates the normal of a child object", func() {
+		g1 := NewGroup()
+		g1.SetTransform(base.RotateY(math.Pi / 2))
+		g2 := NewGroup()
+		g2.SetTransform(base.Scale(1, 2, 3))
+		g1.Add(g2)
+
+		s := NewSphere()
+		s.SetTransform(base.Translate(5, 0, 0))
+		g2.Add(s)
+
+		n := s.NormalAt(base.NewPoint(1.7321, 1.1547, -5.5774))
+		Expect(n).To(Equal(base.NewVector(0.28570368184140726, 0.42854315178114105, -0.8571605294481017)))
 	})
 })

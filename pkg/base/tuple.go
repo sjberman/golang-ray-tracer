@@ -141,7 +141,7 @@ func (t *Tuple) Magnitude() float64 {
 // Normalize converts a vector into a unit vector (magnitude of 1)
 func (t *Tuple) Normalize() *Tuple {
 	magnitude := t.Magnitude()
-	if magnitude > 1 {
+	if magnitude != 0 {
 		return t.Divide(magnitude)
 	}
 	return t

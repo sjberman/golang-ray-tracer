@@ -19,6 +19,14 @@ func NewSphere() *Sphere {
 	}
 }
 
+// Bounds returns the untransformed bounds of a sphere
+func (s *Sphere) Bounds() *bounds {
+	return &bounds{
+		minimum: base.NewPoint(-1, -1, -1),
+		maximum: base.NewPoint(1, 1, 1),
+	}
+}
+
 // calculates where a ray intersects a sphere
 func (s *Sphere) Intersect(ray *ray.Ray) []*Intersection {
 	r := s.transformRay(ray)

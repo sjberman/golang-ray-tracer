@@ -16,8 +16,11 @@ var _ = Describe("cylinder tests", func() {
 		c := NewCylinder()
 		testNewObject(c)
 		Expect(c.Minimum).To(Equal(math.Inf(-1)))
-		Expect(c.Maximum).To(Equal(math.Inf(0)))
+		Expect(c.Maximum).To(Equal(math.Inf(1)))
 		Expect(c.Closed).To(BeFalse())
+		Expect(c.Bounds()).To(Equal(&bounds{
+			minimum: base.NewPoint(-1, c.Minimum, -1),
+			maximum: base.NewPoint(1, c.Maximum, 1)}))
 	})
 
 	It("calculates a cylinder intersection", func() {

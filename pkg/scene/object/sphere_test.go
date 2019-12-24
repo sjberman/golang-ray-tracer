@@ -14,6 +14,9 @@ var _ = Describe("sphere tests", func() {
 	It("creates spheres", func() {
 		s := NewSphere()
 		testNewObject(s)
+		Expect(s.Bounds()).To(Equal(&bounds{
+			minimum: base.NewPoint(-1, -1, -1),
+			maximum: base.NewPoint(1, 1, 1)}))
 
 		s = GlassSphere()
 		Expect(s.Transparency).To(Equal(1.0))

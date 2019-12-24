@@ -20,17 +20,25 @@ func NewCube() *Cube {
 	}
 }
 
+// Bounds returns the untransformed bounds of a cube
+func (c *Cube) Bounds() *bounds {
+	return &bounds{
+		minimum: base.NewPoint(-1, -1, -1),
+		maximum: base.NewPoint(1, 1, 1),
+	}
+}
+
 // calculates where a ray intersects a cube
 func (c *Cube) Intersect(ray *ray.Ray) []*Intersection {
 	r := c.transformRay(ray)
 	// find largest minimum t value and smallest maximum t value for each axis
 	// (t is intersection point)
-	xtMin, xtMax := checkAxis(r.Origin.GetX(), r.Direction.GetX())
-	ytMin, ytMax := checkAxis(r.Origin.GetY(), r.Direction.GetY())
+	xtMin, xtMax := checkAxis(r.Origin.GetX(), r.Direction.GetX(), -1, 1)
+	ytMin, ytMax := checkAxis(r.Origin.GetY(), r.Direction.GetY(), -1, 1)
 	if xtMin > ytMax || ytMin > xtMax {
 		return []*Intersection{}
 	}
-	ztMin, ztMax := checkAxis(r.Origin.GetZ(), r.Direction.GetZ())
+	ztMin, ztMax := checkAxis(r.Origin.GetZ(), r.Direction.GetZ(), -1, 1)
 
 	tMin := utils.Max(xtMin, ytMin, ztMin)
 	tMax := utils.Min(xtMax, ytMax, ztMax)
@@ -62,10 +70,10 @@ func cubeNormal(objectPoint *base.Tuple, o Object) *base.Tuple {
 }
 
 // checkAxis finds the min and max intersection values for the axis
-func checkAxis(origin, direction float64) (float64, float64) {
+func checkAxis(origin, direction, min, max float64) (float64, float64) {
 	var tMin, tMax float64
-	tMinNumerator := -1 - origin
-	tMaxNumerator := 1 - origin
+	tMinNumerator := min - origin
+	tMaxNumerator := max - origin
 
 	if math.Abs(direction) >= base.Epsilon {
 		tMin = tMinNumerator / direction
@@ -73,8 +81,8 @@ func checkAxis(origin, direction float64) (float64, float64) {
 	} else {
 		// if denominator is effectively zero, multiply by infinity to ensure
 		// values have the correct sign (positive or negative)
-		tMin = tMinNumerator * math.Inf(0)
-		tMax = tMaxNumerator * math.Inf(0)
+		tMin = tMinNumerator * math.Inf(1)
+		tMax = tMaxNumerator * math.Inf(1)
 	}
 
 	if tMin > tMax {

@@ -25,6 +25,14 @@ func NewCone() *Cone {
 	}
 }
 
+// Bounds returns the untransformed bounds of a cone
+func (cone *Cone) Bounds() *bounds {
+	return &bounds{
+		minimum: base.NewPoint(-1, cone.Minimum, -1),
+		maximum: base.NewPoint(1, cone.Maximum, 1),
+	}
+}
+
 // calculates where a ray intersects a cone
 func (cone *Cone) Intersect(ray *ray.Ray) []*Intersection {
 	r := cone.transformRay(ray)
