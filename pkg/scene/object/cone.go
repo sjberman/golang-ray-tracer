@@ -26,10 +26,10 @@ func NewCone() *Cone {
 }
 
 // Bounds returns the untransformed bounds of a cone
-func (cone *Cone) Bounds() *bounds {
-	return &bounds{
-		minimum: base.NewPoint(-1, cone.Minimum, -1),
-		maximum: base.NewPoint(1, cone.Maximum, 1),
+func (cone *Cone) Bounds() *Bounds {
+	return &Bounds{
+		Minimum: base.NewPoint(-1, cone.Minimum, -1),
+		Maximum: base.NewPoint(1, cone.Maximum, 1),
 	}
 }
 
@@ -82,12 +82,12 @@ func (cone *Cone) Intersect(ray *ray.Ray) []*Intersection {
 
 // wrapper for the normalAt interface function, using the common normal function
 // with the specific cone logic embedded
-func (cone *Cone) NormalAt(objectPoint *base.Tuple) *base.Tuple {
-	return commonNormalAt(cone, objectPoint, coneNormal)
+func (cone *Cone) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
+	return commonNormalAt(cone, objectPoint, hit, coneNormal)
 }
 
 // cone-specific calculation of the normal
-func coneNormal(objectPoint *base.Tuple, o Object) *base.Tuple {
+func coneNormal(objectPoint *base.Tuple, o Object, _ *Intersection) *base.Tuple {
 	cone := o.(*Cone)
 	x := objectPoint.GetX()
 	y := objectPoint.GetY()

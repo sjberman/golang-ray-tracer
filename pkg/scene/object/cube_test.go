@@ -14,9 +14,9 @@ var _ = Describe("cube tests", func() {
 	It("creates cubes", func() {
 		c := NewCube()
 		testNewObject(c)
-		Expect(c.Bounds()).To(Equal(&bounds{
-			minimum: base.NewPoint(-1, -1, -1),
-			maximum: base.NewPoint(1, 1, 1)}))
+		Expect(c.Bounds()).To(Equal(&Bounds{
+			Minimum: base.NewPoint(-1, -1, -1),
+			Maximum: base.NewPoint(1, 1, 1)}))
 	})
 
 	It("calculates a cube intersection", func() {
@@ -94,28 +94,28 @@ var _ = Describe("cube tests", func() {
 	It("computes the surface normal", func() {
 		c := NewCube()
 
-		n := c.NormalAt(base.NewPoint(1, 0.5, -0.8))
+		n := c.NormalAt(base.NewPoint(1, 0.5, -0.8), nil)
 		Expect(n).To(Equal(base.NewVector(1, 0, 0)))
 
-		n = c.NormalAt(base.NewPoint(-1, -0.2, 0.9))
+		n = c.NormalAt(base.NewPoint(-1, -0.2, 0.9), nil)
 		Expect(n).To(Equal(base.NewVector(-1, 0, 0)))
 
-		n = c.NormalAt(base.NewPoint(-0.4, 1, -0.1))
+		n = c.NormalAt(base.NewPoint(-0.4, 1, -0.1), nil)
 		Expect(n).To(Equal(base.NewVector(0, 1, 0)))
 
-		n = c.NormalAt(base.NewPoint(0.3, -1, -0.7))
+		n = c.NormalAt(base.NewPoint(0.3, -1, -0.7), nil)
 		Expect(n).To(Equal(base.NewVector(0, -1, 0)))
 
-		n = c.NormalAt(base.NewPoint(-0.6, 0.3, 1))
+		n = c.NormalAt(base.NewPoint(-0.6, 0.3, 1), nil)
 		Expect(n).To(Equal(base.NewVector(0, 0, 1)))
 
-		n = c.NormalAt(base.NewPoint(0.4, 0.4, -1))
+		n = c.NormalAt(base.NewPoint(0.4, 0.4, -1), nil)
 		Expect(n).To(Equal(base.NewVector(0, 0, -1)))
 
-		n = c.NormalAt(base.NewPoint(1, 1, 1))
+		n = c.NormalAt(base.NewPoint(1, 1, 1), nil)
 		Expect(n).To(Equal(base.NewVector(1, 0, 0)))
 
-		n = c.NormalAt(base.NewPoint(-1, -1, -1))
+		n = c.NormalAt(base.NewPoint(-1, -1, -1), nil)
 		Expect(n).To(Equal(base.NewVector(-1, 0, 0)))
 	})
 })

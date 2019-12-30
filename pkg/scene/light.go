@@ -39,8 +39,7 @@ func lighting(
 	effectiveColor := color.MultiplyColor(light.intensity)
 
 	// find the direction to the light source
-	diff, _ := light.position.Subtract(point)
-	lightv := diff.Normalize()
+	lightv := light.position.Subtract(point).Normalize()
 
 	// compute the ambient contribution
 	ambient := effectiveColor.Multiply(material.Ambient)

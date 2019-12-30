@@ -58,11 +58,10 @@ func (c *Camera) RayForPixel(x, y int) *ray.Ray {
 	// using the camera matrix, transform the canvas point and the origin,
 	// and then compute the ray's direction vector
 	// (canvas is at z = -1)
-	inverse, _ := c.transform.Inverse()
+	inverse := c.transform.Inverse()
 	pixel := inverse.MultiplyTuple(base.NewPoint(worldX, worldY, -1))
 	origin := inverse.MultiplyTuple(base.Origin)
-	diff, _ := pixel.Subtract(origin)
-	direction := diff.Normalize()
+	direction := pixel.Subtract(origin).Normalize()
 
 	return ray.NewRay(origin, direction)
 }

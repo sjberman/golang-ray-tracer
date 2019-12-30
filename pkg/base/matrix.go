@@ -1,7 +1,6 @@
 package base
 
 import (
-	"errors"
 	"math"
 )
 
@@ -92,71 +91,47 @@ func (m *Matrix) Transpose() *Matrix {
 	return res
 }
 
-// Inverse returns the inversion of a matrix
-func (m *Matrix) Inverse() (*Matrix, error) {
-	if !m.invertible() {
-		return nil, errors.New("cannot invert matrix with determinant of 0")
-	}
-	inverse := NewMatrix(newData(m.size))
-	for i := 0; i < m.size; i++ {
-		for j := 0; j < m.size; j++ {
-			c := m.cofactor(i, j)
-			inverse.data[j][i] = c / m.determinant()
-		}
-	}
-	return inverse, nil
-}
+// Inverse returns the inversion of a 4x4 matrix
+func (m *Matrix) Inverse() *Matrix {
+	s0 := m.data[0][0]*m.data[1][1] - m.data[1][0]*m.data[0][1]
+	s1 := m.data[0][0]*m.data[1][2] - m.data[1][0]*m.data[0][2]
+	s2 := m.data[0][0]*m.data[1][3] - m.data[1][0]*m.data[0][3]
+	s3 := m.data[0][1]*m.data[1][2] - m.data[1][1]*m.data[0][2]
+	s4 := m.data[0][1]*m.data[1][3] - m.data[1][1]*m.data[0][3]
+	s5 := m.data[0][2]*m.data[1][3] - m.data[1][2]*m.data[0][3]
 
-// returns whether or not a matrix can be inverted
-func (m *Matrix) invertible() bool {
-	return m.determinant() != 0
-}
+	c5 := m.data[2][2]*m.data[3][3] - m.data[3][2]*m.data[2][3]
+	c4 := m.data[2][1]*m.data[3][3] - m.data[3][1]*m.data[2][3]
+	c3 := m.data[2][1]*m.data[3][2] - m.data[3][1]*m.data[2][2]
+	c2 := m.data[2][0]*m.data[3][3] - m.data[3][0]*m.data[2][3]
+	c1 := m.data[2][0]*m.data[3][2] - m.data[3][0]*m.data[2][2]
+	c0 := m.data[2][0]*m.data[3][1] - m.data[3][0]*m.data[2][1]
 
-// Returns the determinant of a matrix
-func (m *Matrix) determinant() float64 {
-	if m.size == 2 {
-		return m.data[0][0]*m.data[1][1] - m.data[0][1]*m.data[1][0]
-	}
-	var det float64
-	for i, val := range m.data[0] {
-		det += val * m.cofactor(0, i)
-	}
-	return det
-}
+	// Should check for 0 determinant
+	invdet := 1.0 / (s0*c5 - s1*c4 + s2*c3 + s3*c2 - s4*c1 + s5*c0)
 
-// Returns a matrix with row and column removed
-func (m *Matrix) subMatrix(row, col int) *Matrix {
-	res := NewMatrix(newData(m.size - 1))
-	var curRow int
-	for i := 0; i < m.size; i++ {
-		var curCol int
-		if i == row {
-			continue
-		}
-		for j := 0; j < m.size; j++ {
-			if j == col {
-				continue
-			}
-			res.data[curRow][curCol] = m.data[i][j]
-			curCol++
-		}
-		curRow++
-	}
-	return res
-}
+	data := newData(4)
+	data[0][0] = (m.data[1][1]*c5 - m.data[1][2]*c4 + m.data[1][3]*c3) * invdet
+	data[0][1] = (-m.data[0][1]*c5 + m.data[0][2]*c4 - m.data[0][3]*c3) * invdet
+	data[0][2] = (m.data[3][1]*s5 - m.data[3][2]*s4 + m.data[3][3]*s3) * invdet
+	data[0][3] = (-m.data[2][1]*s5 + m.data[2][2]*s4 - m.data[2][3]*s3) * invdet
 
-// Returns the minor (determinant of the submatrix) of a matrix
-func (m *Matrix) minor(row, col int) float64 {
-	return m.subMatrix(row, col).determinant()
-}
+	data[1][0] = (-m.data[1][0]*c5 + m.data[1][2]*c2 - m.data[1][3]*c1) * invdet
+	data[1][1] = (m.data[0][0]*c5 - m.data[0][2]*c2 + m.data[0][3]*c1) * invdet
+	data[1][2] = (-m.data[3][0]*s5 + m.data[3][2]*s2 - m.data[3][3]*s1) * invdet
+	data[1][3] = (m.data[2][0]*s5 - m.data[2][2]*s2 + m.data[2][3]*s1) * invdet
 
-// Returns the cofactor of a matrix
-func (m *Matrix) cofactor(row, col int) float64 {
-	minor := m.minor(row, col)
-	if minor == 0 || (row+col)%2 == 0 {
-		return minor
-	}
-	return -minor
+	data[2][0] = (m.data[1][0]*c4 - m.data[1][1]*c2 + m.data[1][3]*c0) * invdet
+	data[2][1] = (-m.data[0][0]*c4 + m.data[0][1]*c2 - m.data[0][3]*c0) * invdet
+	data[2][2] = (m.data[3][0]*s4 - m.data[3][1]*s2 + m.data[3][3]*s0) * invdet
+	data[2][3] = (-m.data[2][0]*s4 + m.data[2][1]*s2 - m.data[2][3]*s0) * invdet
+
+	data[3][0] = (-m.data[1][0]*c3 + m.data[1][1]*c1 - m.data[1][2]*c0) * invdet
+	data[3][1] = (m.data[0][0]*c3 - m.data[0][1]*c1 + m.data[0][2]*c0) * invdet
+	data[3][2] = (-m.data[3][0]*s3 + m.data[3][1]*s1 - m.data[3][2]*s0) * invdet
+	data[3][3] = (m.data[2][0]*s3 - m.data[2][1]*s1 + m.data[2][2]*s0) * invdet
+
+	return NewMatrix(data)
 }
 
 // Translate returns a translation matrix
@@ -230,8 +205,7 @@ func Shear(xy, xz, yx, yz, zx, zy float64) *Matrix {
 // from is the camera, to is where we look, and up is
 // the vector indicating which direction is up
 func ViewTransform(from, to, up *Tuple) *Matrix {
-	diff, _ := to.Subtract(from)
-	forward := diff.Normalize()
+	forward := to.Subtract(from).Normalize()
 	upNormal := up.Normalize()
 	left := forward.CrossProduct(upNormal)
 	trueUp := left.CrossProduct(forward)

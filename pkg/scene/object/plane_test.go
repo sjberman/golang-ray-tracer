@@ -14,9 +14,9 @@ var _ = Describe("plane tests", func() {
 	It("creates planes", func() {
 		p := NewPlane()
 		testNewObject(p)
-		Expect(p.Bounds()).To(Equal(&bounds{
-			minimum: base.NewPoint(math.Inf(-1), 0, math.Inf(-1)),
-			maximum: base.NewPoint(math.Inf(1), 0, math.Inf(1))}))
+		Expect(p.Bounds()).To(Equal(&Bounds{
+			Minimum: base.NewPoint(math.Inf(-1), 0, math.Inf(-1)),
+			Maximum: base.NewPoint(math.Inf(1), 0, math.Inf(1))}))
 	})
 
 	It("calculates a plane intersection", func() {
@@ -50,11 +50,11 @@ var _ = Describe("plane tests", func() {
 		p := NewPlane()
 		constVector := base.NewVector(0, 1, 0)
 
-		n := p.NormalAt(base.NewPoint(0, 0, 0))
+		n := p.NormalAt(base.NewPoint(0, 0, 0), nil)
 		Expect(n).To(Equal(constVector))
-		n = p.NormalAt(base.NewPoint(10, 0, -10))
+		n = p.NormalAt(base.NewPoint(10, 0, -10), nil)
 		Expect(n).To(Equal(constVector))
-		n = p.NormalAt(base.NewPoint(-5, 0, 150))
+		n = p.NormalAt(base.NewPoint(-5, 0, 150), nil)
 		Expect(n).To(Equal(constVector))
 	})
 })

@@ -20,10 +20,10 @@ func NewPlane() *Plane {
 }
 
 // Bounds returns the untransformed bounds of a plane
-func (p *Plane) Bounds() *bounds {
-	return &bounds{
-		minimum: base.NewPoint(math.Inf(-1), 0, math.Inf(-1)),
-		maximum: base.NewPoint(math.Inf(1), 0, math.Inf(1)),
+func (p *Plane) Bounds() *Bounds {
+	return &Bounds{
+		Minimum: base.NewPoint(math.Inf(-1), 0, math.Inf(-1)),
+		Maximum: base.NewPoint(math.Inf(1), 0, math.Inf(1)),
 	}
 }
 
@@ -41,11 +41,11 @@ func (p *Plane) Intersect(ray *ray.Ray) []*Intersection {
 
 // wrapper for the normalAt interface function, using the common normal function
 // with the specific plane logic embedded
-func (p *Plane) NormalAt(objectPoint *base.Tuple) *base.Tuple {
-	return commonNormalAt(p, objectPoint, planeNormal)
+func (p *Plane) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
+	return commonNormalAt(p, objectPoint, hit, planeNormal)
 }
 
 // plane-specific calculation of the normal
-func planeNormal(objectPoint *base.Tuple, o Object) *base.Tuple {
+func planeNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tuple {
 	return base.NewVector(0, 1, 0)
 }

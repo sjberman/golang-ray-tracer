@@ -18,9 +18,9 @@ var _ = Describe("cylinder tests", func() {
 		Expect(c.Minimum).To(Equal(math.Inf(-1)))
 		Expect(c.Maximum).To(Equal(math.Inf(1)))
 		Expect(c.Closed).To(BeFalse())
-		Expect(c.Bounds()).To(Equal(&bounds{
-			minimum: base.NewPoint(-1, c.Minimum, -1),
-			maximum: base.NewPoint(1, c.Maximum, 1)}))
+		Expect(c.Bounds()).To(Equal(&Bounds{
+			Minimum: base.NewPoint(-1, c.Minimum, -1),
+			Maximum: base.NewPoint(1, c.Maximum, 1)}))
 	})
 
 	It("calculates a cylinder intersection", func() {
@@ -104,38 +104,38 @@ var _ = Describe("cylinder tests", func() {
 	It("computes the surface normal", func() {
 		c := NewCylinder()
 
-		n := c.NormalAt(base.NewPoint(1, 0, 0))
+		n := c.NormalAt(base.NewPoint(1, 0, 0), nil)
 		Expect(n).To(Equal(base.NewVector(1, 0, 0)))
 
-		n = c.NormalAt(base.NewPoint(0, 5, -1))
+		n = c.NormalAt(base.NewPoint(0, 5, -1), nil)
 		Expect(n).To(Equal(base.NewVector(0, 0, -1)))
 
-		n = c.NormalAt(base.NewPoint(0, -2, 1))
+		n = c.NormalAt(base.NewPoint(0, -2, 1), nil)
 		Expect(n).To(Equal(base.NewVector(0, 0, 1)))
 
-		n = c.NormalAt(base.NewPoint(-1, 1, 0))
+		n = c.NormalAt(base.NewPoint(-1, 1, 0), nil)
 		Expect(n).To(Equal(base.NewVector(-1, 0, 0)))
 
 		// cylinder caps
 		c.Minimum = 1
 		c.Maximum = 2
 		c.Closed = true
-		n = c.NormalAt(base.NewPoint(0, 1, 0))
+		n = c.NormalAt(base.NewPoint(0, 1, 0), nil)
 		Expect(n).To(Equal(base.NewVector(0, -1, 0)))
 
-		n = c.NormalAt(base.NewPoint(0.5, 1, 0))
+		n = c.NormalAt(base.NewPoint(0.5, 1, 0), nil)
 		Expect(n).To(Equal(base.NewVector(0, -1, 0)))
 
-		n = c.NormalAt(base.NewPoint(0, 1, 0.5))
+		n = c.NormalAt(base.NewPoint(0, 1, 0.5), nil)
 		Expect(n).To(Equal(base.NewVector(0, -1, 0)))
 
-		n = c.NormalAt(base.NewPoint(0, 2, 0))
+		n = c.NormalAt(base.NewPoint(0, 2, 0), nil)
 		Expect(n).To(Equal(base.NewVector(0, 1, 0)))
 
-		n = c.NormalAt(base.NewPoint(0.5, 2, 0))
+		n = c.NormalAt(base.NewPoint(0.5, 2, 0), nil)
 		Expect(n).To(Equal(base.NewVector(0, 1, 0)))
 
-		n = c.NormalAt(base.NewPoint(0, 2, 0.5))
+		n = c.NormalAt(base.NewPoint(0, 2, 0.5), nil)
 		Expect(n).To(Equal(base.NewVector(0, 1, 0)))
 	})
 })

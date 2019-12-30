@@ -6,6 +6,7 @@ import "sort"
 type Intersection struct {
 	Value  float64
 	Object Object
+	u, v   float64 // only used for triangles
 }
 
 // NewIntersection returns a new Intersection object

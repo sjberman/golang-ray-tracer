@@ -1,7 +1,6 @@
 package base
 
 import (
-	"errors"
 	"math"
 )
 
@@ -77,19 +76,19 @@ func (t *Tuple) SetW(val float64) {
 }
 
 // Add adds two tuples together and returns the result
-func (t *Tuple) Add(t2 *Tuple) (*Tuple, error) {
+func (t *Tuple) Add(t2 *Tuple) *Tuple {
 	if t.IsPoint() && t2.IsPoint() {
-		return nil, errors.New("cannot add two points together")
+		return nil
 	}
-	return NewTuple(t.xAxis+t2.xAxis, t.yAxis+t2.yAxis, t.zAxis+t2.zAxis, t.w+t2.w), nil
+	return NewTuple(t.xAxis+t2.xAxis, t.yAxis+t2.yAxis, t.zAxis+t2.zAxis, t.w+t2.w)
 }
 
 // Subtract returns the difference between two tuples
-func (t *Tuple) Subtract(t2 *Tuple) (*Tuple, error) {
+func (t *Tuple) Subtract(t2 *Tuple) *Tuple {
 	if t.IsVector() && t2.IsPoint() {
-		return nil, errors.New("cannot subtract a point from a vector")
+		return nil
 	}
-	return NewTuple(t.xAxis-t2.xAxis, t.yAxis-t2.yAxis, t.zAxis-t2.zAxis, t.w-t2.w), nil
+	return NewTuple(t.xAxis-t2.xAxis, t.yAxis-t2.yAxis, t.zAxis-t2.zAxis, t.w-t2.w)
 }
 
 // Multiply returns a tuple multiplied by a value
@@ -122,6 +121,34 @@ func (t *Tuple) Equals(t2 *Tuple) bool {
 		return false
 	}
 	return t.w == t2.w
+}
+
+// GreaterThan returns whether or not a tuple is greater than another (all points)
+func (t *Tuple) GreaterThan(t2 *Tuple) bool {
+	if t.xAxis < t2.xAxis {
+		return false
+	}
+	if t.yAxis < t2.yAxis {
+		return false
+	}
+	if t.zAxis < t2.zAxis {
+		return false
+	}
+	return !t.Equals(t2)
+}
+
+// LessThan returns whether or not a tuple is less than another (all points)
+func (t *Tuple) LessThan(t2 *Tuple) bool {
+	if t.xAxis > t2.xAxis {
+		return false
+	}
+	if t.yAxis > t2.yAxis {
+		return false
+	}
+	if t.zAxis > t2.zAxis {
+		return false
+	}
+	return !t.Equals(t2)
 }
 
 // Negate returns the calling tuple with its fields negated
@@ -166,8 +193,7 @@ func (t *Tuple) CrossProduct(t2 *Tuple) *Tuple {
 
 // Reflect returns the reflection vector around a normal vector
 func (t *Tuple) Reflect(normal *Tuple) *Tuple {
-	reflection, _ := t.Subtract(normal.Multiply(2).Multiply(t.DotProduct(normal)))
-	return reflection
+	return t.Subtract(normal.Multiply(2).Multiply(t.DotProduct(normal)))
 }
 
 // Converts a list of 4 values to a tuple

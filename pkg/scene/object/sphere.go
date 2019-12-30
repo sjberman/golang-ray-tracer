@@ -20,10 +20,10 @@ func NewSphere() *Sphere {
 }
 
 // Bounds returns the untransformed bounds of a sphere
-func (s *Sphere) Bounds() *bounds {
-	return &bounds{
-		minimum: base.NewPoint(-1, -1, -1),
-		maximum: base.NewPoint(1, 1, 1),
+func (s *Sphere) Bounds() *Bounds {
+	return &Bounds{
+		Minimum: base.NewPoint(-1, -1, -1),
+		Maximum: base.NewPoint(1, 1, 1),
 	}
 }
 
@@ -31,7 +31,7 @@ func (s *Sphere) Bounds() *bounds {
 func (s *Sphere) Intersect(ray *ray.Ray) []*Intersection {
 	r := s.transformRay(ray)
 	// sphere is centered at world origin
-	sphereToRay, _ := r.Origin.Subtract(base.Origin)
+	sphereToRay := r.Origin.Subtract(base.Origin)
 
 	// quadratic formula to determine intersection
 	a := r.Direction.DotProduct(r.Direction)
@@ -50,14 +50,13 @@ func (s *Sphere) Intersect(ray *ray.Ray) []*Intersection {
 
 // wrapper for the normalAt interface function, using the common normal function
 // with the specific sphere logic embedded
-func (s *Sphere) NormalAt(objectPoint *base.Tuple) *base.Tuple {
-	return commonNormalAt(s, objectPoint, sphereNormal)
+func (s *Sphere) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
+	return commonNormalAt(s, objectPoint, hit, sphereNormal)
 }
 
 // sphere-specific calculation of the normal
-func sphereNormal(objectPoint *base.Tuple, o Object) *base.Tuple {
-	normal, _ := objectPoint.Subtract(base.Origin)
-	return normal
+func sphereNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tuple {
+	return objectPoint.Subtract(base.Origin)
 }
 
 // GlassSphere creates a glass sphere object

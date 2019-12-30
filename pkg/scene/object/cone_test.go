@@ -18,9 +18,9 @@ var _ = Describe("cone tests", func() {
 		Expect(c.Minimum).To(Equal(math.Inf(-1)))
 		Expect(c.Maximum).To(Equal(math.Inf(0)))
 		Expect(c.Closed).To(BeFalse())
-		Expect(c.Bounds()).To(Equal(&bounds{
-			minimum: base.NewPoint(-1, c.Minimum, -1),
-			maximum: base.NewPoint(1, c.Maximum, 1)}))
+		Expect(c.Bounds()).To(Equal(&Bounds{
+			Minimum: base.NewPoint(-1, c.Minimum, -1),
+			Maximum: base.NewPoint(1, c.Maximum, 1)}))
 	})
 
 	It("calculates a cone intersection", func() {
@@ -74,13 +74,13 @@ var _ = Describe("cone tests", func() {
 	It("computes the surface normal", func() {
 		c := NewCone()
 
-		n := c.NormalAt(base.NewPoint(0, 0, 0))
+		n := c.NormalAt(base.NewPoint(0, 0, 0), nil)
 		Expect(n).To(Equal(base.NewVector(0, 0, 0)))
 
-		n = c.NormalAt(base.NewPoint(1, 1, 1))
+		n = c.NormalAt(base.NewPoint(1, 1, 1), nil)
 		Expect(n).To(Equal(base.NewVector(0.5, -math.Sqrt(2)/2, 0.5)))
 
-		n = c.NormalAt(base.NewPoint(-1, -1, 0))
+		n = c.NormalAt(base.NewPoint(-1, -1, 0), nil)
 		Expect(n).To(Equal(base.NewVector(-1, 1, 0).Normalize()))
 	})
 })

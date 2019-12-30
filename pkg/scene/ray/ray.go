@@ -18,8 +18,7 @@ func NewRay(point *base.Tuple, vector *base.Tuple) *Ray {
 
 // Position returns the point at a given distance along the ray
 func (r *Ray) Position(distance float64) *base.Tuple {
-	sum, _ := r.Origin.Add(r.Direction.Multiply(distance))
-	return sum
+	return r.Origin.Add(r.Direction.Multiply(distance))
 }
 
 // Transform applies the transformation matrix to the ray

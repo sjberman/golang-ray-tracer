@@ -84,8 +84,7 @@ var _ = Describe("tuple tests", func() {
 		// point + point
 		p1 := NewPoint(1, 2, 3)
 		p2 := NewPoint(4, 5, 6)
-		_, err := p1.Add(p2)
-		Expect(err).To(HaveOccurred())
+		Expect(p1.Add(p2)).To(BeNil())
 	})
 
 	It("subtracts tuples", func() {
@@ -108,8 +107,7 @@ var _ = Describe("tuple tests", func() {
 		Expect(p1.Subtract(p2)).To(Equal(expVector))
 
 		// vector - point
-		_, err := v.Subtract(p)
-		Expect(err).To(HaveOccurred())
+		Expect(v.Subtract(p)).To(BeNil())
 	})
 
 	It("multiplies tuples", func() {
@@ -158,6 +156,36 @@ var _ = Describe("tuple tests", func() {
 		Expect(p1.Equals(p2)).To(BeFalse())
 
 		Expect(p1.Equals(v1)).To(BeFalse())
+	})
+
+	It("checks whether tuples are greater or less than each other", func() {
+		t1 := NewPoint(0, 0, 0)
+		t2 := NewPoint(1, 1, 1)
+		Expect(t1.LessThan(t2)).To(BeTrue())
+		Expect(t1.GreaterThan(t2)).To(BeFalse())
+
+		t2 = NewPoint(-1, 1, 1)
+		Expect(t1.LessThan(t2)).To(BeFalse())
+
+		t2 = NewPoint(1, -1, 1)
+		Expect(t1.LessThan(t2)).To(BeFalse())
+
+		t2 = NewPoint(1, 1, -1)
+		Expect(t1.LessThan(t2)).To(BeFalse())
+
+		t2 = NewPoint(-1, -1, -1)
+		Expect(t1.GreaterThan(t2)).To(BeTrue())
+
+		t2 = NewPoint(-1, 1, -1)
+		Expect(t1.GreaterThan(t2)).To(BeFalse())
+
+		t2 = NewPoint(-1, -1, 1)
+		Expect(t1.GreaterThan(t2)).To(BeFalse())
+
+		t1 = NewPoint(0, 0, 0)
+		t2 = NewPoint(0, 0, 0)
+		Expect(t1.LessThan(t2)).To(BeFalse())
+		Expect(t1.GreaterThan(t2)).To(BeFalse())
 	})
 
 	It("negates tuples", func() {

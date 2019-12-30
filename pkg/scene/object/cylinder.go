@@ -25,10 +25,10 @@ func NewCylinder() *Cylinder {
 }
 
 // Bounds returns the untransformed bounds of a cylinder
-func (cyl *Cylinder) Bounds() *bounds {
-	return &bounds{
-		minimum: base.NewPoint(-1, cyl.Minimum, -1),
-		maximum: base.NewPoint(1, cyl.Maximum, 1),
+func (cyl *Cylinder) Bounds() *Bounds {
+	return &Bounds{
+		Minimum: base.NewPoint(-1, cyl.Minimum, -1),
+		Maximum: base.NewPoint(1, cyl.Maximum, 1),
 	}
 }
 
@@ -74,12 +74,12 @@ func (cyl *Cylinder) Intersect(ray *ray.Ray) []*Intersection {
 
 // wrapper for the normalAt interface function, using the common normal function
 // with the specific cylinder logic embedded
-func (cyl *Cylinder) NormalAt(objectPoint *base.Tuple) *base.Tuple {
-	return commonNormalAt(cyl, objectPoint, cylinderNormal)
+func (cyl *Cylinder) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
+	return commonNormalAt(cyl, objectPoint, hit, cylinderNormal)
 }
 
 // cylinder-specific calculation of the normal
-func cylinderNormal(objectPoint *base.Tuple, o Object) *base.Tuple {
+func cylinderNormal(objectPoint *base.Tuple, o Object, _ *Intersection) *base.Tuple {
 	cyl := o.(*Cylinder)
 	// compute the square of the distance from the y axis
 	distance := objectPoint.GetX()*objectPoint.GetX() + objectPoint.GetZ()*objectPoint.GetZ()

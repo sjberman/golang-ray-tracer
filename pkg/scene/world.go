@@ -58,7 +58,7 @@ func (w *World) shadeHit(hd *hitData, remaining int) *image.Color {
 
 // isShadowed returns if a point is in a shadow
 func (w *World) isShadowed(point *base.Tuple) bool {
-	v, _ := w.light.position.Subtract(point)
+	v := w.light.position.Subtract(point)
 	distance := v.Magnitude()
 	direction := v.Normalize()
 
@@ -110,7 +110,7 @@ func (w *World) refractedColor(hd *hitData, remaining int) *image.Color {
 	// find cos(theta_t) via trig identity
 	cosT := math.Sqrt(1 - sin2t)
 	// compute direction of refracted ray
-	direction, _ := hd.normalv.Multiply((nRatio*cosI - cosT)).Subtract(hd.eyev.Multiply(nRatio))
+	direction := hd.normalv.Multiply((nRatio*cosI - cosT)).Subtract(hd.eyev.Multiply(nRatio))
 	refractRay := ray.NewRay(hd.underPoint, direction)
 	color := w.ColorAt(refractRay, remaining)
 	return color.Multiply(hd.object.GetMaterial().Transparency)
@@ -142,7 +142,7 @@ func prepareComputations(
 		eyev:   ray.Direction.Negate(),
 	}
 	hd.point = ray.Position(hd.value)
-	hd.normalv = hd.object.NormalAt(hd.point)
+	hd.normalv = hd.object.NormalAt(hd.point, intersection)
 
 	if hd.normalv.DotProduct(hd.eyev) < 0 {
 		// Hit occurs inside the object (normal points away from eye)
@@ -152,10 +152,10 @@ func prepareComputations(
 	hd.reflectv = ray.Direction.Reflect(hd.normalv)
 	// have a point just above normal point to account for accidental shadow calculation when
 	// a ray hits the object it's leaving
-	hd.overPoint, _ = hd.point.Add(hd.normalv.Multiply(base.Epsilon * 2))
+	hd.overPoint = hd.point.Add(hd.normalv.Multiply(base.Epsilon * 2))
 
 	// have a point just below normal point for the origination of refracted rays
-	hd.underPoint, _ = hd.point.Subtract(hd.normalv.Multiply(base.Epsilon * 2))
+	hd.underPoint = hd.point.Subtract(hd.normalv.Multiply(base.Epsilon * 2))
 
 	// containers is a list of objects that we've intersected, but haven't yet exited
 	containers := []object.Object{}
@@ -172,7 +172,7 @@ func prepareComputations(
 		// if intersection's object is already in containers list, then this intersection must
 		// be exiting the object; otherwise, the intersection is entering the object
 		if contains(containers, iSection.Object) {
-			containers = remove(containers, iSection.Object)
+			containers = object.Remove(containers, iSection.Object)
 		} else {
 			containers = append(containers, iSection.Object)
 		}
@@ -235,17 +235,4 @@ func contains(s []object.Object, o object.Object) bool {
 		}
 	}
 	return false
-}
-
-// removes an object.Object from a slice of Objects
-func remove(s []object.Object, o object.Object) []object.Object {
-	for i, obj := range s {
-		if obj == o {
-			copy(s[i:], s[i+1:])
-			s[len(s)-1] = nil
-			s = s[:len(s)-1]
-			return s
-		}
-	}
-	return s
 }

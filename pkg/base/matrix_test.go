@@ -127,120 +127,21 @@ var _ = Describe("matrix tests", func() {
 		Expect(Identity.Transpose()).To(Equal(&Identity))
 	})
 
-	It("computes the determinant of a 2x2 matrix", func() {
-		data := [][]float64{
-			{1, 5},
-			{-3, 2},
-		}
-		m := NewMatrix(data)
-		Expect(m.determinant()).To(Equal(17.0))
-	})
-
-	It("creates submatrices from larger matrices", func() {
-		// reducing 3x3 to 2x2
-		data := [][]float64{
-			{1, 5, 0},
-			{-3, 2, 7},
-			{0, 6, -3},
-		}
-		m := NewMatrix(data)
-
-		data = [][]float64{
-			{-3, 2},
-			{0, 6},
-		}
-		expMatrix := NewMatrix(data)
-		Expect(m.subMatrix(0, 2)).To(Equal(expMatrix))
-
-		// reducing 4x4 to 3x3
-		data = [][]float64{
-			{-6, 1, 1, 6},
-			{-8, 5, 8, 6},
-			{-1, 0, 8, 2},
-			{-7, 1, -1, 1},
-		}
-		m = NewMatrix(data)
-
-		data = [][]float64{
-			{-6, 1, 6},
-			{-8, 8, 6},
-			{-7, -1, 1},
-		}
-		expMatrix = NewMatrix(data)
-		Expect(m.subMatrix(2, 1)).To(Equal(expMatrix))
-	})
-
-	It("computes the minor of a matrix", func() {
-		data := [][]float64{
-			{3, 5, 0},
-			{2, -1, -7},
-			{6, -1, 5},
-		}
-		m := NewMatrix(data)
-		Expect(m.minor(1, 0)).To(Equal(25.0))
-	})
-
-	It("computes the cofactor of a matrix", func() {
-		data := [][]float64{
-			{3, 5, 0},
-			{2, -1, -7},
-			{6, -1, 5},
-		}
-		m := NewMatrix(data)
-		Expect(m.minor(0, 0)).To(Equal(-12.0))
-		Expect(m.cofactor(0, 0)).To(Equal(-12.0))
-		Expect(m.minor(1, 0)).To(Equal(25.0))
-		Expect(m.cofactor(1, 0)).To(Equal(-25.0))
-	})
-
-	It("computes the determinant of a 3x3 matrix", func() {
-		data := [][]float64{
-			{1, 2, 6},
-			{-5, 8, -4},
-			{2, 6, 4},
-		}
-		m := NewMatrix(data)
-		Expect(m.determinant()).To(Equal(-196.0))
-	})
-
-	It("computes the determinant of a 4x4 matrix", func() {
-		data := [][]float64{
-			{-2, -8, 3, 5},
-			{-3, 1, 7, 3},
-			{1, 2, -9, 6},
-			{-6, 7, 7, -9},
-		}
-		m := NewMatrix(data)
-		Expect(m.determinant()).To(Equal(-4071.0))
-	})
-
 	It("inverts a matrix", func() {
-		// determinant 0, not invertible
 		data := [][]float64{
-			{-4, 2, -2, 3},
-			{9, 6, 2, 6},
-			{0, -5, 1, -5},
-			{0, 0, 0, 0},
-		}
-		m := NewMatrix(data)
-		_, err := m.Inverse()
-		Expect(err).To(HaveOccurred())
-
-		data = [][]float64{
 			{-5, 2, 6, -8},
 			{1, -5, 1, 8},
 			{7, 7, -6, -7},
 			{1, -3, 7, 4},
 		}
-		m = NewMatrix(data)
-		invertM, err := m.Inverse()
-		Expect(err).ToNot(HaveOccurred())
+		m := NewMatrix(data)
+		invertM := m.Inverse()
 
 		data = [][]float64{
 			{0.21804511278195488, 0.45112781954887216, 0.24060150375939848, -0.045112781954887216},
-			{-0.8082706766917294, -1.4567669172932332, -0.44360902255639095, 0.5206766917293233},
-			{-0.07894736842105263, -0.2236842105263158, -0.05263157894736842, 0.19736842105263158},
-			{-0.5225563909774437, -0.8139097744360902, -0.3007518796992481, 0.30639097744360905},
+			{-0.8082706766917293, -1.456766917293233, -0.44360902255639095, 0.5206766917293233},
+			{-0.07894736842105263, -0.22368421052631576, -0.05263157894736842, 0.19736842105263158},
+			{-0.5225563909774436, -0.8139097744360901, -0.3007518796992481, 0.306390977443609},
 		}
 		expMatrix := NewMatrix(data)
 		Expect(invertM).To(Equal(expMatrix))
@@ -263,8 +164,7 @@ var _ = Describe("matrix tests", func() {
 		m2 := NewMatrix(data2)
 
 		m3 := m1.Multiply(m2)
-		inverse, err := m2.Inverse()
-		Expect(err).ToNot(HaveOccurred())
+		inverse := m2.Inverse()
 
 		res := m3.Multiply(inverse)
 		Expect(res.Equals(m1)).To(BeTrue())
@@ -276,8 +176,7 @@ var _ = Describe("matrix tests", func() {
 		expPoint := NewPoint(2, 1, 7)
 		Expect(t.MultiplyTuple(p)).To(Equal(expPoint))
 
-		inverse, err := t.Inverse()
-		Expect(err).ToNot(HaveOccurred())
+		inverse := t.Inverse()
 		expPoint = NewPoint(-8, 7, 3)
 		Expect(inverse.MultiplyTuple(p)).To(Equal(expPoint))
 
@@ -295,8 +194,7 @@ var _ = Describe("matrix tests", func() {
 		expVector := NewVector(-8, 18, 32)
 		Expect(s.MultiplyTuple(v)).To(Equal(expVector))
 
-		inverse, err := s.Inverse()
-		Expect(err).ToNot(HaveOccurred())
+		inverse := s.Inverse()
 		expVector = NewVector(-2, 2, 2)
 		Expect(inverse.MultiplyTuple(v)).To(Equal(expVector))
 

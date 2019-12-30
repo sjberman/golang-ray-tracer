@@ -21,10 +21,10 @@ func NewCube() *Cube {
 }
 
 // Bounds returns the untransformed bounds of a cube
-func (c *Cube) Bounds() *bounds {
-	return &bounds{
-		minimum: base.NewPoint(-1, -1, -1),
-		maximum: base.NewPoint(1, 1, 1),
+func (c *Cube) Bounds() *Bounds {
+	return &Bounds{
+		Minimum: base.NewPoint(-1, -1, -1),
+		Maximum: base.NewPoint(1, 1, 1),
 	}
 }
 
@@ -51,12 +51,12 @@ func (c *Cube) Intersect(ray *ray.Ray) []*Intersection {
 
 // wrapper for the normalAt interface function, using the common normal function
 // with the specific cube logic embedded
-func (c *Cube) NormalAt(objectPoint *base.Tuple) *base.Tuple {
-	return commonNormalAt(c, objectPoint, cubeNormal)
+func (c *Cube) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
+	return commonNormalAt(c, objectPoint, hit, cubeNormal)
 }
 
 // cube-specific calculation of the normal
-func cubeNormal(objectPoint *base.Tuple, o Object) *base.Tuple {
+func cubeNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tuple {
 	absX := math.Abs(objectPoint.GetX())
 	absY := math.Abs(objectPoint.GetY())
 	absZ := math.Abs(objectPoint.GetZ())
