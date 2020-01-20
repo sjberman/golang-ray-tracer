@@ -15,14 +15,14 @@ const remainingReflections = 4
 
 // World represents the collection of all objects in a scene
 type World struct {
-	light   *PointLight
+	lights  []*PointLight
 	objects []object.Object
 }
 
 // NewWorld returns a new World object
-func NewWorld(light *PointLight, objects []object.Object) *World {
+func NewWorld(lights []*PointLight, objects []object.Object) *World {
 	return &World{
-		light:   light,
+		lights:  lights,
 		objects: objects,
 	}
 }
@@ -40,9 +40,12 @@ func (w *World) ColorAt(r *ray.Ray, remaining int) *image.Color {
 
 // shadeHit returns the color at the intersection encapsulated by hitData
 func (w *World) shadeHit(hd *hitData, remaining int) *image.Color {
-	shadowed := w.isShadowed(hd.overPoint)
-	surface := lighting(
-		w.light, hd.object, hd.object.GetMaterial(), hd.point, hd.eyev, hd.normalv, shadowed)
+	surface := image.Black
+	for _, light := range w.lights {
+		shadowed := w.isShadowed(light, hd.overPoint)
+		surface = surface.Add(lighting(
+			light, hd.object, hd.object.GetMaterial(), hd.point, hd.eyev, hd.normalv, shadowed))
+	}
 	reflected := w.reflectedColor(hd, remaining)
 	refracted := w.refractedColor(hd, remaining)
 
@@ -57,8 +60,8 @@ func (w *World) shadeHit(hd *hitData, remaining int) *image.Color {
 }
 
 // isShadowed returns if a point is in a shadow
-func (w *World) isShadowed(point *base.Tuple) bool {
-	v := w.light.position.Subtract(point)
+func (w *World) isShadowed(light *PointLight, point *base.Tuple) bool {
+	v := light.position.Subtract(point)
 	distance := v.Magnitude()
 	direction := v.Normalize()
 

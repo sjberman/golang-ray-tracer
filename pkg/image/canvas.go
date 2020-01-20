@@ -46,23 +46,23 @@ func (c *Canvas) PixelAt(x, y int) *Color {
 // toPPM returns a PPM (portable pixelmap) string of the canvas
 func (c *Canvas) toPPM() string {
 	header := fmt.Sprintf("P3\n%d %d\n%d\n", c.width, c.height, 255)
-	var body string
+	var body strings.Builder
 	for i := 0; i < c.height; i++ {
-		var line string
+		var line strings.Builder
 		for j := 0; j < c.width; j++ {
 			color := c.PixelAt(j, i)
 			red, green, blue := scalePixel(color)
 			pixelVal := fmt.Sprintf("%d %d %d ", red, green, blue)
 			// lines should not exceed 70 chars
-			if len(line+pixelVal) > 70 {
-				body += strings.TrimRight(line, " ") + "\n"
-				line = ""
+			if len(line.String()+pixelVal) > 70 {
+				body.WriteString(strings.TrimRight(line.String(), " ") + "\n")
+				line.Reset()
 			}
-			line += pixelVal
+			line.WriteString(pixelVal)
 		}
-		body += strings.TrimRight(line, " ") + "\n"
+		body.WriteString(strings.TrimRight(line.String(), " ") + "\n")
 	}
-	ppm := header + body
+	ppm := header + body.String()
 	return ppm
 }
 

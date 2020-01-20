@@ -13,11 +13,11 @@ import (
 )
 
 var _ = Describe("world tests", func() {
-	var light *PointLight
+	var lights []*PointLight
 	var objects []object.Object
 
 	BeforeEach(func() {
-		light = NewPointLight(base.NewPoint(-10, 10, -10), image.White)
+		lights = []*PointLight{NewPointLight(base.NewPoint(-10, 10, -10), image.White)}
 		s1 := object.NewSphere()
 		s1.GetMaterial().Color = image.NewColor(0.8, 1.0, 0.6)
 		s1.GetMaterial().Diffuse = 0.7
@@ -28,13 +28,13 @@ var _ = Describe("world tests", func() {
 	})
 
 	It("creates worlds", func() {
-		w := NewWorld(light, objects)
-		Expect(w.light).To(Equal(light))
+		w := NewWorld(lights, objects)
+		Expect(w.lights).To(Equal(lights))
 		Expect(w.objects).To(Equal(objects))
 	})
 
 	It("computes object.Intersections in a world", func() {
-		w := NewWorld(light, objects)
+		w := NewWorld(lights, objects)
 		r := ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
 		ints := w.intersect(r)
 
@@ -47,7 +47,7 @@ var _ = Describe("world tests", func() {
 
 	It("computes the color at a ray intersection", func() {
 		// when ray misses
-		w := NewWorld(light, objects)
+		w := NewWorld(lights, objects)
 		r := ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 1, 0))
 		color := w.ColorAt(r, remainingReflections)
 		Expect(color).To(Equal(image.Black))
@@ -85,26 +85,26 @@ var _ = Describe("world tests", func() {
 
 	It("determines if a point is shadowed", func() {
 		// nothing collinear with point and light
-		w := NewWorld(light, objects)
+		w := NewWorld(lights, objects)
 		p := base.NewPoint(0, 10, 0)
-		Expect(w.isShadowed(p)).To(BeFalse())
+		Expect(w.isShadowed(w.lights[0], p)).To(BeFalse())
 
 		// object between point and light
 		p = base.NewPoint(10, -10, 10)
-		Expect(w.isShadowed(p)).To(BeTrue())
+		Expect(w.isShadowed(w.lights[0], p)).To(BeTrue())
 
 		// object is behind the light
 		p = base.NewPoint(-20, 20, -20)
-		Expect(w.isShadowed(p)).To(BeFalse())
+		Expect(w.isShadowed(w.lights[0], p)).To(BeFalse())
 
 		// object is behind the point
 		p = base.NewPoint(-2, 2, -2)
-		Expect(w.isShadowed(p)).To(BeFalse())
+		Expect(w.isShadowed(w.lights[0], p)).To(BeFalse())
 	})
 
 	It("returns the reflected color", func() {
 		// nonreflective material
-		w := NewWorld(light, objects)
+		w := NewWorld(lights, objects)
 		r := ray.NewRay(base.NewPoint(0, 0, 0), base.NewVector(0, 0, 1))
 		s := w.objects[1]
 		s.GetMaterial().Ambient = 1
@@ -135,7 +135,7 @@ var _ = Describe("world tests", func() {
 
 	Context("refraction", func() {
 		Specify("opaque surface", func() {
-			w := NewWorld(light, objects)
+			w := NewWorld(lights, objects)
 			r := ray.NewRay(base.NewPoint(0, 0, 0), base.NewVector(0, 0, 1))
 			s := w.objects[0]
 			ints := object.Intersections(object.NewIntersection(4, s), object.NewIntersection(6, s))
@@ -145,7 +145,7 @@ var _ = Describe("world tests", func() {
 		})
 
 		Specify("refracted color with max recursive depth", func() {
-			w := NewWorld(light, objects)
+			w := NewWorld(lights, objects)
 			s := w.objects[0]
 			s.GetMaterial().Transparency = 1
 			s.GetMaterial().RefractiveIndex = 1.5
@@ -158,7 +158,7 @@ var _ = Describe("world tests", func() {
 		})
 
 		Specify("refracted color under total internal reflection", func() {
-			w := NewWorld(light, objects)
+			w := NewWorld(lights, objects)
 			s := w.objects[0]
 			r := ray.NewRay(base.NewPoint(0, 0, math.Sqrt(2)/2), base.NewVector(0, 1, 0))
 			ints := object.Intersections(object.NewIntersection(-math.Sqrt(2)/2, s), object.NewIntersection(math.Sqrt(2)/2, s))
@@ -170,7 +170,7 @@ var _ = Describe("world tests", func() {
 		})
 
 		Specify("refracted color with a refracted ray", func() {
-			w := NewWorld(light, objects)
+			w := NewWorld(lights, objects)
 			s1 := w.objects[0]
 			s1.GetMaterial().Ambient = 1
 			s1.GetMaterial().Pattern = image.NewMockPattern()
@@ -189,7 +189,7 @@ var _ = Describe("world tests", func() {
 	})
 
 	It("calculates the shadeHit with reflective, transparent material", func() {
-		w := NewWorld(light, objects)
+		w := NewWorld(lights, objects)
 		floor := object.NewPlane()
 		floor.SetTransform(base.Translate(0, -1, 0))
 		floor.Transparency = 0.5
@@ -339,7 +339,7 @@ var _ = Describe("world tests", func() {
 	})
 
 	It("renders the world", func() {
-		w := NewWorld(light, objects)
+		w := NewWorld(lights, objects)
 		c := NewCamera(11, 11, math.Pi/2)
 		from := base.NewPoint(0, 0, -5)
 		to := base.Origin
