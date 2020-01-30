@@ -9,7 +9,7 @@ import (
 	. "github.com/sjberman/golang-ray-tracer/pkg/scene/object"
 )
 
-func FiveBallRainbow(camera *Camera) (*Group, []*PointLight) {
+func FiveBallRainbow(camera *Camera) (Object, []*PointLight) {
 	s1 := NewSphere()
 	s1.Color = NewColor(1, 0, 0)
 	s1.Reflective = 0.9
@@ -62,14 +62,14 @@ func FiveBallRainbow(camera *Camera) (*Group, []*PointLight) {
 	return group, lights
 }
 
-func AllShapes(camera *Camera) (*Group, []*PointLight) {
+func AllShapes(camera *Camera) (Object, []*PointLight) {
 	s1 := NewSphere()
 	s1.SetTransform(
 		Translate(0, 2, 0),
 	)
 	s1.Color = NewColor(1, 0, 0)
 
-	s2 := NewSphere()
+	s2 := GlassSphere()
 	s2.SetTransform(
 		Translate(-2.5, 2, -1),
 	)
@@ -80,6 +80,7 @@ func AllShapes(camera *Camera) (*Group, []*PointLight) {
 		Translate(2.5, 2, -1),
 	)
 	s3.Color = NewColor(0, 0, 1)
+	s3.Specular = 0
 
 	c1 := NewCylinder()
 	c1.Closed = true

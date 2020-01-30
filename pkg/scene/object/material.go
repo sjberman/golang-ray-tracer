@@ -13,6 +13,7 @@ type Material struct {
 	Reflective      float64
 	Transparency    float64
 	RefractiveIndex float64
+	Shadow          bool
 }
 
 var DefaultMaterial = Material{
@@ -24,4 +25,5 @@ var DefaultMaterial = Material{
 	Reflective:      0,
 	Transparency:    0,
 	RefractiveIndex: 1.0,
+	Shadow:          true,
 }

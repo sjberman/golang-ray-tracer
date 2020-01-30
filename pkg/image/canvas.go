@@ -43,7 +43,7 @@ func (c *Canvas) PixelAt(x, y int) *Color {
 	return Black
 }
 
-// toPPM returns a PPM (portable pixelmap) string of the canvas
+// returns a PPM (portable pixelmap) string of the canvas
 func (c *Canvas) toPPM() string {
 	header := fmt.Sprintf("P3\n%d %d\n%d\n", c.width, c.height, 255)
 	var body strings.Builder

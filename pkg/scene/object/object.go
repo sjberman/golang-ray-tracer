@@ -11,14 +11,15 @@ import (
 type Object interface {
 	GetMaterial() *Material
 	GetTransform() *base.Matrix
-	GetParent() *Group
+	GetParent() Object
 	Bounds() *Bounds
 	SetTransform(...*base.Matrix)
 	SetMaterial(*Material)
-	SetParent(*Group)
+	SetParent(Object)
 	PatternAt(*base.Tuple, image.Pattern) *image.Color
 	Intersect(*ray.Ray) []*Intersection
 	NormalAt(*base.Tuple, *Intersection) *base.Tuple
+	Divide(int)
 	worldToObject(*base.Tuple) *base.Tuple
 	normalToWorld(*base.Tuple) *base.Tuple
 }
@@ -27,7 +28,7 @@ type Object interface {
 type object struct {
 	Material
 	transform base.Matrix
-	parent    *Group
+	parent    Object
 }
 
 // newObject returns a new object
@@ -48,8 +49,8 @@ func (o *object) GetMaterial() *Material {
 	return &o.Material
 }
 
-// GetParent gets the Object's parent group
-func (o *object) GetParent() *Group {
+// GetParent gets the Object's parent Object
+func (o *object) GetParent() Object {
 	return o.parent
 }
 
@@ -67,9 +68,9 @@ func (o *object) SetMaterial(material *Material) {
 	o.Material = *material
 }
 
-// SetParent sets the Object's parent group
-func (o *object) SetParent(group *Group) {
-	o.parent = group
+// SetParent sets the Object's parent Object
+func (o *object) SetParent(obj Object) {
+	o.parent = obj
 }
 
 // patternAt returns the pattern at a point on the object
@@ -125,6 +126,22 @@ func (o *object) normalToWorld(normal *base.Tuple) *base.Tuple {
 	return normal
 }
 
+// returns whether or not A contains B
+func includes(a Object, b Object) bool {
+	if grp, ok := a.(*Group); ok {
+		for _, o := range grp.Objects {
+			if includes(o, b) {
+				return true
+			}
+		}
+		return false
+	}
+	if csg, ok := a.(*Csg); ok {
+		return includes(csg.left, b) || includes(csg.right, b)
+	}
+	return a == b
+}
+
 // Remove removes an object.Object from a slice of Objects
 func Remove(s []Object, o Object) []Object {
 	for i, obj := range s {
@@ -137,6 +154,9 @@ func Remove(s []Object, o Object) []Object {
 	}
 	return s
 }
+
+// unused (interface satisfier)
+func (o *object) Divide(_ int) {}
 
 // Bounds represents a bounding box for an object
 type Bounds struct {

@@ -35,9 +35,10 @@ func usingObjFile(objfile *string, camera *Camera) (*Group, []*PointLight) {
 	return group, lights
 }
 
-func usingCustomObjects(camera *Camera) (*Group, []*PointLight) {
+func usingCustomObjects(camera *Camera) (Object, []*PointLight) {
 	// return demo.FiveBallRainbow(camera)
 	return demo.AllShapes(camera)
+	// return demo.CSG(camera)
 }
 
 // Test program
@@ -75,18 +76,18 @@ func main() {
 	// group.SetMaterial(group.GetMaterial())
 
 	// Build scene using custom objects
-	group, lights := usingCustomObjects(camera)
+	obj, lights := usingCustomObjects(camera)
 
-	group.Divide(1)
+	obj.Divide(1)
 
 	world := NewWorld(lights, []Object{
-		group,
+		obj,
 		floor,
-		wall,
+		//wall,
 	})
 
 	canvas := Render(camera, world)
-	err := canvas.WriteToFile("image.ppm")
+	err := canvas.WriteToFile("image.png")
 	if err != nil {
 		fmt.Println("error writing file: ", err.Error())
 	}

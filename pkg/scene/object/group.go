@@ -34,12 +34,12 @@ func (g *Group) SetMaterial(material *Material) {
 	}
 }
 
-// calculates the group's bounds based on its objects
-func (g *Group) calculateBounds() {
+// calculates the bounds based on supplied objects (for group and csg)
+func calculateBounds(objects []Object) *Bounds {
 	minX, minY, minZ := math.Inf(1), math.Inf(1), math.Inf(1)
 	maxX, maxY, maxZ := math.Inf(-1), math.Inf(-1), math.Inf(-1)
 
-	for _, o := range g.Objects {
+	for _, o := range objects {
 		objBounds := o.Bounds()
 		if objBounds == nil {
 			continue
@@ -71,7 +71,7 @@ func (g *Group) calculateBounds() {
 			maxZ = utils.Max(maxZ, p.GetZ())
 		}
 	}
-	g.bounds = &Bounds{Minimum: base.NewPoint(minX, minY, minZ), Maximum: base.NewPoint(maxX, maxY, maxZ)}
+	return &Bounds{Minimum: base.NewPoint(minX, minY, minZ), Maximum: base.NewPoint(maxX, maxY, maxZ)}
 }
 
 // Add adds children to the group's collection, and sets the group as each child's parent
@@ -80,9 +80,11 @@ func (g *Group) Add(objs ...Object) {
 	for _, o := range objs {
 		o.SetParent(g)
 	}
-	g.calculateBounds()
+	g.bounds = calculateBounds(g.Objects)
 	if g.parent != nil {
-		g.parent.calculateBounds()
+		if grp, ok := g.parent.(*Group); ok {
+			grp.bounds = calculateBounds(grp.Objects)
+		}
 	}
 }
 
@@ -98,9 +100,7 @@ func (g *Group) Divide(threshold int) {
 		}
 	}
 	for _, o := range g.Objects {
-		if obj, ok := o.(*Group); ok {
-			obj.Divide(threshold)
-		}
+		o.Divide(threshold)
 	}
 }
 
@@ -112,8 +112,16 @@ func (g *Group) partitionChildren() ([]Object, []Object) {
 	var toRemove []Object
 	for _, o := range g.Objects {
 		bounds := o.Bounds()
+		if bounds == nil {
+			continue
+		}
 		bMin := o.GetTransform().MultiplyTuple(bounds.Minimum)
 		bMax := o.GetTransform().MultiplyTuple(bounds.Maximum)
+		if bMin.GreaterThan(bMax) {
+			b := bMin
+			bMin = bMax
+			bMax = b
+		}
 		// check which box the object fits in, otherwise don't put it in one
 		if (bMin.GreaterThan(leftBox.Minimum) || bMin.Equals(leftBox.Minimum)) &&
 			(bMax.LessThan(leftBox.Maximum) || bMax.Equals(leftBox.Maximum)) {

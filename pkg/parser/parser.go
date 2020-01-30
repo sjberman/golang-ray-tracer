@@ -37,7 +37,6 @@ func Parse(filename string) (*Parser, error) {
 	vIndex := 1
 	vnIndex := 1
 	triangles := make(map[int][]object.Object)
-	// smoothTriangles := make(map[int][]object.Object)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()

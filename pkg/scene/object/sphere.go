@@ -62,7 +62,11 @@ func sphereNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tupl
 // GlassSphere creates a glass sphere object
 func GlassSphere() *Sphere {
 	s := NewSphere()
+	s.Diffuse = 0.1
 	s.Transparency = 1
+	s.Reflective = 0.9
 	s.RefractiveIndex = 1.5
+	s.Specular = 1
+	s.Shininess = 300
 	return s
 }

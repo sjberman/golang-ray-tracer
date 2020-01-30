@@ -68,7 +68,7 @@ func (w *World) isShadowed(light *PointLight, point *base.Tuple) bool {
 	ray := ray.NewRay(point, direction)
 	ints := w.intersect(ray)
 	hit := object.Hit(ints)
-	if hit != nil && hit.Value < distance {
+	if hit != nil && hit.Value < distance && hit.Object.GetMaterial().Shadow {
 		return true
 	}
 	return false
