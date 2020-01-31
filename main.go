@@ -20,9 +20,9 @@ import (
 	"github.com/sjberman/golang-ray-tracer/schema"
 )
 
-// SUPPORT ABSOLUTE AND RELATIVE PATHS
-var schemaFile = flag.String("schema", "schema/schema.json", "Path to the schema.json file")
+var schemaFile = flag.String("schema", "schema/schema.json", "Relative path to the schema.json file")
 var sceneFile = flag.String("scene", "", "JSON or YAML file containing scene info")
+var outputFile = flag.String("output", "image.ppm", "Image output file (.ppm)")
 
 func parseArgs() {
 	flag.Parse()
@@ -96,7 +96,7 @@ func main() {
 
 	world := scene.NewWorld(lights, objects)
 	canvas := scene.Render(camera, world)
-	err = canvas.WriteToFile("image.ppm")
+	err = canvas.WriteToFile(*outputFile)
 	if err != nil {
 		fmt.Println("error writing file: ", err.Error())
 	}

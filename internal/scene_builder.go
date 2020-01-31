@@ -161,7 +161,9 @@ func ParseOBJ(files []*schema.File) ([]object.Object, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error parsing OBJ file: %v", err)
 		}
-		groups = append(groups, parser.GetGroup())
+		group := parser.GetGroup()
+		group.Divide(1)
+		groups = append(groups, group)
 	}
 	return groups, nil
 }
