@@ -1,0 +1,89 @@
+camera:
+  width: 1000
+  height: 1000
+  field-of-view: 60
+  from: [0, 5, -10]
+  to: [0, 0, 0]
+  up: [0, 1, 0]
+lights:
+- at: [-5, 10, -10]
+  intensity: [1, 1, 1]
+shapes:
+- name: s1
+  type: sphere
+  material:
+    color: [1, 0, 0]
+  transform:
+  - type: translate
+    values: [0, 2, 0]
+- name: s2
+  type: glassSphere
+  material:
+    color: [0, 1, 0]
+  transform:
+  - type: translate
+    values: [-2.5, 2, -1]
+- name: s3
+  type: sphere
+  material:
+    color: [0, 0, 1]
+    specular: 0
+  transform:
+  - type: translate
+    values: [2.5, 2, -1]
+- name: c1
+  type: cylinder
+  closed: true
+  maximum: 1
+  minimum: -1
+  material:
+    color: [0.5, 0.2, 0.7]
+    reflective: 0.1
+  transform:
+  - type: translate
+    values: [-2.5, 0, -1]
+- name: c2
+  type: cube
+  material:
+    color: [0.2, 0.7, 0.4]
+    reflective: 0.2
+  transform:
+  - type: rotate
+    values: [0, 45, 0]
+- name: c3
+  type: cone
+  closed: true
+  maximum: 1
+  minimum: -1
+  material:
+    color: [0.8, 0.3, 0.4]
+    reflective: 0.5
+  transform:
+  - type: translate
+    values: [2.5, 0, -1]
+- name: wall
+  type: plane
+  material:
+    pattern:
+      type: ring
+      color1: [0, 0, 0]
+      color2: [1, 1, 1]
+  transform:
+  - type: rotate
+    values: [90, 0, 0]
+  - type: translate
+    values: [0, 5, 0]
+- name: floor
+  type: plane
+  material:
+    reflective: 0.2
+    pattern:
+      type: checker
+      color1: [0, 0, 0]
+      color2: [1, 1, 1]
+      transform:
+      - type: rotate
+        values: [0, 45, 0]
+  transform:
+  - type: translate
+    values: [0, -1, 0]

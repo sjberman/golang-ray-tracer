@@ -1,96 +1,105 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"math"
+	"io/ioutil"
+	"log"
 	"os"
+	"path"
 	"runtime/pprof"
+	"strings"
 	"time"
 
-	"github.com/sjberman/golang-ray-tracer/demo"
-	. "github.com/sjberman/golang-ray-tracer/pkg/base"
-	. "github.com/sjberman/golang-ray-tracer/pkg/image"
-	. "github.com/sjberman/golang-ray-tracer/pkg/parser"
-	. "github.com/sjberman/golang-ray-tracer/pkg/scene"
-	. "github.com/sjberman/golang-ray-tracer/pkg/scene/object"
+	"github.com/ghodss/yaml"
+	"github.com/xeipuuv/gojsonschema"
+
+	"github.com/sjberman/golang-ray-tracer/internal"
+	"github.com/sjberman/golang-ray-tracer/pkg/scene"
+	"github.com/sjberman/golang-ray-tracer/schema"
 )
 
-var objFile = flag.String("file", "", "OBJ file to render")
+// SUPPORT ABSOLUTE AND RELATIVE PATHS
+var schemaFile = flag.String("schema", "schema/schema.json", "Path to the schema.json file")
+var sceneFile = flag.String("scene", "", "JSON or YAML file containing scene info")
 
-func usingObjFile(objfile *string, camera *Camera) (*Group, []*PointLight) {
-	var group *Group
-	parser, err := Parse(*objFile)
-	if err != nil {
-		fmt.Println("error parsing OBJ file: ", err)
-		os.Exit(1)
+func parseArgs() {
+	flag.Parse()
+	if *sceneFile == "" {
+		log.Fatalf("scene file is a required argument")
 	}
-	group = parser.GetGroup()
-	fmt.Println("OBJ minimum: ", group.Bounds().Minimum)
-	fmt.Println("OBJ maximum: ", group.Bounds().Maximum)
-	camera.SetTransform(ViewTransform(NewPoint(0, 2.5, -10), NewPoint(0, 1, 0), NewVector(0, 1, 0)))
-	lights := []*PointLight{
-		NewPointLight(NewPoint(-10, 100, -100), White),
+
+	if *schemaFile == "schema/schema.json" {
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Fatalf("error getting current working directory: %v\n", err)
+		}
+		*schemaFile = path.Join(cwd, *schemaFile)
 	}
-	return group, lights
+
+	if !strings.HasSuffix(*sceneFile, ".json") && !strings.HasSuffix(*sceneFile, ".yaml") {
+		log.Fatal("scene file must be of type .json or .yaml")
+	}
 }
 
-func usingCustomObjects(camera *Camera) (Object, []*PointLight) {
-	// return demo.FiveBallRainbow(camera)
-	return demo.AllShapes(camera)
-	// return demo.CSG(camera)
-}
-
-// Test program
 func main() {
 	startTime := time.Now()
 	f1, _ := os.Create("perfFile")
 	pprof.StartCPUProfile(f1)
 	defer pprof.StopCPUProfile()
+	parseArgs()
 
-	flag.Parse()
+	sceneBytes, err := ioutil.ReadFile(*sceneFile)
+	if err != nil {
+		log.Fatalf("error reading scene file: %v\n", err)
+	}
+	schemaLoader := gojsonschema.NewReferenceLoader("file://" + *schemaFile)
+	if strings.HasSuffix(*sceneFile, ".yaml") {
+		sceneBytes, err = yaml.YAMLToJSON(sceneBytes)
+		if err != nil {
+			log.Fatalf("error converting YAML to JSON: %v", err)
+		}
+	}
+	docLoader := gojsonschema.NewStringLoader(string(sceneBytes))
 
-	camera := NewCamera(1200, 1200, math.Pi/3)
+	result, err := gojsonschema.Validate(schemaLoader, docLoader)
+	if err != nil {
+		log.Fatalf("could not validate scene with schema: %v\n", err)
+	}
 
-	cp := NewCheckerPattern(Black, White)
-	cp.SetTransform(RotateY(math.Sqrt(2) / 2))
-	floor := NewPlane()
-	floor.SetTransform(
-		Translate(0, -1, 0),
-	)
-	floor.Pattern = cp
-	floor.Reflective = 0.2
+	if !result.Valid() {
+		fmt.Println("Scene is invalid:")
+		for _, desc := range result.Errors() {
+			fmt.Println("- ", desc)
+		}
+		os.Exit(1)
+	}
 
-	wall := NewPlane()
-	rp := NewRingPattern(Black, White)
-	wall.SetTransform(
-		RotateX(math.Pi/2),
-		Translate(0, 5, 0),
-	)
-	wall.Pattern = rp
+	var sceneStruct schema.RayTracerScene
+	err = json.Unmarshal(sceneBytes, &sceneStruct)
+	if err != nil {
+		log.Fatalf("error unmarshaling scene JSON: %v\n", err)
+	}
 
-	// Build scene using OBJ file
-	// group, lights := usingObjFile(objFile, camera)
-	// group.Color = NewColor(0.5, 0.5, 0)
-	// group.Shininess = 300
-	// group.SetMaterial(group.GetMaterial())
+	camera := internal.CreateCamera(sceneStruct.Camera)
+	lights := internal.CreateLights(sceneStruct.Lights)
+	shapes, shapeMap := internal.CreateShapes(sceneStruct.Shapes)
+	// Note: this could be very buggy; needs some testing
+	groups := internal.CreateGroupsAndCSGs(sceneStruct, shapes, shapeMap)
+	objGroups, err := internal.ParseOBJ(sceneStruct.Files)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	objects := append(shapes, objGroups...)
+	objects = append(objects, groups...)
 
-	// Build scene using custom objects
-	obj, lights := usingCustomObjects(camera)
-
-	obj.Divide(1)
-
-	world := NewWorld(lights, []Object{
-		obj,
-		floor,
-		//wall,
-	})
-
-	canvas := Render(camera, world)
-	err := canvas.WriteToFile("image.png")
+	world := scene.NewWorld(lights, objects)
+	canvas := scene.Render(camera, world)
+	err = canvas.WriteToFile("image.ppm")
 	if err != nil {
 		fmt.Println("error writing file: ", err.Error())
 	}
 
-	fmt.Println(time.Since(startTime).Round(time.Second))
+	fmt.Println("Total runtime: ", time.Since(startTime).Round(time.Second))
 }

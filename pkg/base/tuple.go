@@ -1,8 +1,6 @@
 package base
 
-import (
-	"math"
-)
+import "math"
 
 const (
 	vector = 0

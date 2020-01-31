@@ -1,0 +1,204 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Ray tracer scene",
+    "type": "object",
+    "required": [
+        "camera",
+        "lights"
+    ],
+    "properties": {
+        "camera": {
+            "type": "object",
+            "properties": {
+                "width": { "type": "integer", "description": "Width of the image." },
+                "height": { "type": "integer", "description": "Height of the image." },
+                "field-of-view": { "type": "number", "description": "Field of view in degrees." },
+                "from": { "$ref": "#/definitions/tuple", "description": "Origin of the camera." },
+                "to": { "$ref": "#/definitions/tuple", "description": "Where the camera looks." },
+                "up": { "$ref": "#/definitions/tuple", "description": "The up direction." }
+            },
+            "required": [
+                "width",
+                "height",
+                "field-of-view",
+                "from",
+                "to",
+                "up"
+            ]
+        },
+        "lights": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "at": { "$ref": "#/definitions/tuple", "description": "Position of the light." },
+                    "intensity": { "$ref": "#/definitions/tuple", "description": "Color of the light." }
+                },
+                "required": ["at", "intensity"]
+            }
+        },
+        "shapes": {
+            "type": "array",
+            "items": { 
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string", "description": "Name of the shape." },
+                    "type": { 
+                        "type": "string",
+                        "enum": [
+                            "cone",
+                            "cube",
+                            "cylinder",
+                            "plane",
+                            "sphere",
+                            "glassSphere"
+                        ],
+                        "description": "Type of shape."
+                    },
+                    "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the shape." },
+                    "material": { "$ref": "#/definitions/material", "description": "Material of the shape" },
+                    "closed": {
+                        "type": "boolean",
+                        "description": "Closed caps for cone or cylinder."
+                    },
+                    "minimum": {
+                        "type": "number",
+                        "description": "Minimum value for cone or cylinder."
+                    },
+                    "maximum": {
+                        "type": "number",
+                        "description": "Maximum value for cone or cylinder."
+                    }
+                },
+                "required": ["type"]
+            }
+        },
+        "groups": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string", "description": "Name of the group." },
+                    "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the group." },
+                    "material": { "$ref": "#/definitions/material", "description": "Material of the group." },
+                    "children": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "Names of objects contained in the group."
+                    }
+                },
+                "required": ["children"]
+            }
+        },
+        "csgs": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string", "description": "Name of the CSG." },
+                    "operation": {
+                        "type": "string",
+                        "enum": [
+                            "union",
+                            "intersection",
+                            "difference"
+                        ],
+                        "description": "Type of operation to perform on the objects."
+                    },
+                    "leftChild": { "type": "string", "description": "Name of the left child object." },
+                    "rightChild": { "type": "string", "description": "Name of the right child object." },
+                    "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the CSG." },
+                    "material": { "$ref": "#/definitions/material", "description": "Material of the CSG." }
+                },
+                "required": [
+                    "operation",
+                    "leftChild",
+                    "rightChild"
+                ]
+            }
+        },
+        "files": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string", "description": "Name of the object to be created." },
+                    "file": { "type": "string", "description": "OBJ filename to be loaded" }
+                },
+                "required": ["file"]
+            }
+        }
+    },
+    "definitions": {
+        "tuple": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+                "type": "number"
+            }
+        },
+        "transform": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "translate",
+                            "scale",
+                            "rotate"
+                        ],
+                        "description": "Type of transform to be performed."
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "type": "number",
+                            "minItems": 3
+                        },
+                        "description": "x,y,z values for the transformation."
+                    }
+                },
+                "required": ["type", "values"]
+            }
+        },
+        "material": {
+            "type": "object",
+            "properties": {
+                "color": { "$ref": "#/definitions/tuple" },
+                "pattern": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "checker",
+                                "gradient",
+                                "ring",
+                                "stripe"
+                            ]
+                        },
+                        "color1": { "$ref": "#/definitions/tuple" },
+                        "color2": { "$ref": "#/definitions/tuple" },
+                        "transform": { "$ref": "#/definitions/transform" }
+                    },
+                    "required": [
+                        "type",
+                        "color1",
+                        "color2"
+                    ]
+                },
+                "ambient": { "type": "number" },
+                "diffuse": { "type": "number" },
+                "specular": { "type": "number" },
+                "shininess": { "type": "number" },
+                "reflective": { "type": "number" },
+                "transparency": { "type": "number" },
+                "refractiveIndex": { "type": "number" },
+                "shadow": { "type": "boolean" }
+            }
+        }
+    }
+}

@@ -1,0 +1,66 @@
+camera:
+  width: 1500
+  height: 1500
+  field-of-view: 60
+  from: [0, 0, -5]
+  to: [0, 0, 0]
+  up: [0, 1, 0]
+lights:
+- at: [-6, 6, -5]
+  intensity: [1, 1, 1]
+- at: [10, -10, 3]
+  intensity: [1, 1, 1]
+shapes:
+- name: s1
+  type: sphere
+  material:
+    color: [1, 0, 0]
+    reflective: 0.9
+- name: s2
+  type: sphere
+  material:
+    color: [0, 1, 1]
+    reflective: 0.9
+  transform:
+  - type: scale
+    values: [0.5, 0.5, 0.5]
+  - type: translate
+    values: [-3.5, 0, 0]
+- name: s3
+  type: sphere
+  material:
+    color: [0.1, 0.4, 1]
+    reflective: 0.9
+  transform:
+  - type: scale
+    values: [0.5, 0.5, 0.5]
+  - type: translate
+    values: [0, -3.5, 0]
+- name: s4
+  type: sphere
+  material:
+    color: [1, 1, 0]
+    reflective: 0.9
+  transform:
+  - type: scale
+    values: [0.5, 0.5, 0.5]
+  - type: translate
+    values: [3.5, 0, 0]
+- name: s5
+  type: sphere
+  material:
+    color: [0.6, 1, 0]
+    reflective: 0.9
+  transform:
+  - type: scale
+    values: [0.5, 0.5, 0.5]
+  - type: translate
+    values: [0, 3.5, 0]
+groups:
+- name: g1
+  children:
+  - s1
+  - s2
+  - s3
+  - s4
+  - s5

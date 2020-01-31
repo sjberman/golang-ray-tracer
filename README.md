@@ -9,11 +9,14 @@ A [ray tracer](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)) written in 
 #### Disadvantages of using Go
 - Inheritance/polymorphism is hard. The object classes (shapes) in this ray tracer have a lot of common code, and are designed in such a way that polymorphism is required. I managed to make it work, but it isn't as pretty as it could be using an object-oriented language.
 
-### Building/Testing
+### Building/Running
 
 #### Pre-requisites:
 - go 1.13 installed
 
 ```make build``` builds the ray tracer binary.
 
-**Note:** main.go is currently a sandbox for testing out various scenes, and requires manually updating the code to render a desired scene. It can accept an OBJ file via the `--file` flag.
+Specify a scene file when running:
+```./gtracer --scene my-scene.yaml```
+
+Both YAML and JSON file types are supported. See the `demo/` directory for some example scenes. The schema for the scene file can be viewed [here](schema/schema.md).

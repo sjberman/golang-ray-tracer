@@ -1,0 +1,13 @@
+camera:
+  width: 300
+  height: 300
+  field-of-view: 60
+  from: [0, 2.5, -10]
+  to: [0, 1, 0]
+  up: [0, 1, 0]
+lights:
+- at: [-10, 100, -100]
+  intensity: [1, 1, 1]
+files:
+- name: cow
+  file: demo/cow.obj

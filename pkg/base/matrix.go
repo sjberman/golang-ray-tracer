@@ -1,8 +1,6 @@
 package base
 
-import (
-	"math"
-)
+import "math"
 
 // Matrix is a matrix of floating point numbers
 type Matrix struct {
