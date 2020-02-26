@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
@@ -37,11 +38,13 @@ func CreateLights(lights []*schema.Light) []*scene.PointLight {
 }
 
 // CreateShapes builds the shape objects using the spec
-func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]*object.Object) {
+func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]object.Object) {
 	objs := []object.Object{}
-	shapeMap := make(map[string]*object.Object)
+	shapeMap := make(map[string]object.Object)
 	for _, shape := range shapes {
-		var obj object.Object
+		var obj, parent object.Object
+		var inheritedMaterial *object.Material
+		var inheritedTform *base.Matrix
 
 		switch shape.Type {
 		case "cone":
@@ -81,11 +84,20 @@ func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]*object.O
 			sphere := object.GlassSphere()
 			obj = sphere
 		}
+		if shape.Inherits != nil {
+			parent = shapeMap[*shape.Inherits]
+			if parent == nil {
+				log.Fatalf("Shape '%s' inherits from shape '%s', which must be defined prior.",
+					shape.Name, *shape.Inherits)
+			}
+			inheritedMaterial = parent.GetMaterial()
+			inheritedTform = parent.GetTransform()
+		}
 
-		obj.SetMaterial(getMaterial(shape.Material))
-		obj.SetTransform(getTransforms(shape.Transform)...)
+		obj.SetMaterial(getMaterial(shape.Material, inheritedMaterial))
+		obj.SetTransform(getTransforms(shape.Transform, inheritedTform)...)
 		objs = append(objs, obj)
-		shapeMap[shape.Name] = &obj
+		shapeMap[shape.Name] = obj
 	}
 	return objs, shapeMap
 }
@@ -94,8 +106,11 @@ func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]*object.O
 func CreateGroupsAndCSGs(
 	sceneStruct schema.RayTracerScene,
 	shapes []object.Object,
-	shapeMap map[string]*object.Object,
-) []object.Object {
+	shapeMap map[string]object.Object,
+	objGroups []object.Object,
+	objMap map[string]object.Object,
+) ([]object.Object, []string, []string) {
+	var usedShapes, usedOBJGroups []string
 	groupMap := make(map[string]*object.Group)
 	csgMap := make(map[string]*object.Csg)
 
@@ -111,20 +126,30 @@ func CreateGroupsAndCSGs(
 	for _, csg := range sceneStruct.Csgs {
 		var left, right object.Object
 		if o, ok := shapeMap[csg.LeftChild]; ok {
-			left = *o
+			left = o
+			usedShapes = append(usedShapes, csg.LeftChild)
 		} else if o, ok := groupMap[csg.LeftChild]; ok {
 			left = o
+		} else if o, ok := objMap[csg.LeftChild]; ok {
+			left = o
+			usedOBJGroups = append(usedOBJGroups, csg.LeftChild)
 		}
+
 		if o, ok := shapeMap[csg.RightChild]; ok {
-			right = *o
+			right = o
+			usedShapes = append(usedShapes, csg.RightChild)
 		} else if o, ok := groupMap[csg.RightChild]; ok {
 			right = o
+		} else if o, ok := objMap[csg.RightChild]; ok {
+			right = o
+			usedOBJGroups = append(usedOBJGroups, csg.RightChild)
 		}
+
 		newCSG := object.NewCsg(csg.Operation, left, right)
 		if csg.Material != nil {
-			newCSG.SetMaterial(getMaterial(csg.Material))
+			newCSG.SetMaterial(getMaterial(csg.Material, nil))
 		}
-		newCSG.SetTransform(getTransforms(csg.Transform)...)
+		newCSG.SetTransform(getTransforms(csg.Transform, nil)...)
 		csgMap[csg.Name] = newCSG
 		newCSG.Divide(1)
 		csgs = append(csgs, newCSG)
@@ -136,40 +161,53 @@ func CreateGroupsAndCSGs(
 		group := groupMap[grp.Name]
 		for _, child := range grp.Children {
 			if o, ok := shapeMap[child]; ok {
-				toAdd = append(toAdd, *o)
-			}
-			if o, ok := csgMap[child]; ok {
 				toAdd = append(toAdd, o)
+				usedShapes = append(usedShapes, child)
+			} else if o, ok := csgMap[child]; ok {
+				toAdd = append(toAdd, o)
+			} else if o, ok := objMap[child]; ok {
+				toAdd = append(toAdd, o)
+				usedOBJGroups = append(usedOBJGroups, child)
 			}
 		}
 		group.Add(toAdd...)
 		if grp.Material != nil {
-			group.SetMaterial(getMaterial(grp.Material))
+			group.SetMaterial(getMaterial(grp.Material, nil))
 		}
-		group.SetTransform(getTransforms(grp.Transform)...)
+		group.SetTransform(getTransforms(grp.Transform, nil)...)
 		group.Divide(1)
 		groups = append(groups, group)
 	}
-	return append(groups, csgs...)
+	return append(groups, csgs...), usedShapes, usedOBJGroups
 }
 
 // ParseOBJ parses the supplied OBJ files and creates groupss
-func ParseOBJ(files []*schema.File) ([]object.Object, error) {
+func ParseOBJ(files []*schema.File) ([]object.Object, map[string]object.Object, error) {
 	groups := make([]object.Object, 0, len(files))
-	for _, group := range files {
-		parser, err := parser.Parse(group.File)
+	objMap := make(map[string]object.Object)
+
+	for _, grp := range files {
+		parser, err := parser.Parse(grp.File)
 		if err != nil {
-			return nil, fmt.Errorf("error parsing OBJ file: %v", err)
+			return nil, nil, fmt.Errorf("error parsing OBJ file: %v", err)
 		}
 		group := parser.GetGroup()
+		if grp.Material != nil {
+			group.SetMaterial(getMaterial(grp.Material, nil))
+		}
+		group.SetTransform(getTransforms(grp.Transform, nil)...)
 		group.Divide(1)
 		groups = append(groups, group)
+		objMap[grp.Name] = group
 	}
-	return groups, nil
+	return groups, objMap, nil
 }
 
-func getMaterial(material *schema.Material) *object.Material {
+func getMaterial(material *schema.Material, inheritedMaterial *object.Material) *object.Material {
 	objMaterial := object.DefaultMaterial
+	if inheritedMaterial != nil {
+		objMaterial = *inheritedMaterial
+	}
 	if material == nil {
 		return &objMaterial
 	}
@@ -195,7 +233,7 @@ func getMaterial(material *schema.Material) *object.Material {
 		case "stripe":
 			pattern = image.NewStripePattern(color1, color2)
 		}
-		pattern.SetTransform(getTransforms(material.Pattern.Transform)...)
+		pattern.SetTransform(getTransforms(material.Pattern.Transform, nil)...)
 		objMaterial.Pattern = pattern
 	}
 	if material.Ambient != nil {
@@ -225,8 +263,17 @@ func getMaterial(material *schema.Material) *object.Material {
 	return &objMaterial
 }
 
-func getTransforms(transforms []*schema.Transform) []*base.Matrix {
-	t := make([]*base.Matrix, 0, len(transforms))
+func getTransforms(transforms []*schema.Transform, inheritedTform *base.Matrix) []*base.Matrix {
+	var t []*base.Matrix
+	tLength := len(transforms)
+	if inheritedTform != nil {
+		tLength++
+		t = make([]*base.Matrix, 0, tLength)
+		t = append(t, inheritedTform)
+	} else {
+		t = make([]*base.Matrix, 0, tLength)
+	}
+
 	for _, transform := range transforms {
 		switch transform.Type {
 		case "translate":
@@ -246,7 +293,14 @@ func getTransforms(transforms []*schema.Transform) []*base.Matrix {
 			if transform.Values[2] != 0 {
 				t = append(t, base.RotateZ(z))
 			}
-			// case "shear": still need to figure out the JSON for this
+		case "shear":
+			xy := transform.Values[0] * math.Pi / 180
+			xz := transform.Values[1] * math.Pi / 180
+			yx := transform.Values[2] * math.Pi / 180
+			yz := transform.Values[3] * math.Pi / 180
+			zx := transform.Values[4] * math.Pi / 180
+			zy := transform.Values[5] * math.Pi / 180
+			t = append(t, base.Shear(xy, xz, yx, yz, zx, zy))
 		}
 	}
 	return t

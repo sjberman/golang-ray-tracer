@@ -19,4 +19,4 @@ A [ray tracer](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)) written in 
 Specify a scene file when running:
 ```./gtracer --scene my-scene.yaml```
 
-Both YAML and JSON file types are supported. See the `demo/` directory for some example scenes. The schema for the scene file can be viewed [here](schema/schema.md).
+Both YAML and JSON file types are supported. See the `demo/` directory for some example scenes. The schema for the scene file can be viewed [here](schema/README.md).

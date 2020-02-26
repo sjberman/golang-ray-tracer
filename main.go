@@ -17,6 +17,7 @@ import (
 
 	"github.com/sjberman/golang-ray-tracer/internal"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene"
+	"github.com/sjberman/golang-ray-tracer/pkg/scene/object"
 	"github.com/sjberman/golang-ray-tracer/schema"
 )
 
@@ -41,6 +42,25 @@ func parseArgs() {
 	if !strings.HasSuffix(*sceneFile, ".json") && !strings.HasSuffix(*sceneFile, ".yaml") {
 		log.Fatal("scene file must be of type .json or .yaml")
 	}
+}
+
+func deDupe(
+	objList []object.Object,
+	objectMap map[string]object.Object,
+	usedObjects []string,
+) []object.Object {
+	for _, s := range usedObjects {
+		i := 0
+		for _, obj := range objList {
+			if objectMap[s] != obj {
+				objList[i] = obj
+				i++
+				break
+			}
+		}
+		objList = objList[:i]
+	}
+	return objList
 }
 
 func main() {
@@ -85,12 +105,18 @@ func main() {
 	camera := internal.CreateCamera(sceneStruct.Camera)
 	lights := internal.CreateLights(sceneStruct.Lights)
 	shapes, shapeMap := internal.CreateShapes(sceneStruct.Shapes)
-	// Note: this could be very buggy; needs some testing
-	groups := internal.CreateGroupsAndCSGs(sceneStruct, shapes, shapeMap)
-	objGroups, err := internal.ParseOBJ(sceneStruct.Files)
+	objGroups, objMap, err := internal.ParseOBJ(sceneStruct.Files)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Note: this could be very buggy; needs some testing (may need to de-dupe CSG/GROUPS)
+	groups, usedShapes, usedOBJGroups := internal.CreateGroupsAndCSGs(
+		sceneStruct, shapes, shapeMap, objGroups, objMap)
+
+	// De-dupe any objects that are included in a group definition
+	shapes = deDupe(shapes, shapeMap, usedShapes)
+	objGroups = deDupe(objGroups, objMap, usedOBJGroups)
+
 	objects := append(shapes, objGroups...)
 	objects = append(objects, groups...)
 

@@ -39,83 +39,15 @@
         },
         "shapes": {
             "type": "array",
-            "items": { 
-                "type": "object",
-                "properties": {
-                    "name": { "type": "string", "description": "Name of the shape." },
-                    "type": { 
-                        "type": "string",
-                        "enum": [
-                            "cone",
-                            "cube",
-                            "cylinder",
-                            "plane",
-                            "sphere",
-                            "glassSphere"
-                        ],
-                        "description": "Type of shape."
-                    },
-                    "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the shape." },
-                    "material": { "$ref": "#/definitions/material", "description": "Material of the shape" },
-                    "closed": {
-                        "type": "boolean",
-                        "description": "Closed caps for cone or cylinder."
-                    },
-                    "minimum": {
-                        "type": "number",
-                        "description": "Minimum value for cone or cylinder."
-                    },
-                    "maximum": {
-                        "type": "number",
-                        "description": "Maximum value for cone or cylinder."
-                    }
-                },
-                "required": ["type"]
-            }
+            "items": { "$ref": "#/definitions/shape" }
         },
         "groups": {
             "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": { "type": "string", "description": "Name of the group." },
-                    "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the group." },
-                    "material": { "$ref": "#/definitions/material", "description": "Material of the group." },
-                    "children": {
-                        "type": "array",
-                        "items": { "type": "string" },
-                        "description": "Names of objects contained in the group."
-                    }
-                },
-                "required": ["children"]
-            }
+            "items": { "$ref": "#/definitions/group" }
         },
         "csgs": {
             "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": { "type": "string", "description": "Name of the CSG." },
-                    "operation": {
-                        "type": "string",
-                        "enum": [
-                            "union",
-                            "intersection",
-                            "difference"
-                        ],
-                        "description": "Type of operation to perform on the objects."
-                    },
-                    "leftChild": { "type": "string", "description": "Name of the left child object." },
-                    "rightChild": { "type": "string", "description": "Name of the right child object." },
-                    "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the CSG." },
-                    "material": { "$ref": "#/definitions/material", "description": "Material of the CSG." }
-                },
-                "required": [
-                    "operation",
-                    "leftChild",
-                    "rightChild"
-                ]
-            }
+            "items": { "$ref": "#/definitions/csg" }
         },
         "files": {
             "type": "array",
@@ -123,9 +55,11 @@
                 "type": "object",
                 "properties": {
                     "name": { "type": "string", "description": "Name of the object to be created." },
-                    "file": { "type": "string", "description": "OBJ filename to be loaded" }
+                    "file": { "type": "string", "description": "OBJ filename to be loaded" },
+                    "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the object." },
+                    "material": { "$ref": "#/definitions/material", "description": "Material of the object." }
                 },
-                "required": ["file"]
+                "required": ["name", "file"]
             }
         }
     },
@@ -138,6 +72,85 @@
                 "type": "number"
             }
         },
+        "shape": {
+            "type": "object",
+            "description": "A 3 dimensional shape.",
+            "properties": {
+                "name": { "type": "string", "description": "Name of the shape." },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "cone",
+                        "cube",
+                        "cylinder",
+                        "plane",
+                        "sphere",
+                        "glassSphere"
+                    ],
+                    "description": "Type of shape."
+                },
+                "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the shape." },
+                "material": { "$ref": "#/definitions/material", "description": "Material of the shape" },
+                "closed": {
+                    "type": "boolean",
+                    "description": "Closed caps for cone or cylinder."
+                },
+                "minimum": {
+                    "type": "number",
+                    "description": "Minimum value for cone or cylinder."
+                },
+                "maximum": {
+                    "type": "number",
+                    "description": "Maximum value for cone or cylinder."
+                },
+                "inherits": {
+                    "type": "string",
+                    "description": "Inherits the properties from another shape."
+                }
+            },
+            "required": ["type", "name"]
+        },
+        "group": {
+            "type": "object",
+            "description": "A group of objects.",
+            "properties": {
+                "name": { "type": "string", "description": "Name of the group." },
+                "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the group." },
+                "material": { "$ref": "#/definitions/material", "description": "Material of the group." },
+                "children": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Names of objects contained in the group."
+                }
+            },
+            "required": ["name", "children"]
+        },
+        "csg": {
+            "type": "object",
+            "description": "Constructive Solid Geometry (combination of two shapes).",
+            "properties": {
+                "name": { "type": "string", "description": "Name of the CSG." },
+                "operation": {
+                    "type": "string",
+                    "enum": [
+                        "union",
+                        "intersection",
+                        "difference"
+                    ],
+                    "description": "Type of operation to perform on the objects."
+                },
+                "leftChild": { "type": "string", "description": "Name of the left child object." },
+                "rightChild": { "type": "string", "description": "Name of the right child object." },
+                "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the CSG." },
+                "material": { "$ref": "#/definitions/material", "description": "Material of the CSG." }
+            },
+            "required": [
+                "name",
+                "operation",
+                "leftChild",
+                "rightChild"
+            ]
+        },
         "transform": {
             "type": "array",
             "items": {
@@ -148,7 +161,8 @@
                         "enum": [
                             "translate",
                             "scale",
-                            "rotate"
+                            "rotate",
+                            "shear"
                         ],
                         "description": "Type of transform to be performed."
                     },

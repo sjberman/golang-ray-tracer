@@ -16,7 +16,7 @@ type Camera struct {
 type Csg struct {
 	LeftChild  string       `json:"leftChild"`
 	Material   *Material    `json:"material,omitempty"`
-	Name       string       `json:"name,omitempty"`
+	Name       string       `json:"name"`
 	Operation  string       `json:"operation"`
 	RightChild string       `json:"rightChild"`
 	Transform  []*Transform `json:"transform,omitempty"`
@@ -24,13 +24,15 @@ type Csg struct {
 
 // File
 type File struct {
-	Name string `json:"name,omitempty"`
-	File string `json:"file"`
+	File      string       `json:"file"`
+	Material  *Material    `json:"material,omitempty"`
+	Name      string       `json:"name"`
+	Transform []*Transform `json:"transform,omitempty"`
 }
 
 // Group
 type Group struct {
-	Children  []string     `json:"children,omitempty"`
+	Children  []string     `json:"children"`
 	Material  *Material    `json:"material,omitempty"`
 	Name      string       `json:"name,omitempty"`
 	Transform []*Transform `json:"transform,omitempty"`
@@ -77,10 +79,11 @@ type RayTracerScene struct {
 // Shape
 type Shape struct {
 	Closed    *bool        `json:"closed,omitempty"`
+	Inherits  *string      `json:"inherits,omitempty"`
 	Material  *Material    `json:"material,omitempty"`
 	Maximum   *float64     `json:"maximum,omitempty"`
 	Minimum   *float64     `json:"minimum,omitempty"`
-	Name      string       `json:"name,omitempty"`
+	Name      string       `json:"name"`
 	Transform []*Transform `json:"transform,omitempty"`
 	Type      string       `json:"type"`
 }
