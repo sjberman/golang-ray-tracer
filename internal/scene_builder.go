@@ -60,8 +60,7 @@ func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]object.Ob
 			}
 			obj = cone
 		case "cube":
-			cube := object.NewCube()
-			obj = cube
+			obj = object.NewCube()
 		case "cylinder":
 			cylinder := object.NewCylinder()
 			if shape.Closed != nil {
@@ -75,14 +74,11 @@ func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]object.Ob
 			}
 			obj = cylinder
 		case "plane":
-			plane := object.NewPlane()
-			obj = plane
+			obj = object.NewPlane()
 		case "sphere":
-			sphere := object.NewSphere()
-			obj = sphere
+			obj = object.NewSphere()
 		case "glassSphere":
-			sphere := object.GlassSphere()
-			obj = sphere
+			obj = object.GlassSphere()
 		}
 		if shape.Inherits != nil {
 			parent = shapeMap[*shape.Inherits]
@@ -181,7 +177,7 @@ func CreateGroupsAndCSGs(
 	return append(groups, csgs...), usedShapes, usedOBJGroups
 }
 
-// ParseOBJ parses the supplied OBJ files and creates groupss
+// ParseOBJ parses the supplied OBJ files and creates groups
 func ParseOBJ(files []*schema.File) ([]object.Object, map[string]object.Object, error) {
 	groups := make([]object.Object, 0, len(files))
 	objMap := make(map[string]object.Object)

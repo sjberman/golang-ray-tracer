@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"runtime/pprof"
 	"strings"
 	"time"
 
@@ -63,11 +62,34 @@ func deDupe(
 	return objList
 }
 
+// Builds all of the objects defined in the scene
+func getSceneObjects(sceneStruct schema.RayTracerScene) (*scene.Camera, []*scene.PointLight, []object.Object) {
+	camera := internal.CreateCamera(sceneStruct.Camera)
+	lights := internal.CreateLights(sceneStruct.Lights)
+	shapes, shapeMap := internal.CreateShapes(sceneStruct.Shapes)
+	objGroups, objMap, err := internal.ParseOBJ(sceneStruct.Files)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	// Note: this could be very buggy; needs some testing (may need to de-dupe CSG/GROUPS)
+	groups, usedShapes, usedOBJGroups := internal.CreateGroupsAndCSGs(
+		sceneStruct, shapes, shapeMap, objGroups, objMap)
+
+	// De-dupe any objects that are included in a group definition
+	shapes = deDupe(shapes, shapeMap, usedShapes)
+	objGroups = deDupe(objGroups, objMap, usedOBJGroups)
+
+	objects := append(shapes, objGroups...)
+	objects = append(objects, groups...)
+
+	return camera, lights, objects
+}
+
 func main() {
 	startTime := time.Now()
-	f1, _ := os.Create("perfFile")
-	pprof.StartCPUProfile(f1)
-	defer pprof.StopCPUProfile()
+	// f1, _ := os.Create("perfFile")
+	// pprof.StartCPUProfile(f1)
+	// defer pprof.StopCPUProfile()
 	parseArgs()
 
 	sceneBytes, err := ioutil.ReadFile(*sceneFile)
@@ -101,24 +123,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error unmarshaling scene JSON: %v\n", err)
 	}
-
-	camera := internal.CreateCamera(sceneStruct.Camera)
-	lights := internal.CreateLights(sceneStruct.Lights)
-	shapes, shapeMap := internal.CreateShapes(sceneStruct.Shapes)
-	objGroups, objMap, err := internal.ParseOBJ(sceneStruct.Files)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	// Note: this could be very buggy; needs some testing (may need to de-dupe CSG/GROUPS)
-	groups, usedShapes, usedOBJGroups := internal.CreateGroupsAndCSGs(
-		sceneStruct, shapes, shapeMap, objGroups, objMap)
-
-	// De-dupe any objects that are included in a group definition
-	shapes = deDupe(shapes, shapeMap, usedShapes)
-	objGroups = deDupe(objGroups, objMap, usedOBJGroups)
-
-	objects := append(shapes, objGroups...)
-	objects = append(objects, groups...)
+	camera, lights, objects := getSceneObjects(sceneStruct)
 
 	world := scene.NewWorld(lights, objects)
 	canvas := scene.Render(camera, world)
