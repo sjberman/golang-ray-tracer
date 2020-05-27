@@ -22,6 +22,7 @@ type Object interface {
 	Divide(int)
 	worldToObject(*base.Tuple) *base.Tuple
 	normalToWorld(*base.Tuple) *base.Tuple
+	DeepCopy() Object
 }
 
 // object is the base implementation of an Object
@@ -162,6 +163,16 @@ func (o *object) Divide(_ int) {}
 type Bounds struct {
 	Minimum *base.Tuple
 	Maximum *base.Tuple
+}
+
+// DeepCopy performs a deep copy of the object to a new object
+func (b *Bounds) DeepCopy() *Bounds {
+	min := *b.Minimum
+	max := *b.Maximum
+	return &Bounds{
+		Minimum: &min,
+		Maximum: &max,
+	}
 }
 
 // use cube intersect method

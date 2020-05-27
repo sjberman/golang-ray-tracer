@@ -160,12 +160,12 @@ Type: `object`
 		 - <i id="#/definitions/group/properties/material">path: #/definitions/group/properties/material</i>
 		 - &#36;ref: [#/definitions/material](#/definitions/material)
 	 - <b id="#/definitions/group/properties/children">children</b> `required`
-		 - _Names of objects contained in the group._
+		 - _Objects contained in the group._
 		 - Type: `array`
 		 - <i id="#/definitions/group/properties/children">path: #/definitions/group/properties/children</i>
 			 - **_Items_**
-			 - Type: `string`
 			 - <i id="#/definitions/group/properties/children/items">path: #/definitions/group/properties/children/items</i>
+			 - &#36;ref: [#/definitions/objectShell](#/definitions/objectShell)
  - _Constructive Solid Geometry (combination of two shapes)._
  - Type: `object`
  - <i id="#/definitions/csg">path: #/definitions/csg</i>
@@ -183,13 +183,13 @@ Type: `object`
 			 2. _"intersection"_
 			 3. _"difference"_
 	 - <b id="#/definitions/csg/properties/leftChild">leftChild</b> `required`
-		 - _Name of the left child object._
-		 - Type: `string`
+		 - _Left child object._
 		 - <i id="#/definitions/csg/properties/leftChild">path: #/definitions/csg/properties/leftChild</i>
+		 - &#36;ref: [#/definitions/objectShell](#/definitions/objectShell)
 	 - <b id="#/definitions/csg/properties/rightChild">rightChild</b> `required`
-		 - _Name of the right child object._
-		 - Type: `string`
+		 - _Right child object._
 		 - <i id="#/definitions/csg/properties/rightChild">path: #/definitions/csg/properties/rightChild</i>
+		 - &#36;ref: [#/definitions/objectShell](#/definitions/objectShell)
 	 - <b id="#/definitions/csg/properties/transform">transform</b>
 		 - _Ways to transform the CSG._
 		 - <i id="#/definitions/csg/properties/transform">path: #/definitions/csg/properties/transform</i>
@@ -197,6 +197,18 @@ Type: `object`
 	 - <b id="#/definitions/csg/properties/material">material</b>
 		 - _Material of the CSG._
 		 - <i id="#/definitions/csg/properties/material">path: #/definitions/csg/properties/material</i>
+		 - &#36;ref: [#/definitions/material](#/definitions/material)
+ - Type: `object`
+ - <i id="#/definitions/objectShell">path: #/definitions/objectShell</i>
+ - **_Properties_**
+	 - <b id="#/definitions/objectShell/properties/name">name</b> `required`
+		 - Type: `string`
+		 - <i id="#/definitions/objectShell/properties/name">path: #/definitions/objectShell/properties/name</i>
+	 - <b id="#/definitions/objectShell/properties/transform">transform</b>
+		 - <i id="#/definitions/objectShell/properties/transform">path: #/definitions/objectShell/properties/transform</i>
+		 - &#36;ref: [#/definitions/transform](#/definitions/transform)
+	 - <b id="#/definitions/objectShell/properties/material">material</b>
+		 - <i id="#/definitions/objectShell/properties/material">path: #/definitions/objectShell/properties/material</i>
 		 - &#36;ref: [#/definitions/material](#/definitions/material)
  - Type: `array`
  - <i id="#/definitions/transform">path: #/definitions/transform</i>

@@ -101,9 +101,7 @@ func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]object.Ob
 // CreateGroupsAndCSGs builds the group and csg objects using the spec
 func CreateGroupsAndCSGs(
 	sceneStruct schema.RayTracerScene,
-	shapes []object.Object,
-	shapeMap map[string]object.Object,
-	objGroups []object.Object,
+	shapeMap,
 	objMap map[string]object.Object,
 ) ([]object.Object, []string, []string) {
 	var usedShapes, usedOBJGroups []string
@@ -120,34 +118,16 @@ func CreateGroupsAndCSGs(
 
 	// Create CSGs
 	for _, csg := range sceneStruct.Csgs {
-		var left, right object.Object
-		if o, ok := shapeMap[csg.LeftChild]; ok {
-			left = o
-			usedShapes = append(usedShapes, csg.LeftChild)
-		} else if o, ok := groupMap[csg.LeftChild]; ok {
-			left = o
-		} else if o, ok := objMap[csg.LeftChild]; ok {
-			left = o
-			usedOBJGroups = append(usedOBJGroups, csg.LeftChild)
-		}
-
-		if o, ok := shapeMap[csg.RightChild]; ok {
-			right = o
-			usedShapes = append(usedShapes, csg.RightChild)
-		} else if o, ok := groupMap[csg.RightChild]; ok {
-			right = o
-		} else if o, ok := objMap[csg.RightChild]; ok {
-			right = o
-			usedOBJGroups = append(usedOBJGroups, csg.RightChild)
-		}
+		left := getChild(&csg.LeftChild, shapeMap, objMap, groupMap, nil, &usedShapes, &usedOBJGroups)
+		right := getChild(&csg.RightChild, shapeMap, objMap, groupMap, nil, &usedShapes, &usedOBJGroups)
 
 		newCSG := object.NewCsg(csg.Operation, left, right)
 		if csg.Material != nil {
 			newCSG.SetMaterial(getMaterial(csg.Material, nil))
 		}
 		newCSG.SetTransform(getTransforms(csg.Transform, nil)...)
+		newCSG.Divide(2)
 		csgMap[csg.Name] = newCSG
-		newCSG.Divide(1)
 		csgs = append(csgs, newCSG)
 	}
 
@@ -155,26 +135,69 @@ func CreateGroupsAndCSGs(
 	for _, grp := range sceneStruct.Groups {
 		toAdd := make([]object.Object, 0, len(grp.Children))
 		group := groupMap[grp.Name]
+
 		for _, child := range grp.Children {
-			if o, ok := shapeMap[child]; ok {
-				toAdd = append(toAdd, o)
-				usedShapes = append(usedShapes, child)
-			} else if o, ok := csgMap[child]; ok {
-				toAdd = append(toAdd, o)
-			} else if o, ok := objMap[child]; ok {
-				toAdd = append(toAdd, o)
-				usedOBJGroups = append(usedOBJGroups, child)
-			}
+			childObj := getChild(&child, shapeMap, objMap, groupMap, csgMap, &usedShapes, &usedOBJGroups)
+			toAdd = append(toAdd, childObj)
 		}
 		group.Add(toAdd...)
 		if grp.Material != nil {
 			group.SetMaterial(getMaterial(grp.Material, nil))
 		}
 		group.SetTransform(getTransforms(grp.Transform, nil)...)
-		group.Divide(1)
+		group.Divide(2)
 		groups = append(groups, group)
 	}
 	return append(groups, csgs...), usedShapes, usedOBJGroups
+}
+
+func getChild(
+	child *schema.ObjectShell,
+	shapeMap,
+	objMap map[string]object.Object,
+	groupMap map[string]*object.Group,
+	csgMap map[string]*object.Csg,
+	usedShapes,
+	usedOBJGroups *[]string,
+) object.Object {
+	var childObject object.Object
+	var inheritedMaterial *object.Material
+	var inheritedTform *base.Matrix
+
+	if o, ok := shapeMap[child.Name]; ok {
+		childObject = o.DeepCopy()
+		*usedShapes = append(*usedShapes, child.Name)
+		inheritedMaterial = o.GetMaterial()
+		inheritedTform = o.GetTransform()
+	}
+	if csgMap != nil {
+		if o, ok := csgMap[child.Name]; ok {
+			childObject = o.DeepCopy()
+			inheritedMaterial = o.GetMaterial()
+			inheritedTform = o.GetTransform()
+		}
+	}
+	if groupMap != nil {
+		if o, ok := groupMap[child.Name]; ok {
+			childObject = o.DeepCopy()
+			inheritedMaterial = o.GetMaterial()
+			inheritedTform = o.GetTransform()
+		}
+	}
+	if o, ok := objMap[child.Name]; ok {
+		childObject = o.DeepCopy()
+		*usedOBJGroups = append(*usedOBJGroups, child.Name)
+		inheritedMaterial = o.GetMaterial()
+		inheritedTform = o.GetTransform()
+	}
+
+	if child.Material != nil {
+		childObject.SetMaterial(getMaterial(child.Material, inheritedMaterial))
+	}
+	if child.Transform != nil {
+		childObject.SetTransform(getTransforms(child.Transform, inheritedTform)...)
+	}
+	return childObject
 }
 
 // ParseOBJ parses the supplied OBJ files and creates groups
@@ -192,7 +215,7 @@ func ParseOBJ(files []*schema.File) ([]object.Object, map[string]object.Object, 
 			group.SetMaterial(getMaterial(grp.Material, nil))
 		}
 		group.SetTransform(getTransforms(grp.Transform, nil)...)
-		group.Divide(1)
+		group.Divide(2)
 		groups = append(groups, group)
 		objMap[grp.Name] = group
 	}
@@ -248,7 +271,7 @@ func getMaterial(material *schema.Material, inheritedMaterial *object.Material) 
 		objMaterial.Reflective = *material.Reflective
 	}
 	if material.Transparency != nil {
-		objMaterial.Ambient = *material.Transparency
+		objMaterial.Transparency = *material.Transparency
 	}
 	if material.RefractiveIndex != nil {
 		objMaterial.RefractiveIndex = *material.RefractiveIndex

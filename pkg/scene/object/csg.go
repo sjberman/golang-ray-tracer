@@ -33,6 +33,23 @@ func NewCsg(op string, l, r Object) *Csg {
 	return csg
 }
 
+// DeepCopy performs a deep copy of the object to a new object
+func (c *Csg) DeepCopy() Object {
+	left := c.left.DeepCopy()
+	right := c.right.DeepCopy()
+	newObj := NewCsg(c.operation, left, right)
+
+	newMaterial := c.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := c.transform
+	newObj.SetTransform(&newTransform)
+
+	if c.bounds != nil {
+		newObj.bounds = c.bounds.DeepCopy()
+	}
+	return newObj
+}
+
 // Bounds returns the bounding box for the csg of objects
 func (csg *Csg) Bounds() *Bounds {
 	return csg.bounds

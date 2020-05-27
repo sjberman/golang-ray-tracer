@@ -22,6 +22,25 @@ func NewGroup() *Group {
 	}
 }
 
+// DeepCopy performs a deep copy of the object to a new object
+func (g *Group) DeepCopy() Object {
+	newObj := NewGroup()
+	for _, o := range g.Objects {
+		cpy := o.DeepCopy()
+		newObj.Objects = append(newObj.Objects, cpy)
+	}
+
+	newMaterial := g.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := g.transform
+	newObj.SetTransform(&newTransform)
+
+	if g.bounds != nil {
+		newObj.bounds = g.bounds.DeepCopy()
+	}
+	return newObj
+}
+
 // Bounds returns the bounding box for the group of objects
 func (g *Group) Bounds() *Bounds {
 	return g.bounds
@@ -32,6 +51,7 @@ func (g *Group) SetMaterial(material *Material) {
 	for _, o := range g.Objects {
 		o.SetMaterial(material)
 	}
+	g.Material = *material
 }
 
 // calculates the bounds based on supplied objects (for group and csg)

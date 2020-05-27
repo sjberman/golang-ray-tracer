@@ -14,11 +14,11 @@ type Camera struct {
 
 // Csg
 type Csg struct {
-	LeftChild  string       `json:"leftChild"`
+	LeftChild  ObjectShell  `json:"leftChild"`
 	Material   *Material    `json:"material,omitempty"`
 	Name       string       `json:"name"`
 	Operation  string       `json:"operation"`
-	RightChild string       `json:"rightChild"`
+	RightChild ObjectShell  `json:"rightChild"`
 	Transform  []*Transform `json:"transform,omitempty"`
 }
 
@@ -32,10 +32,10 @@ type File struct {
 
 // Group
 type Group struct {
-	Children  []string     `json:"children"`
-	Material  *Material    `json:"material,omitempty"`
-	Name      string       `json:"name,omitempty"`
-	Transform []*Transform `json:"transform,omitempty"`
+	Children  []ObjectShell `json:"children"`
+	Material  *Material     `json:"material,omitempty"`
+	Name      string        `json:"name"`
+	Transform []*Transform  `json:"transform,omitempty"`
 }
 
 // Light
@@ -56,6 +56,13 @@ type Material struct {
 	Shininess       *float64   `json:"shininess,omitempty"`
 	Specular        *float64   `json:"specular,omitempty"`
 	Transparency    *float64   `json:"transparency,omitempty"`
+}
+
+// ObjectShell
+type ObjectShell struct {
+	Material  *Material    `json:"material,omitempty"`
+	Name      string       `json:"name"`
+	Transform []*Transform `json:"transform,omitempty"`
 }
 
 // Pattern

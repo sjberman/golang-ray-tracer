@@ -49,6 +49,26 @@ func NewSmoothTriangle(p1, p2, p3, n1, n2, n3 *base.Tuple) *SmoothTriangle {
 	}
 }
 
+// DeepCopy performs a deep copy of the object to a new object
+func (t *Triangle) DeepCopy() Object {
+	newObj := NewTriangle(t.P1, t.P2, t.P3)
+	newMaterial := t.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := t.transform
+	newObj.SetTransform(&newTransform)
+	return newObj
+}
+
+// DeepCopy performs a deep copy of the object to a new object
+func (t *SmoothTriangle) DeepCopy() Object {
+	newObj := NewSmoothTriangle(t.P1, t.P2, t.P3, t.N1, t.N2, t.N3)
+	newMaterial := t.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := t.transform
+	newObj.SetTransform(&newTransform)
+	return newObj
+}
+
 // Bounds returns the untransformed bounds of a triangle
 func (t *Triangle) Bounds() *Bounds {
 	xMin := utils.Min(t.P1.GetX(), t.P2.GetX(), t.P3.GetX())

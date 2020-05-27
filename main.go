@@ -72,8 +72,7 @@ func getSceneObjects(sceneStruct schema.RayTracerScene) (*scene.Camera, []*scene
 		log.Fatal(err.Error())
 	}
 	// Note: this could be very buggy; needs some testing (may need to de-dupe CSG/GROUPS)
-	groups, usedShapes, usedOBJGroups := internal.CreateGroupsAndCSGs(
-		sceneStruct, shapes, shapeMap, objGroups, objMap)
+	groups, usedShapes, usedOBJGroups := internal.CreateGroupsAndCSGs(sceneStruct, shapeMap, objMap)
 
 	// De-dupe any objects that are included in a group definition
 	shapes = deDupe(shapes, shapeMap, usedShapes)

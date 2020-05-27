@@ -119,8 +119,8 @@
                 "material": { "$ref": "#/definitions/material", "description": "Material of the group." },
                 "children": {
                     "type": "array",
-                    "items": { "type": "string" },
-                    "description": "Names of objects contained in the group."
+                    "items": { "$ref": "#/definitions/objectShell" },
+                    "description": "Objects contained in the group."
                 }
             },
             "required": ["name", "children"]
@@ -139,8 +139,8 @@
                     ],
                     "description": "Type of operation to perform on the objects."
                 },
-                "leftChild": { "type": "string", "description": "Name of the left child object." },
-                "rightChild": { "type": "string", "description": "Name of the right child object." },
+                "leftChild": { "$ref": "#/definitions/objectShell", "description": "Left child object." },
+                "rightChild": { "$ref": "#/definitions/objectShell", "description": "Right child object." },
                 "transform": { "$ref": "#/definitions/transform", "description": "Ways to transform the CSG." },
                 "material": { "$ref": "#/definitions/material", "description": "Material of the CSG." }
             },
@@ -150,6 +150,15 @@
                 "leftChild",
                 "rightChild"
             ]
+        },
+        "objectShell": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" },
+                "transform": { "$ref": "#/definitions/transform" },
+                "material": { "$ref": "#/definitions/material" }
+            },
+            "required": ["name"]
         },
         "transform": {
             "type": "array",

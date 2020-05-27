@@ -20,6 +20,16 @@ func NewCube() *Cube {
 	}
 }
 
+// DeepCopy performs a deep copy of the object to a new object
+func (c *Cube) DeepCopy() Object {
+	newObj := NewCube()
+	newMaterial := c.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := c.transform
+	newObj.SetTransform(&newTransform)
+	return newObj
+}
+
 // Bounds returns the untransformed bounds of a cube
 func (c *Cube) Bounds() *Bounds {
 	return &Bounds{

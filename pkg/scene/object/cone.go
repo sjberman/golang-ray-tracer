@@ -25,6 +25,20 @@ func NewCone() *Cone {
 	}
 }
 
+// DeepCopy performs a deep copy of the object to a new object
+func (c *Cone) DeepCopy() Object {
+	newObj := NewCone()
+	newObj.Closed = c.Closed
+	newObj.Minimum = c.Minimum
+	newObj.Maximum = c.Maximum
+
+	newMaterial := c.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := c.transform
+	newObj.SetTransform(&newTransform)
+	return newObj
+}
+
 // Bounds returns the untransformed bounds of a cone
 func (cone *Cone) Bounds() *Bounds {
 	return &Bounds{

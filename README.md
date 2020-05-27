@@ -20,3 +20,5 @@ Specify a scene file when running:
 ```./gtracer --scene my-scene.yaml```
 
 Both YAML and JSON file types are supported. See the `demo/` directory for some example scenes. The schema for the scene file can be viewed [here](schema/README.md).
+
+**Note: In a scene definition, children listed in either a group or csg need to be defined as a top level object (either as shape, file, group, or csg) in order to be properly referenced.**

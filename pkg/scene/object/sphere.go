@@ -19,6 +19,16 @@ func NewSphere() *Sphere {
 	}
 }
 
+// DeepCopy performs a deep copy of the object to a new object
+func (s *Sphere) DeepCopy() Object {
+	newObj := NewCylinder()
+	newMaterial := s.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := s.transform
+	newObj.SetTransform(&newTransform)
+	return newObj
+}
+
 // Bounds returns the untransformed bounds of a sphere
 func (s *Sphere) Bounds() *Bounds {
 	return &Bounds{

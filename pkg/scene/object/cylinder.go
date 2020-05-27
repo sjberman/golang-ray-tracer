@@ -24,6 +24,20 @@ func NewCylinder() *Cylinder {
 	}
 }
 
+// DeepCopy performs a deep copy of the object to a new object
+func (c *Cylinder) DeepCopy() Object {
+	newObj := NewCylinder()
+	newObj.Closed = c.Closed
+	newObj.Minimum = c.Minimum
+	newObj.Maximum = c.Maximum
+
+	newMaterial := c.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := c.transform
+	newObj.SetTransform(&newTransform)
+	return newObj
+}
+
 // Bounds returns the untransformed bounds of a cylinder
 func (cyl *Cylinder) Bounds() *Bounds {
 	return &Bounds{

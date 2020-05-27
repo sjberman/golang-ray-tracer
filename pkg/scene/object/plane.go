@@ -19,6 +19,16 @@ func NewPlane() *Plane {
 	}
 }
 
+// DeepCopy performs a deep copy of the object to a new object
+func (p *Plane) DeepCopy() Object {
+	newObj := NewPlane()
+	newMaterial := p.Material
+	newObj.SetMaterial(&newMaterial)
+	newTransform := p.transform
+	newObj.SetTransform(&newTransform)
+	return newObj
+}
+
 // Bounds returns the untransformed bounds of a plane
 func (p *Plane) Bounds() *Bounds {
 	return &Bounds{
