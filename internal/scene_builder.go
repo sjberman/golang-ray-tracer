@@ -13,6 +13,26 @@ import (
 	"github.com/sjberman/golang-ray-tracer/schema"
 )
 
+// DeDupe removes duplicate Objects from the objList
+func DeDupe(
+	objList []object.Object,
+	objectMap map[string]object.Object,
+	usedObjects []string,
+) []object.Object {
+	for _, s := range usedObjects {
+		i := 0
+		for _, obj := range objList {
+			if objectMap[s] != obj {
+				objList[i] = obj
+				i++
+				break
+			}
+		}
+		objList = objList[:i]
+	}
+	return objList
+}
+
 // CreateCamera builds a camera object using the spec
 func CreateCamera(cam *schema.Camera) *scene.Camera {
 	fov := cam.FieldOfView * math.Pi / 180
@@ -104,9 +124,9 @@ func CreateGroupsAndCSGs(
 	shapeMap,
 	objMap map[string]object.Object,
 ) ([]object.Object, []string, []string) {
-	var usedShapes, usedOBJGroups []string
-	groupMap := make(map[string]*object.Group)
-	csgMap := make(map[string]*object.Csg)
+	var usedShapes, usedOBJGroups, usedGroups []string
+	groupMap := make(map[string]object.Object)
+	csgMap := make(map[string]object.Object)
 
 	groups := make([]object.Object, 0, len(sceneStruct.Groups))
 	csgs := make([]object.Object, 0, len(sceneStruct.Csgs))
@@ -118,8 +138,8 @@ func CreateGroupsAndCSGs(
 
 	// Create CSGs
 	for _, csg := range sceneStruct.Csgs {
-		left := getChild(&csg.LeftChild, shapeMap, objMap, groupMap, nil, &usedShapes, &usedOBJGroups)
-		right := getChild(&csg.RightChild, shapeMap, objMap, groupMap, nil, &usedShapes, &usedOBJGroups)
+		left := getChild(&csg.LeftChild, shapeMap, objMap, groupMap, nil, &usedShapes, &usedOBJGroups, &usedGroups)
+		right := getChild(&csg.RightChild, shapeMap, objMap, groupMap, nil, &usedShapes, &usedOBJGroups, &usedGroups)
 
 		newCSG := object.NewCsg(csg.Operation, left, right)
 		if csg.Material != nil {
@@ -134,10 +154,10 @@ func CreateGroupsAndCSGs(
 	// Now update groups
 	for _, grp := range sceneStruct.Groups {
 		toAdd := make([]object.Object, 0, len(grp.Children))
-		group := groupMap[grp.Name]
+		group := groupMap[grp.Name].(*object.Group)
 
 		for _, child := range grp.Children {
-			childObj := getChild(&child, shapeMap, objMap, groupMap, csgMap, &usedShapes, &usedOBJGroups)
+			childObj := getChild(&child, shapeMap, objMap, groupMap, csgMap, &usedShapes, &usedOBJGroups, &usedGroups)
 			toAdd = append(toAdd, childObj)
 		}
 		group.Add(toAdd...)
@@ -148,17 +168,21 @@ func CreateGroupsAndCSGs(
 		group.Divide(2)
 		groups = append(groups, group)
 	}
-	return append(groups, csgs...), usedShapes, usedOBJGroups
+	groups = DeDupe(append(groups, csgs...), groupMap, usedGroups)
+	groups = DeDupe(groups, csgMap, usedGroups)
+
+	return groups, usedShapes, usedOBJGroups
 }
 
 func getChild(
 	child *schema.ObjectShell,
 	shapeMap,
-	objMap map[string]object.Object,
-	groupMap map[string]*object.Group,
-	csgMap map[string]*object.Csg,
+	objMap,
+	groupMap,
+	csgMap map[string]object.Object,
 	usedShapes,
-	usedOBJGroups *[]string,
+	usedOBJGroups,
+	usedGroups *[]string,
 ) object.Object {
 	var childObject object.Object
 	var inheritedMaterial *object.Material
@@ -173,6 +197,7 @@ func getChild(
 	if csgMap != nil {
 		if o, ok := csgMap[child.Name]; ok {
 			childObject = o.DeepCopy()
+			*usedGroups = append(*usedGroups, child.Name)
 			inheritedMaterial = o.GetMaterial()
 			inheritedTform = o.GetTransform()
 		}
@@ -180,6 +205,7 @@ func getChild(
 	if groupMap != nil {
 		if o, ok := groupMap[child.Name]; ok {
 			childObject = o.DeepCopy()
+			*usedGroups = append(*usedGroups, child.Name)
 			inheritedMaterial = o.GetMaterial()
 			inheritedTform = o.GetTransform()
 		}

@@ -21,4 +21,7 @@ Specify a scene file when running:
 
 Both YAML and JSON file types are supported. See the `demo/` directory for some example scenes. The schema for the scene file can be viewed [here](schema/README.md).
 
-**Note: In a scene definition, children listed in either a group or csg need to be defined as a top level object (either as shape, file, group, or csg) in order to be properly referenced.**
+**Important Notes:**
+1. In a scene definition, children listed in either a group or csg need to be defined as a top level object (either as shape, file, group, or csg) in order to be properly referenced.
+2. Child objects must be defined before their parents.
+3. As of now, materials defined on a child within nested groups may not be honored. For best results, avoid nested groups and csgs.

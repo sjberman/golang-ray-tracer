@@ -43,25 +43,6 @@ func parseArgs() {
 	}
 }
 
-func deDupe(
-	objList []object.Object,
-	objectMap map[string]object.Object,
-	usedObjects []string,
-) []object.Object {
-	for _, s := range usedObjects {
-		i := 0
-		for _, obj := range objList {
-			if objectMap[s] != obj {
-				objList[i] = obj
-				i++
-				break
-			}
-		}
-		objList = objList[:i]
-	}
-	return objList
-}
-
 // Builds all of the objects defined in the scene
 func getSceneObjects(sceneStruct schema.RayTracerScene) (*scene.Camera, []*scene.PointLight, []object.Object) {
 	camera := internal.CreateCamera(sceneStruct.Camera)
@@ -71,12 +52,12 @@ func getSceneObjects(sceneStruct schema.RayTracerScene) (*scene.Camera, []*scene
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// Note: this could be very buggy; needs some testing (may need to de-dupe CSG/GROUPS)
+
 	groups, usedShapes, usedOBJGroups := internal.CreateGroupsAndCSGs(sceneStruct, shapeMap, objMap)
 
 	// De-dupe any objects that are included in a group definition
-	shapes = deDupe(shapes, shapeMap, usedShapes)
-	objGroups = deDupe(objGroups, objMap, usedOBJGroups)
+	shapes = internal.DeDupe(shapes, shapeMap, usedShapes)
+	objGroups = internal.DeDupe(objGroups, objMap, usedOBJGroups)
 
 	objects := append(shapes, objGroups...)
 	objects = append(objects, groups...)
