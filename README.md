@@ -12,7 +12,7 @@ A [ray tracer](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)) written in 
 ### Building/Running
 
 #### Pre-requisites:
-- go 1.13 installed
+- go 1.17 installed
 
 ```make build``` builds the ray tracer binary.
 
