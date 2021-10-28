@@ -8,13 +8,13 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/object"
 )
 
-// PointLight is a light with no size, existing at a single point
+// PointLight is a light with no size, existing at a single point.
 type PointLight struct {
 	position  *base.Tuple
 	intensity *image.Color
 }
 
-// NewPointLight returns a new PointLight object
+// NewPointLight returns a new PointLight object.
 func NewPointLight(pos *base.Tuple, intensity *image.Color) *PointLight {
 	return &PointLight{
 		position:  pos,
@@ -22,7 +22,7 @@ func NewPointLight(pos *base.Tuple, intensity *image.Color) *PointLight {
 	}
 }
 
-// lighting returns the color at a point based on the light, material, and the eye/normal vectors
+// lighting returns the color at a point based on the light, material, and the eye/normal vectors.
 func lighting(
 	light *PointLight,
 	obj object.Object,

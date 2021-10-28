@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/object"
@@ -154,7 +153,6 @@ var _ = Describe("world tests", func() {
 			hd := prepareComputations(ints[0], r, ints)
 			color := w.refractedColor(hd, 0)
 			Expect(color).To(Equal(image.Black))
-
 		})
 
 		Specify("refracted color under total internal reflection", func() {
@@ -166,7 +164,6 @@ var _ = Describe("world tests", func() {
 			hd := prepareComputations(ints[1], r, ints)
 			color := w.refractedColor(hd, 5)
 			Expect(color).To(Equal(image.Black))
-
 		})
 
 		Specify("refracted color with a refracted ray", func() {
@@ -184,7 +181,6 @@ var _ = Describe("world tests", func() {
 			hd := prepareComputations(ints[2], r, ints)
 			color := w.refractedColor(hd, 5)
 			Expect(color).To(Equal(image.NewColor(0, 0.9988845862650526, 0.04721846378372032)))
-
 		})
 	})
 

@@ -20,10 +20,10 @@ Type: `object`
 			 - _Height of the image._
 			 - Type: `integer`
 			 - <i id="#/properties/camera/properties/height">path: #/properties/camera/properties/height</i>
-		 - <b id="#/properties/camera/properties/field-of-view">field-of-view</b> `required`
+		 - <b id="#/properties/camera/properties/fieldOfView">fieldOfView</b> `required`
 			 - _Field of view in degrees._
 			 - Type: `number`
-			 - <i id="#/properties/camera/properties/field-of-view">path: #/properties/camera/properties/field-of-view</i>
+			 - <i id="#/properties/camera/properties/fieldOfView">path: #/properties/camera/properties/fieldOfView</i>
 		 - <b id="#/properties/camera/properties/from">from</b> `required`
 			 - _Origin of the camera._
 			 - <i id="#/properties/camera/properties/from">path: #/properties/camera/properties/from</i>

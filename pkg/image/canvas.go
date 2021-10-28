@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Canvas represents a grid of pixels for displaying an image
+// Canvas represents a grid of pixels for displaying an image.
 type Canvas struct {
 	width  int
 	height int
@@ -15,12 +15,13 @@ type Canvas struct {
 	pixels [][]Color
 }
 
-// NewCanvas returns a new Canvas object
+// NewCanvas returns a new Canvas object.
 func NewCanvas(width, height int) *Canvas {
 	pixels := make([][]Color, width)
 	for i := range pixels {
 		pixels[i] = make([]Color, height)
 	}
+
 	return &Canvas{
 		width:  width,
 		height: height,
@@ -28,22 +29,23 @@ func NewCanvas(width, height int) *Canvas {
 	}
 }
 
-// WritePixel sets a Canvas's pixel to a color
+// WritePixel sets a Canvas's pixel to a color.
 func (c *Canvas) WritePixel(x, y int, color *Color) {
 	if !(x > c.width-1) && !(y > c.height-1) {
 		c.pixels[x][y] = *color
 	}
 }
 
-// PixelAt returns the Color of a Canvas's pixel
+// PixelAt returns the Color of a Canvas's pixel.
 func (c *Canvas) PixelAt(x, y int) *Color {
 	if !(x > c.width-1) && !(y > c.height-1) {
 		return &c.pixels[x][y]
 	}
+
 	return Black
 }
 
-// returns a PPM (portable pixelmap) string of the canvas
+// returns a PPM (portable pixelmap) string of the canvas.
 func (c *Canvas) toPPM() string {
 	header := fmt.Sprintf("P3\n%d %d\n%d\n", c.width, c.height, 255)
 	var body strings.Builder
@@ -54,7 +56,8 @@ func (c *Canvas) toPPM() string {
 			red, green, blue := scalePixel(color)
 			pixelVal := fmt.Sprintf("%d %d %d ", red, green, blue)
 			// lines should not exceed 70 chars
-			if len(line.String()+pixelVal) > 70 {
+			lineMax := 70
+			if len(line.String()+pixelVal) > lineMax {
 				body.WriteString(strings.TrimRight(line.String(), " ") + "\n")
 				line.Reset()
 			}
@@ -63,27 +66,31 @@ func (c *Canvas) toPPM() string {
 		body.WriteString(strings.TrimRight(line.String(), " ") + "\n")
 	}
 	ppm := header + body.String()
+
 	return ppm
 }
 
-// WriteToFile writes the canvas ppm to a file
+// WriteToFile writes the canvas ppm to a file.
 func (c *Canvas) WriteToFile(name string) error {
 	f, err := os.Create(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating file: %w", err)
 	}
 	defer f.Close()
 
-	_, err = f.WriteString(c.toPPM())
-	return err
+	if _, err := f.WriteString(c.toPPM()); err != nil {
+		return fmt.Errorf("error writing PPM string: %w", err)
+	}
+
+	return nil
 }
 
-// scales a color's values to be from 0 to 255
+// scales a color's values to be from 0 to 255.
 func scalePixel(color *Color) (int64, int64, int64) {
 	return scaleColor(color.red), scaleColor(color.green), scaleColor(color.blue)
 }
 
-// scales a color float value to be between 0 and 255
+// scales a color float value to be between 0 and 255.
 func scaleColor(color float64) int64 {
 	if color < 0 {
 		return 0
@@ -91,5 +98,6 @@ func scaleColor(color float64) int64 {
 	if color > 1 {
 		return 255
 	}
+
 	return int64(math.Round(255 * color))
 }

@@ -7,29 +7,30 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
-// Sphere is a sphere object
+// Sphere is a sphere object.
 type Sphere struct {
 	*object
 }
 
-// NewSphere returns a new Sphere object
+// NewSphere returns a new Sphere object.
 func NewSphere() *Sphere {
 	return &Sphere{
 		object: newObject(),
 	}
 }
 
-// DeepCopy performs a deep copy of the object to a new object
+// DeepCopy performs a deep copy of the object to a new object.
 func (s *Sphere) DeepCopy() Object {
 	newObj := NewCylinder()
 	newMaterial := s.Material
 	newObj.SetMaterial(&newMaterial)
 	newTransform := s.transform
 	newObj.SetTransform(&newTransform)
+
 	return newObj
 }
 
-// Bounds returns the untransformed bounds of a sphere
+// Bounds returns the untransformed bounds of a sphere.
 func (s *Sphere) Bounds() *Bounds {
 	return &Bounds{
 		Minimum: base.NewPoint(-1, -1, -1),
@@ -37,7 +38,7 @@ func (s *Sphere) Bounds() *Bounds {
 	}
 }
 
-// calculates where a ray intersects a sphere
+// calculates where a ray intersects a sphere.
 func (s *Sphere) Intersect(ray *ray.Ray) []*Intersection {
 	r := s.transformRay(ray)
 	// sphere is centered at world origin
@@ -59,17 +60,17 @@ func (s *Sphere) Intersect(ray *ray.Ray) []*Intersection {
 }
 
 // wrapper for the normalAt interface function, using the common normal function
-// with the specific sphere logic embedded
+// with the specific sphere logic embedded.
 func (s *Sphere) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
 	return commonNormalAt(s, objectPoint, hit, sphereNormal)
 }
 
-// sphere-specific calculation of the normal
+// sphere-specific calculation of the normal.
 func sphereNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tuple {
 	return objectPoint.Subtract(base.Origin)
 }
 
-// GlassSphere creates a glass sphere object
+// GlassSphere creates a glass sphere object.
 func GlassSphere() *Sphere {
 	s := NewSphere()
 	s.Diffuse = 0.1
@@ -78,5 +79,6 @@ func GlassSphere() *Sphere {
 	s.RefractiveIndex = 1.5
 	s.Specular = 1
 	s.Shininess = 300
+
 	return s
 }

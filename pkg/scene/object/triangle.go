@@ -1,6 +1,7 @@
 package object
 
 import (
+	"log"
 	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
@@ -8,7 +9,7 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/utils"
 )
 
-// Triangle is a triangle object
+// Triangle is a triangle object.
 type Triangle struct {
 	*object
 	P1, P2, P3   *base.Tuple
@@ -16,13 +17,13 @@ type Triangle struct {
 	normal       *base.Tuple
 }
 
-// SmoothTriangle is a smooth triangle object
+// SmoothTriangle is a smooth triangle object.
 type SmoothTriangle struct {
 	*Triangle
 	N1, N2, N3 *base.Tuple
 }
 
-// NewTriangle returns a new Triangle object
+// NewTriangle returns a new Triangle object.
 func NewTriangle(p1, p2, p3 *base.Tuple) *Triangle {
 	e1 := p2.Subtract(p1)
 	e2 := p3.Subtract(p1)
@@ -39,7 +40,7 @@ func NewTriangle(p1, p2, p3 *base.Tuple) *Triangle {
 	}
 }
 
-// NewSmoothTriangle returns a new SmoothTriangle object
+// NewSmoothTriangle returns a new SmoothTriangle object.
 func NewSmoothTriangle(p1, p2, p3, n1, n2, n3 *base.Tuple) *SmoothTriangle {
 	return &SmoothTriangle{
 		Triangle: NewTriangle(p1, p2, p3),
@@ -49,27 +50,29 @@ func NewSmoothTriangle(p1, p2, p3, n1, n2, n3 *base.Tuple) *SmoothTriangle {
 	}
 }
 
-// DeepCopy performs a deep copy of the object to a new object
+// DeepCopy performs a deep copy of the object to a new object.
 func (t *Triangle) DeepCopy() Object {
 	newObj := NewTriangle(t.P1, t.P2, t.P3)
 	newMaterial := t.Material
 	newObj.SetMaterial(&newMaterial)
 	newTransform := t.transform
 	newObj.SetTransform(&newTransform)
+
 	return newObj
 }
 
-// DeepCopy performs a deep copy of the object to a new object
+// DeepCopy performs a deep copy of the object to a new object.
 func (t *SmoothTriangle) DeepCopy() Object {
 	newObj := NewSmoothTriangle(t.P1, t.P2, t.P3, t.N1, t.N2, t.N3)
 	newMaterial := t.Material
 	newObj.SetMaterial(&newMaterial)
 	newTransform := t.transform
 	newObj.SetTransform(&newTransform)
+
 	return newObj
 }
 
-// Bounds returns the untransformed bounds of a triangle
+// Bounds returns the untransformed bounds of a triangle.
 func (t *Triangle) Bounds() *Bounds {
 	xMin := utils.Min(t.P1.GetX(), t.P2.GetX(), t.P3.GetX())
 	yMin := utils.Min(t.P1.GetY(), t.P2.GetY(), t.P3.GetY())
@@ -85,7 +88,7 @@ func (t *Triangle) Bounds() *Bounds {
 	}
 }
 
-// calculates where a ray intersects a triangle
+// calculates where a ray intersects a triangle.
 func (t *Triangle) Intersect(ray *ray.Ray) []*Intersection {
 	r := t.transformRay(ray)
 	// Muller-Trumbore algorithm
@@ -114,38 +117,44 @@ func (t *Triangle) Intersect(ray *ray.Ray) []*Intersection {
 	intersection := NewIntersection(val, t)
 	intersection.u = u
 	intersection.v = v
+
 	return []*Intersection{intersection}
 }
 
 // wrapper for the normalAt interface function, using the common normal function
-// with the specific triangle logic embedded
+// with the specific triangle logic embedded.
 func (t *Triangle) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
 	return commonNormalAt(t, objectPoint, hit, triangleNormal)
 }
 
-// triangle-specific calculation of the normal
+// triangle-specific calculation of the normal.
 func triangleNormal(objectPoint *base.Tuple, o Object, _ *Intersection) *base.Tuple {
 	return o.(*Triangle).normal
 }
 
-// calculates where a ray intersects a smooth triangle
+// calculates where a ray intersects a smooth triangle.
 func (t *SmoothTriangle) Intersect(ray *ray.Ray) []*Intersection {
 	intersection := t.Triangle.Intersect(ray)
 	if len(intersection) > 0 {
 		// replace Triangle object with SmoothTriangle object
 		intersection[0].Object = t
 	}
+
 	return intersection
 }
 
 // wrapper for the normalAt interface function, using the common normal function
-// with the specific smooth triangle logic embedded
+// with the specific smooth triangle logic embedded.
 func (t *SmoothTriangle) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
 	return commonNormalAt(t, objectPoint, hit, smoothTriangleNormal)
 }
 
-// smoothTriangle-specific calculation of the normal
+// smoothTriangle-specific calculation of the normal.
 func smoothTriangleNormal(objectPoint *base.Tuple, o Object, hit *Intersection) *base.Tuple {
-	t := o.(*SmoothTriangle)
+	t, ok := o.(*SmoothTriangle)
+	if !ok {
+		log.Fatal("failed type assertion for smooth triangle")
+	}
+
 	return t.N2.Multiply(hit.u).Add(t.N3.Multiply(hit.v).Add(t.N1.Multiply((1 - hit.u - hit.v))))
 }

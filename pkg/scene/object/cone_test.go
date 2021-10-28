@@ -6,7 +6,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
@@ -20,7 +19,8 @@ var _ = Describe("cone tests", func() {
 		Expect(c.Closed).To(BeFalse())
 		Expect(c.Bounds()).To(Equal(&Bounds{
 			Minimum: base.NewPoint(-1, c.Minimum, -1),
-			Maximum: base.NewPoint(1, c.Maximum, 1)}))
+			Maximum: base.NewPoint(1, c.Maximum, 1),
+		}))
 	})
 
 	It("calculates a cone intersection", func() {

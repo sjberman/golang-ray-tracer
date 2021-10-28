@@ -8,29 +8,30 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/utils"
 )
 
-// Cube is a cube object
+// Cube is a cube object.
 type Cube struct {
 	*object
 }
 
-// NewCube returns a new Cube object
+// NewCube returns a new Cube object.
 func NewCube() *Cube {
 	return &Cube{
 		object: newObject(),
 	}
 }
 
-// DeepCopy performs a deep copy of the object to a new object
+// DeepCopy performs a deep copy of the object to a new object.
 func (c *Cube) DeepCopy() Object {
 	newObj := NewCube()
 	newMaterial := c.Material
 	newObj.SetMaterial(&newMaterial)
 	newTransform := c.transform
 	newObj.SetTransform(&newTransform)
+
 	return newObj
 }
 
-// Bounds returns the untransformed bounds of a cube
+// Bounds returns the untransformed bounds of a cube.
 func (c *Cube) Bounds() *Bounds {
 	return &Bounds{
 		Minimum: base.NewPoint(-1, -1, -1),
@@ -38,7 +39,7 @@ func (c *Cube) Bounds() *Bounds {
 	}
 }
 
-// calculates where a ray intersects a cube
+// calculates where a ray intersects a cube.
 func (c *Cube) Intersect(ray *ray.Ray) []*Intersection {
 	r := c.transformRay(ray)
 	// find largest minimum t value and smallest maximum t value for each axis
@@ -56,16 +57,17 @@ func (c *Cube) Intersect(ray *ray.Ray) []*Intersection {
 	if tMin > tMax {
 		return []*Intersection{}
 	}
+
 	return []*Intersection{NewIntersection(tMin, c), NewIntersection(tMax, c)}
 }
 
 // wrapper for the normalAt interface function, using the common normal function
-// with the specific cube logic embedded
+// with the specific cube logic embedded.
 func (c *Cube) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
 	return commonNormalAt(c, objectPoint, hit, cubeNormal)
 }
 
-// cube-specific calculation of the normal
+// cube-specific calculation of the normal.
 func cubeNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tuple {
 	absX := math.Abs(objectPoint.GetX())
 	absY := math.Abs(objectPoint.GetY())
@@ -76,10 +78,11 @@ func cubeNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tuple 
 	} else if maxC == absY {
 		return base.NewVector(0, objectPoint.GetY(), 0)
 	}
+
 	return base.NewVector(0, 0, objectPoint.GetZ())
 }
 
-// checkAxis finds the min and max intersection values for the axis
+// checkAxis finds the min and max intersection values for the axis.
 func checkAxis(origin, direction, min, max float64) (float64, float64) {
 	var tMin, tMax float64
 	tMinNumerator := min - origin
@@ -96,9 +99,7 @@ func checkAxis(origin, direction, min, max float64) (float64, float64) {
 	}
 
 	if tMin > tMax {
-		t := tMin
-		tMin = tMax
-		tMax = t
+		tMin, tMax = tMax, tMin
 	}
 
 	return tMin, tMax

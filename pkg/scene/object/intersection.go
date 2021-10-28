@@ -2,14 +2,14 @@ package object
 
 import "sort"
 
-// Intersection keeps track of the value and object of an intersection
+// Intersection keeps track of the value and object of an intersection.
 type Intersection struct {
 	Value  float64
 	Object Object
 	u, v   float64 // only used for triangles
 }
 
-// NewIntersection returns a new Intersection object
+// NewIntersection returns a new Intersection object.
 func NewIntersection(value float64, object Object) *Intersection {
 	return &Intersection{
 		Value:  value,
@@ -17,7 +17,7 @@ func NewIntersection(value float64, object Object) *Intersection {
 	}
 }
 
-// Hit returns the closest intersection to the origin
+// Hit returns the closest intersection to the origin.
 func Hit(intersections []*Intersection) *Intersection {
 	if len(intersections) == 0 {
 		return nil
@@ -34,18 +34,20 @@ func Hit(intersections []*Intersection) *Intersection {
 			min = i
 		}
 	}
+
 	return min
 }
 
-// sorts a list of intersections based on value
+// sorts a list of intersections based on value.
 func sortIntersections(ints []*Intersection) []*Intersection {
 	sort.Slice(ints, func(i, j int) bool {
 		return ints[i].Value < ints[j].Value
 	})
+
 	return ints
 }
 
-// Intersections returns a combined list of the supplied intersections
+// Intersections returns a combined list of the supplied intersections.
 func Intersections(intersections ...*Intersection) []*Intersection {
 	return sortIntersections(intersections)
 }

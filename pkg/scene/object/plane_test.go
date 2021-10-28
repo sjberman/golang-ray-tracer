@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
@@ -16,7 +15,8 @@ var _ = Describe("plane tests", func() {
 		testNewObject(p)
 		Expect(p.Bounds()).To(Equal(&Bounds{
 			Minimum: base.NewPoint(math.Inf(-1), 0, math.Inf(-1)),
-			Maximum: base.NewPoint(math.Inf(1), 0, math.Inf(1))}))
+			Maximum: base.NewPoint(math.Inf(1), 0, math.Inf(1)),
+		}))
 	})
 
 	It("calculates a plane intersection", func() {

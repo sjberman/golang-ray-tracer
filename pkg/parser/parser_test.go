@@ -25,6 +25,7 @@ func setup(contents string) *Parser {
 	Expect(err).ToNot(HaveOccurred())
 	parser, err := Parse(file.Name())
 	Expect(err).ToNot(HaveOccurred())
+
 	return parser
 }
 
@@ -68,8 +69,10 @@ v 1 1 0
 
 f 1 2 3
 f 1 3 4`)
-		t1 := parser.groups[0].Objects[0].(*object.Triangle)
-		t2 := parser.groups[0].Objects[1].(*object.Triangle)
+		t1, ok := parser.groups[0].Objects[0].(*object.Triangle)
+		Expect(ok).To(BeTrue())
+		t2, ok := parser.groups[0].Objects[1].(*object.Triangle)
+		Expect(ok).To(BeTrue())
 		Expect(t1.P1).To(Equal(parser.vertices[1]))
 		Expect(t1.P2).To(Equal(parser.vertices[2]))
 		Expect(t1.P3).To(Equal(parser.vertices[3]))
@@ -88,8 +91,10 @@ vn 0 1 0
 
 f 1//3 2//1 3//2
 f 1/0/3 2/102/1 3/14/2`)
-		st1 := parser.groups[0].Objects[0].(*object.SmoothTriangle)
-		st2 := parser.groups[0].Objects[1].(*object.SmoothTriangle)
+		st1, ok := parser.groups[0].Objects[0].(*object.SmoothTriangle)
+		Expect(ok).To(BeTrue())
+		st2, ok := parser.groups[0].Objects[1].(*object.SmoothTriangle)
+		Expect(ok).To(BeTrue())
 		Expect(st1.P1).To(Equal(parser.vertices[1]))
 		Expect(st1.P2).To(Equal(parser.vertices[2]))
 		Expect(st1.P3).To(Equal(parser.vertices[3]))
@@ -108,9 +113,12 @@ v 1 1 0
 v 0 2 0
 
 f 1 2 3 4 5`)
-		t1 := parser.groups[0].Objects[0].(*object.Triangle)
-		t2 := parser.groups[0].Objects[1].(*object.Triangle)
-		t3 := parser.groups[0].Objects[2].(*object.Triangle)
+		t1, ok := parser.groups[0].Objects[0].(*object.Triangle)
+		Expect(ok).To(BeTrue())
+		t2, ok := parser.groups[0].Objects[1].(*object.Triangle)
+		Expect(ok).To(BeTrue())
+		t3, ok := parser.groups[0].Objects[2].(*object.Triangle)
+		Expect(ok).To(BeTrue())
 		Expect(t1.P1).To(Equal(parser.vertices[1]))
 		Expect(t1.P2).To(Equal(parser.vertices[2]))
 		Expect(t1.P3).To(Equal(parser.vertices[3]))
@@ -132,8 +140,10 @@ g FirstGroup
 f 1 2 3
 g SecondGroup
 f 1 3 4`)
-		t1 := parser.groups[0].Objects[0].(*object.Triangle)
-		t2 := parser.groups[1].Objects[0].(*object.Triangle)
+		t1, ok := parser.groups[0].Objects[0].(*object.Triangle)
+		Expect(ok).To(BeTrue())
+		t2, ok := parser.groups[1].Objects[0].(*object.Triangle)
+		Expect(ok).To(BeTrue())
 		Expect(t1.P1).To(Equal(parser.vertices[1]))
 		Expect(t1.P2).To(Equal(parser.vertices[2]))
 		Expect(t1.P3).To(Equal(parser.vertices[3]))

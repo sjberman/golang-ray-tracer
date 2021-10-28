@@ -3,7 +3,6 @@ package object
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
@@ -128,12 +127,18 @@ var _ = Describe("csg tests", func() {
 		csg := NewCsg(difference, g1, g2)
 		csg.Divide(1)
 
-		lgrp := csg.left.(*Group)
-		lgrp1 := lgrp.Objects[0].(*Group)
-		lgrp2 := lgrp.Objects[1].(*Group)
-		rgrp := csg.right.(*Group)
-		rgrp1 := rgrp.Objects[0].(*Group)
-		rgrp2 := rgrp.Objects[1].(*Group)
+		lgrp, ok := csg.left.(*Group)
+		Expect(ok).To(BeTrue())
+		lgrp1, ok := lgrp.Objects[0].(*Group)
+		Expect(ok).To(BeTrue())
+		lgrp2, ok := lgrp.Objects[1].(*Group)
+		Expect(ok).To(BeTrue())
+		rgrp, ok := csg.right.(*Group)
+		Expect(ok).To(BeTrue())
+		rgrp1, ok := rgrp.Objects[0].(*Group)
+		Expect(ok).To(BeTrue())
+		rgrp2, ok := rgrp.Objects[1].(*Group)
+		Expect(ok).To(BeTrue())
 
 		Expect(lgrp1.Objects[0]).To(Equal(s1))
 		Expect(lgrp2.Objects[0]).To(Equal(s2))

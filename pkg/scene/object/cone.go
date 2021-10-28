@@ -1,13 +1,14 @@
 package object
 
 import (
+	"log"
 	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
-// Cone is a cone object
+// Cone is a cone object.
 type Cone struct {
 	*object
 	*Cylinder
@@ -15,7 +16,7 @@ type Cone struct {
 	Closed           bool
 }
 
-// NewCylinder returns a new Cone object
+// NewCylinder returns a new Cone object.
 func NewCone() *Cone {
 	return &Cone{
 		object:  newObject(),
@@ -25,21 +26,22 @@ func NewCone() *Cone {
 	}
 }
 
-// DeepCopy performs a deep copy of the object to a new object
-func (c *Cone) DeepCopy() Object {
+// DeepCopy performs a deep copy of the object to a new object.
+func (cone *Cone) DeepCopy() Object {
 	newObj := NewCone()
-	newObj.Closed = c.Closed
-	newObj.Minimum = c.Minimum
-	newObj.Maximum = c.Maximum
+	newObj.Closed = cone.Closed
+	newObj.Minimum = cone.Minimum
+	newObj.Maximum = cone.Maximum
 
-	newMaterial := c.Material
+	newMaterial := cone.Material
 	newObj.SetMaterial(&newMaterial)
-	newTransform := c.transform
+	newTransform := cone.transform
 	newObj.SetTransform(&newTransform)
+
 	return newObj
 }
 
-// Bounds returns the untransformed bounds of a cone
+// Bounds returns the untransformed bounds of a cone.
 func (cone *Cone) Bounds() *Bounds {
 	return &Bounds{
 		Minimum: base.NewPoint(-1, cone.Minimum, -1),
@@ -47,7 +49,7 @@ func (cone *Cone) Bounds() *Bounds {
 	}
 }
 
-// calculates where a ray intersects a cone
+// calculates where a ray intersects a cone.
 func (cone *Cone) Intersect(ray *ray.Ray) []*Intersection {
 	r := cone.transformRay(ray)
 	// quadratic formula to determine intersection
@@ -77,9 +79,7 @@ func (cone *Cone) Intersect(ray *ray.Ray) []*Intersection {
 	t2 := (-b + math.Sqrt(discriminant)) / (2 * a)
 
 	if t1 > t2 {
-		t := t1
-		t1 = t2
-		t2 = t
+		t1, t2 = t2, t1
 	}
 
 	y0 := r.Origin.GetY() + t1*r.Direction.GetY()
@@ -95,14 +95,17 @@ func (cone *Cone) Intersect(ray *ray.Ray) []*Intersection {
 }
 
 // wrapper for the normalAt interface function, using the common normal function
-// with the specific cone logic embedded
+// with the specific cone logic embedded.
 func (cone *Cone) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
 	return commonNormalAt(cone, objectPoint, hit, coneNormal)
 }
 
-// cone-specific calculation of the normal
+// cone-specific calculation of the normal.
 func coneNormal(objectPoint *base.Tuple, o Object, _ *Intersection) *base.Tuple {
-	cone := o.(*Cone)
+	cone, ok := o.(*Cone)
+	if !ok {
+		log.Fatal("failed type assertion for cylinder")
+	}
 	x := objectPoint.GetX()
 	y := objectPoint.GetY()
 	z := objectPoint.GetZ()
@@ -117,17 +120,19 @@ func coneNormal(objectPoint *base.Tuple, o Object, _ *Intersection) *base.Tuple 
 	if y > 0 {
 		yNormal *= -1
 	}
+
 	return base.NewVector(x, yNormal, z)
 }
 
-// checks to see if the intersection at t is within a radius of y*y from the y axis
+// checks to see if the intersection at t is within a radius of y*y from the y axis.
 func (cone *Cone) checkCap(r *ray.Ray, t, y float64) bool {
 	x := r.Origin.GetX() + t*r.Direction.GetX()
 	z := r.Origin.GetZ() + t*r.Direction.GetZ()
+
 	return (x*x + z*z) <= y*y
 }
 
-// checks if a ray intersects the caps of a closed cone
+// checks if a ray intersects the caps of a closed cone.
 func (cone *Cone) intersectCaps(r *ray.Ray, ints []*Intersection) []*Intersection {
 	// caps only matter if the cylinder is closed, and might possibly be intersected
 	if !cone.Closed || math.Abs(r.Direction.GetY()) < base.Epsilon {
@@ -144,5 +149,6 @@ func (cone *Cone) intersectCaps(r *ray.Ray, ints []*Intersection) []*Intersectio
 	if cone.checkCap(r, t, cone.Maximum) {
 		ints = append(ints, NewIntersection(t, cone))
 	}
+
 	return ints
 }

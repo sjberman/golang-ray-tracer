@@ -3,7 +3,6 @@ package object
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
@@ -83,10 +82,13 @@ var _ = Describe("group tests", func() {
 		g.Add(s1, s2, s3)
 		g.Divide(1)
 		Expect(g.Objects[0]).To(Equal(s3))
-		subgroup := g.Objects[1].(*Group)
+		subgroup, ok := g.Objects[1].(*Group)
+		Expect(ok).To(BeTrue())
 		Expect(len(subgroup.Objects)).To(Equal(2))
-		g1 := subgroup.Objects[0].(*Group)
-		g2 := subgroup.Objects[1].(*Group)
+		g1, ok := subgroup.Objects[0].(*Group)
+		Expect(ok).To(BeTrue())
+		g2, ok := subgroup.Objects[1].(*Group)
+		Expect(ok).To(BeTrue())
 		Expect(g1.Objects[0]).To(Equal(s1))
 		Expect(g2.Objects[0]).To(Equal(s2))
 
@@ -104,8 +106,10 @@ var _ = Describe("group tests", func() {
 		Expect(g.Objects[0]).To(Equal(subgroup))
 		Expect(g.Objects[1]).To(Equal(s4))
 		Expect(len(subgroup.Objects)).To(Equal(2))
-		g1 = subgroup.Objects[0].(*Group)
-		g2 = subgroup.Objects[1].(*Group)
+		g1, ok = subgroup.Objects[0].(*Group)
+		Expect(ok).To(BeTrue())
+		g2, ok = subgroup.Objects[1].(*Group)
+		Expect(ok).To(BeTrue())
 		Expect(g1.Objects[0]).To(Equal(s1))
 		Expect(g2.Objects).To(Equal([]Object{s2, s3}))
 	})
@@ -132,7 +136,8 @@ var _ = Describe("group tests", func() {
 		g := NewGroup()
 		g.makeSubgroup([]Object{s1, s2})
 		Expect(len(g.Objects)).To(Equal(1))
-		subgroup := g.Objects[0].(*Group)
+		subgroup, ok := g.Objects[0].(*Group)
+		Expect(ok).To(BeTrue())
 		Expect(subgroup.Objects).To(Equal([]Object{s1, s2}))
 	})
 })

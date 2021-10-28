@@ -7,29 +7,30 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
-// Plane is a plane object
+// Plane is a plane object.
 type Plane struct {
 	*object
 }
 
-// NewPlane returns a new Plane object
+// NewPlane returns a new Plane object.
 func NewPlane() *Plane {
 	return &Plane{
 		object: newObject(),
 	}
 }
 
-// DeepCopy performs a deep copy of the object to a new object
+// DeepCopy performs a deep copy of the object to a new object.
 func (p *Plane) DeepCopy() Object {
 	newObj := NewPlane()
 	newMaterial := p.Material
 	newObj.SetMaterial(&newMaterial)
 	newTransform := p.transform
 	newObj.SetTransform(&newTransform)
+
 	return newObj
 }
 
-// Bounds returns the untransformed bounds of a plane
+// Bounds returns the untransformed bounds of a plane.
 func (p *Plane) Bounds() *Bounds {
 	return &Bounds{
 		Minimum: base.NewPoint(math.Inf(-1), 0, math.Inf(-1)),
@@ -37,7 +38,7 @@ func (p *Plane) Bounds() *Bounds {
 	}
 }
 
-// calculates where a ray intersects a plane
+// calculates where a ray intersects a plane.
 func (p *Plane) Intersect(ray *ray.Ray) []*Intersection {
 	r := p.transformRay(ray)
 	// parallel to plane (y == 0)
@@ -46,16 +47,17 @@ func (p *Plane) Intersect(ray *ray.Ray) []*Intersection {
 	}
 
 	t := -r.Origin.GetY() / r.Direction.GetY()
+
 	return []*Intersection{NewIntersection(t, p)}
 }
 
 // wrapper for the normalAt interface function, using the common normal function
-// with the specific plane logic embedded
+// with the specific plane logic embedded.
 func (p *Plane) NormalAt(objectPoint *base.Tuple, hit *Intersection) *base.Tuple {
 	return commonNormalAt(p, objectPoint, hit, planeNormal)
 }
 
-// plane-specific calculation of the normal
+// plane-specific calculation of the normal.
 func planeNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tuple {
 	return base.NewVector(0, 1, 0)
 }

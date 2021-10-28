@@ -3,7 +3,6 @@ package object
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
@@ -26,7 +25,8 @@ var _ = Describe("triangle tests", func() {
 
 		Expect(t.Bounds()).To(Equal(&Bounds{
 			Minimum: base.NewPoint(-1, 0, 0),
-			Maximum: base.NewPoint(1, 1, 0)}))
+			Maximum: base.NewPoint(1, 1, 0),
+		}))
 	})
 
 	It("calculates a triangle intersection", func() {

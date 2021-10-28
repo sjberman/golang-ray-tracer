@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/object"
 )
 
-// Parser is an OBJ file reader
+// Parser is an OBJ file reader.
 type Parser struct {
 	ignoredLines int
 	vertices     map[int]*base.Tuple
@@ -19,17 +20,18 @@ type Parser struct {
 	groups       []object.Group
 }
 
-// Parse reads and parses an OBJ file and returns a Parser
+// Parse reads and parses an OBJ file and returns a Parser.
 func Parse(filename string) (*Parser, error) {
 	p := &Parser{
 		ignoredLines: 0,
 		vertices:     make(map[int]*base.Tuple),
 		normals:      make(map[int]*base.Tuple),
+		groups:       []object.Group{},
 	}
 
 	file, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error opening file: %w", err)
 	}
 	defer file.Close()
 
@@ -42,6 +44,7 @@ func Parse(filename string) (*Parser, error) {
 		line := scanner.Text()
 		if !re.MatchString(line) {
 			p.ignoredLines++
+
 			continue
 		}
 		split := strings.Fields(line)
@@ -52,7 +55,7 @@ func Parse(filename string) (*Parser, error) {
 			for i := 1; i < 4; i++ {
 				p, err := strconv.ParseFloat(split[i], 64)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("error parsing float value: %w", err)
 				}
 				points = append(points, p)
 			}
@@ -64,7 +67,7 @@ func Parse(filename string) (*Parser, error) {
 			for i := 1; i < 4; i++ {
 				p, err := strconv.ParseFloat(split[i], 64)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("error parsing float value: %w", err)
 				}
 				vals = append(vals, p)
 			}
@@ -116,16 +119,18 @@ func Parse(filename string) (*Parser, error) {
 	for idx, grp := range triangles {
 		p.groups[idx].Add(grp...)
 	}
+
 	return p, nil
 }
 
-// GetGroup returns the single Group instance of all objects in the OBJ file
+// GetGroup returns the single Group instance of all objects in the OBJ file.
 func (p *Parser) GetGroup() *object.Group {
 	group := object.NewGroup()
 	for _, o := range p.groups {
 		o := o
 		group.Add(&o)
 	}
+
 	return group
 }
 
@@ -135,10 +140,11 @@ func getFields(list []string, index int) (int, int, error) {
 	faceSplit := strings.Split(list[index], "/")
 	vIdx, err := strconv.Atoi(faceSplit[0])
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, fmt.Errorf("error converting string to int: %w", err)
 	}
 	if len(faceSplit) > 1 {
 		nIdx, err = strconv.Atoi(faceSplit[2])
 	}
+
 	return vIdx, nIdx, err
 }

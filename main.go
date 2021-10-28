@@ -12,17 +12,18 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-	"github.com/xeipuuv/gojsonschema"
-
 	"github.com/sjberman/golang-ray-tracer/internal"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/object"
 	"github.com/sjberman/golang-ray-tracer/schema"
+	"github.com/xeipuuv/gojsonschema"
 )
 
-var schemaFile = flag.String("schema", "schema/schema.json", "Relative path to the schema.json file")
-var sceneFile = flag.String("scene", "", "JSON or YAML file containing scene info")
-var outputFile = flag.String("output", "image.ppm", "Image output file (.ppm)")
+var (
+	schemaFile = flag.String("schema", "schema/schema.json", "Relative path to the schema.json file")
+	sceneFile  = flag.String("scene", "", "JSON or YAML file containing scene info")
+	outputFile = flag.String("output", "image.ppm", "Image output file (.ppm)")
+)
 
 func parseArgs() {
 	flag.Parse()
@@ -43,7 +44,7 @@ func parseArgs() {
 	}
 }
 
-// Builds all of the objects defined in the scene
+// Builds all of the objects defined in the scene.
 func getSceneObjects(sceneStruct schema.RayTracerScene) (*scene.Camera, []*scene.PointLight, []object.Object) {
 	camera := internal.CreateCamera(sceneStruct.Camera)
 	lights := internal.CreateLights(sceneStruct.Lights)

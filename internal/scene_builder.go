@@ -13,7 +13,9 @@ import (
 	"github.com/sjberman/golang-ray-tracer/schema"
 )
 
-// DeDupe removes duplicate Objects from the objList
+const divisionThreshold = 2
+
+// DeDupe removes duplicate Objects from the objList.
 func DeDupe(
 	objList []object.Object,
 	objectMap map[string]object.Object,
@@ -25,15 +27,17 @@ func DeDupe(
 			if objectMap[s] != obj {
 				objList[i] = obj
 				i++
+
 				break
 			}
 		}
 		objList = objList[:i]
 	}
+
 	return objList
 }
 
-// CreateCamera builds a camera object using the spec
+// CreateCamera builds a camera object using the spec.
 func CreateCamera(cam *schema.Camera) *scene.Camera {
 	fov := cam.FieldOfView * math.Pi / 180
 	camera := scene.NewCamera(cam.Width, cam.Height, fov)
@@ -43,10 +47,11 @@ func CreateCamera(cam *schema.Camera) *scene.Camera {
 	up := base.NewPoint(cam.Up[0], cam.Up[1], cam.Up[2])
 
 	camera.SetTransform(base.ViewTransform(from, to, up))
+
 	return camera
 }
 
-// CreateLights builds the light objects using the spec
+// CreateLights builds the light objects using the spec.
 func CreateLights(lights []*schema.Light) []*scene.PointLight {
 	newLights := []*scene.PointLight{}
 	for _, light := range lights {
@@ -54,10 +59,11 @@ func CreateLights(lights []*schema.Light) []*scene.PointLight {
 		color := image.NewColor(light.Intensity[0], light.Intensity[1], light.Intensity[2])
 		newLights = append(newLights, scene.NewPointLight(point, color))
 	}
+
 	return newLights
 }
 
-// CreateShapes builds the shape objects using the spec
+// CreateShapes builds the shape objects using the spec.
 func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]object.Object) {
 	objs := []object.Object{}
 	shapeMap := make(map[string]object.Object)
@@ -115,10 +121,11 @@ func CreateShapes(shapes []*schema.Shape) ([]object.Object, map[string]object.Ob
 		objs = append(objs, obj)
 		shapeMap[shape.Name] = obj
 	}
+
 	return objs, shapeMap
 }
 
-// CreateGroupsAndCSGs builds the group and csg objects using the spec
+// CreateGroupsAndCSGs builds the group and csg objects using the spec.
 func CreateGroupsAndCSGs(
 	sceneStruct schema.RayTracerScene,
 	shapeMap,
@@ -146,7 +153,7 @@ func CreateGroupsAndCSGs(
 			newCSG.SetMaterial(getMaterial(csg.Material, nil))
 		}
 		newCSG.SetTransform(getTransforms(csg.Transform, nil)...)
-		newCSG.Divide(2)
+		newCSG.Divide(divisionThreshold)
 		csgMap[csg.Name] = newCSG
 		csgs = append(csgs, newCSG)
 	}
@@ -154,9 +161,13 @@ func CreateGroupsAndCSGs(
 	// Now update groups
 	for _, grp := range sceneStruct.Groups {
 		toAdd := make([]object.Object, 0, len(grp.Children))
-		group := groupMap[grp.Name].(*object.Group)
+		group, ok := groupMap[grp.Name].(*object.Group)
+		if !ok {
+			log.Fatal("failed type assertion for Group")
+		}
 
 		for _, child := range grp.Children {
+			child := child
 			childObj := getChild(&child, shapeMap, objMap, groupMap, csgMap, &usedShapes, &usedOBJGroups, &usedGroups)
 			toAdd = append(toAdd, childObj)
 		}
@@ -165,7 +176,7 @@ func CreateGroupsAndCSGs(
 			group.SetMaterial(getMaterial(grp.Material, nil))
 		}
 		group.SetTransform(getTransforms(grp.Transform, nil)...)
-		group.Divide(2)
+		group.Divide(divisionThreshold)
 		groups = append(groups, group)
 	}
 	groups = DeDupe(append(groups, csgs...), groupMap, usedGroups)
@@ -223,10 +234,11 @@ func getChild(
 	if child.Transform != nil {
 		childObject.SetTransform(getTransforms(child.Transform, inheritedTform)...)
 	}
+
 	return childObject
 }
 
-// ParseOBJ parses the supplied OBJ files and creates groups
+// ParseOBJ parses the supplied OBJ files and creates groups.
 func ParseOBJ(files []*schema.File) ([]object.Object, map[string]object.Object, error) {
 	groups := make([]object.Object, 0, len(files))
 	objMap := make(map[string]object.Object)
@@ -234,17 +246,18 @@ func ParseOBJ(files []*schema.File) ([]object.Object, map[string]object.Object, 
 	for _, grp := range files {
 		parser, err := parser.Parse(grp.File)
 		if err != nil {
-			return nil, nil, fmt.Errorf("error parsing OBJ file: %v", err)
+			return nil, nil, fmt.Errorf("error parsing OBJ file: %w", err)
 		}
 		group := parser.GetGroup()
 		if grp.Material != nil {
 			group.SetMaterial(getMaterial(grp.Material, nil))
 		}
 		group.SetTransform(getTransforms(grp.Transform, nil)...)
-		group.Divide(2)
+		group.Divide(divisionThreshold)
 		groups = append(groups, group)
 		objMap[grp.Name] = group
 	}
+
 	return groups, objMap, nil
 }
 
@@ -305,6 +318,7 @@ func getMaterial(material *schema.Material, inheritedMaterial *object.Material) 
 	if material.Shadow != nil {
 		objMaterial.Shadow = *material.Shadow
 	}
+
 	return &objMaterial
 }
 
@@ -348,5 +362,6 @@ func getTransforms(transforms []*schema.Transform, inheritedTform *base.Matrix) 
 			t = append(t, base.Shear(xy, xz, yx, yz, zx, zy))
 		}
 	}
+
 	return t
 }

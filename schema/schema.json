@@ -12,7 +12,7 @@
             "properties": {
                 "width": { "type": "integer", "description": "Width of the image." },
                 "height": { "type": "integer", "description": "Height of the image." },
-                "field-of-view": { "type": "number", "description": "Field of view in degrees." },
+                "fieldOfView": { "type": "number", "description": "Field of view in degrees." },
                 "from": { "$ref": "#/definitions/tuple", "description": "Origin of the camera." },
                 "to": { "$ref": "#/definitions/tuple", "description": "Where the camera looks." },
                 "up": { "$ref": "#/definitions/tuple", "description": "The up direction." }
@@ -20,7 +20,7 @@
             "required": [
                 "width",
                 "height",
-                "field-of-view",
+                "fieldOfView",
                 "from",
                 "to",
                 "up"

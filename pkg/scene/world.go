@@ -10,16 +10,16 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
-// The total number of recursive reflection traces allowed
+// The total number of recursive reflection traces allowed.
 const remainingReflections = 4
 
-// World represents the collection of all objects in a scene
+// World represents the collection of all objects in a scene.
 type World struct {
 	lights  []*PointLight
 	objects []object.Object
 }
 
-// NewWorld returns a new World object
+// NewWorld returns a new World object.
 func NewWorld(lights []*PointLight, objects []object.Object) *World {
 	return &World{
 		lights:  lights,
@@ -27,7 +27,7 @@ func NewWorld(lights []*PointLight, objects []object.Object) *World {
 	}
 }
 
-// ColorAt returns the color of a specific ray intersection in the world
+// ColorAt returns the color of a specific ray intersection in the world.
 func (w *World) ColorAt(r *ray.Ray, remaining int) *image.Color {
 	intersections := w.intersect(r)
 	hit := object.Hit(intersections)
@@ -35,10 +35,11 @@ func (w *World) ColorAt(r *ray.Ray, remaining int) *image.Color {
 		return image.Black
 	}
 	hd := prepareComputations(hit, r, intersections)
+
 	return w.shadeHit(hd, remaining)
 }
 
-// shadeHit returns the color at the intersection encapsulated by hitData
+// shadeHit returns the color at the intersection encapsulated by hitData.
 func (w *World) shadeHit(hd *hitData, remaining int) *image.Color {
 	surface := image.Black
 	for _, light := range w.lights {
@@ -54,12 +55,14 @@ func (w *World) shadeHit(hd *hitData, remaining int) *image.Color {
 		reflectance := schlick(hd)
 		reflect := reflected.Multiply(reflectance)
 		refract := refracted.Multiply(1 - reflectance)
+
 		return surface.Add(reflect).Add(refract)
 	}
+
 	return surface.Add(reflected).Add(refracted)
 }
 
-// isShadowed returns if a point is in a shadow
+// isShadowed returns if a point is in a shadow.
 func (w *World) isShadowed(light *PointLight, point *base.Tuple) bool {
 	v := light.position.Subtract(point)
 	distance := v.Magnitude()
@@ -71,19 +74,21 @@ func (w *World) isShadowed(light *PointLight, point *base.Tuple) bool {
 	if hit != nil && hit.Value < distance && hit.Object.GetMaterial().Shadow {
 		return true
 	}
+
 	return false
 }
 
-// intersect returns all the intersections between a ray and the objects in the world
+// intersect returns all the intersections between a ray and the objects in the world.
 func (w *World) intersect(r *ray.Ray) []*object.Intersection {
 	ints := make([]*object.Intersection, 0, 2*len(w.objects))
 	for _, o := range w.objects {
 		ints = append(ints, o.Intersect(r)...)
 	}
+
 	return object.Intersections(ints...)
 }
 
-// reflectedColor returns the color from a reflected ray
+// reflectedColor returns the color from a reflected ray.
 func (w *World) reflectedColor(hd *hitData, remaining int) *image.Color {
 	if remaining < 1 || hd.object.GetMaterial().Reflective == 0 {
 		return image.Black
@@ -91,10 +96,11 @@ func (w *World) reflectedColor(hd *hitData, remaining int) *image.Color {
 	remaining--
 	reflectRay := ray.NewRay(hd.overPoint, hd.reflectv)
 	color := w.ColorAt(reflectRay, remaining)
+
 	return color.Multiply(hd.object.GetMaterial().Reflective)
 }
 
-// refractedColor returns the color from a refracted ray
+// refractedColor returns the color from a refracted ray.
 func (w *World) refractedColor(hd *hitData, remaining int) *image.Color {
 	if remaining < 1 || hd.object.GetMaterial().Transparency == 0 {
 		return image.Black
@@ -116,10 +122,11 @@ func (w *World) refractedColor(hd *hitData, remaining int) *image.Color {
 	direction := hd.normalv.Multiply((nRatio*cosI - cosT)).Subtract(hd.eyev.Multiply(nRatio))
 	refractRay := ray.NewRay(hd.underPoint, direction)
 	color := w.ColorAt(refractRay, remaining)
+
 	return color.Multiply(hd.object.GetMaterial().Transparency)
 }
 
-// hitData contains information about a hit intersection
+// hitData contains information about a hit intersection.
 type hitData struct {
 	value      float64
 	object     object.Object
@@ -133,7 +140,7 @@ type hitData struct {
 	inside     bool
 }
 
-// Uses an intersection and ray to build up the hit data
+// Uses an intersection and ray to build up the hit data.
 func prepareComputations(
 	intersection *object.Intersection,
 	ray *ray.Ray,
@@ -187,14 +194,16 @@ func prepareComputations(
 			} else {
 				hd.n2 = containers[len(containers)-1].GetMaterial().RefractiveIndex
 			}
+
 			break
 		}
 	}
+
 	return hd
 }
 
 // returns the reflectance, which represents what fraction of light is reflected
-// (named for Christophe Schlick)
+// (named for Christophe Schlick).
 func schlick(hd *hitData) float64 {
 	cos := hd.eyev.DotProduct(hd.normalv)
 
@@ -208,6 +217,7 @@ func schlick(hd *hitData) float64 {
 		cos = math.Sqrt(1 - sin2t)
 	}
 	r0 := math.Pow((hd.n1-hd.n2)/(hd.n1+hd.n2), 2)
+
 	return r0 + (1-r0)*math.Pow(1-cos, 5)
 }
 
@@ -227,15 +237,17 @@ func Render(c *Camera, w *World) *image.Canvas {
 		}
 		wg.Wait()
 	}
+
 	return canvas
 }
 
-// returns if an object.Object slice contains an object
+// returns if an object.Object slice contains an object.
 func contains(s []object.Object, o object.Object) bool {
 	for _, e := range s {
 		if o == e {
 			return true
 		}
 	}
+
 	return false
 }

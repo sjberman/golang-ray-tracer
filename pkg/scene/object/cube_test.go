@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
@@ -16,7 +15,8 @@ var _ = Describe("cube tests", func() {
 		testNewObject(c)
 		Expect(c.Bounds()).To(Equal(&Bounds{
 			Minimum: base.NewPoint(-1, -1, -1),
-			Maximum: base.NewPoint(1, 1, 1)}))
+			Maximum: base.NewPoint(1, 1, 1),
+		}))
 	})
 
 	It("calculates a cube intersection", func() {

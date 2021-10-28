@@ -2,7 +2,7 @@ package object
 
 import "github.com/sjberman/golang-ray-tracer/pkg/image"
 
-// Material contains the attributes of a surface material
+// Material contains the attributes of a surface material.
 type Material struct {
 	Color           *image.Color
 	Pattern         image.Pattern

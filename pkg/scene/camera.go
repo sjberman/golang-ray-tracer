@@ -7,7 +7,7 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
-// Camera is the viewpoint of a scene
+// Camera is the viewpoint of a scene.
 type Camera struct {
 	hsize       int // horizontal size
 	vsize       int // vertical size
@@ -18,7 +18,7 @@ type Camera struct {
 	transform   *base.Matrix
 }
 
-// NewCamera returns a new Camera object
+// NewCamera returns a new Camera object.
 func NewCamera(hsize, vsize int, fieldOfView float64) *Camera {
 	c := &Camera{
 		hsize:       hsize,
@@ -36,15 +36,16 @@ func NewCamera(hsize, vsize int, fieldOfView float64) *Camera {
 		c.halfHeight = halfView
 	}
 	c.pixelSize = (c.halfWidth * 2) / float64(c.hsize)
+
 	return c
 }
 
-// SetTransform sets the transform matrix of the camera
+// SetTransform sets the transform matrix of the camera.
 func (c *Camera) SetTransform(matrix *base.Matrix) {
 	c.transform = matrix
 }
 
-// RayForPixel returns a ray starting at the camera and going to x,y on the canvas
+// RayForPixel returns a ray starting at the camera and going to x,y on the canvas.
 func (c *Camera) RayForPixel(x, y int) *ray.Ray {
 	// the offset from the edge of the canvas to the pixel's center
 	xOffset := (float64(x) + 0.5) * c.pixelSize

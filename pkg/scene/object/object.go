@@ -7,7 +7,7 @@ import (
 	"github.com/sjberman/golang-ray-tracer/pkg/utils"
 )
 
-// Object is a generic object in a scene
+// Object is a generic object in a scene.
 type Object interface {
 	GetMaterial() *Material
 	GetTransform() *base.Matrix
@@ -25,14 +25,14 @@ type Object interface {
 	DeepCopy() Object
 }
 
-// object is the base implementation of an Object
+// object is the base implementation of an Object.
 type object struct {
 	Material
 	transform base.Matrix
 	parent    Object
 }
 
-// newObject returns a new object
+// newObject returns a new object.
 func newObject() *object {
 	return &object{
 		transform: base.Identity,
@@ -40,22 +40,22 @@ func newObject() *object {
 	}
 }
 
-// GetTransform gets the Object's transform matrix
+// GetTransform gets the Object's transform matrix.
 func (o *object) GetTransform() *base.Matrix {
 	return &o.transform
 }
 
-// GetMaterial gets the Object's material
+// GetMaterial gets the Object's material.
 func (o *object) GetMaterial() *Material {
 	return &o.Material
 }
 
-// GetParent gets the Object's parent Object
+// GetParent gets the Object's parent Object.
 func (o *object) GetParent() Object {
 	return o.parent
 }
 
-// SetTransform sets the Object's transform to the supplied matrix
+// SetTransform sets the Object's transform to the supplied matrix.
 func (o *object) SetTransform(matrix ...*base.Matrix) {
 	t := base.Identity
 	for _, m := range matrix {
@@ -64,17 +64,17 @@ func (o *object) SetTransform(matrix ...*base.Matrix) {
 	o.transform = t
 }
 
-// SetMaterial sets the Object's material
+// SetMaterial sets the Object's material.
 func (o *object) SetMaterial(material *Material) {
 	o.Material = *material
 }
 
-// SetParent sets the Object's parent Object
+// SetParent sets the Object's parent Object.
 func (o *object) SetParent(obj Object) {
 	o.parent = obj
 }
 
-// patternAt returns the pattern at a point on the object
+// patternAt returns the pattern at a point on the object.
 func (o *object) PatternAt(worldPoint *base.Tuple, pattern image.Pattern) *image.Color {
 	// convert the point from world space to object space
 	objectPoint := o.worldToObject(worldPoint)
@@ -87,13 +87,14 @@ func (o *object) PatternAt(worldPoint *base.Tuple, pattern image.Pattern) *image
 }
 
 // transform the ray to the inverse of the object's transform;
-// this is the same as transforming the object
+// this is the same as transforming the object.
 func (o *object) transformRay(r *ray.Ray) *ray.Ray {
 	objInverse := o.GetTransform().Inverse()
+
 	return r.Transform(objInverse)
 }
 
-// common normal function with the Object's specific calculation function passed in
+// common normal function with the Object's specific calculation function passed in.
 func commonNormalAt(
 	o Object,
 	worldPoint *base.Tuple,
@@ -102,19 +103,21 @@ func commonNormalAt(
 ) *base.Tuple {
 	objectPoint := o.worldToObject(worldPoint)
 	objectNormal := objectNormalFunc(objectPoint, o, hit)
+
 	return o.normalToWorld(objectNormal)
 }
 
-// converts a point in world space to object space
+// converts a point in world space to object space.
 func (o *object) worldToObject(point *base.Tuple) *base.Tuple {
 	if o.parent != nil {
 		point = o.parent.worldToObject(point)
 	}
 	inverse := o.transform.Inverse()
+
 	return inverse.MultiplyTuple(point)
 }
 
-// converts a normal in object space to world space
+// converts a normal in object space to world space.
 func (o *object) normalToWorld(normal *base.Tuple) *base.Tuple {
 	inverse := o.GetTransform().Inverse()
 	normal = inverse.Transpose().MultiplyTuple(normal)
@@ -124,10 +127,11 @@ func (o *object) normalToWorld(normal *base.Tuple) *base.Tuple {
 	if o.parent != nil {
 		normal = o.parent.normalToWorld(normal)
 	}
+
 	return normal
 }
 
-// returns whether or not A contains B
+// returns whether or not A contains B.
 func includes(a Object, b Object) bool {
 	if grp, ok := a.(*Group); ok {
 		for _, o := range grp.Objects {
@@ -135,47 +139,52 @@ func includes(a Object, b Object) bool {
 				return true
 			}
 		}
+
 		return false
 	}
 	if csg, ok := a.(*Csg); ok {
 		return includes(csg.left, b) || includes(csg.right, b)
 	}
+
 	return a == b
 }
 
-// Remove removes an object.Object from a slice of Objects
+// Remove removes an object.Object from a slice of Objects.
 func Remove(s []Object, o Object) []Object {
 	for i, obj := range s {
 		if obj == o {
 			copy(s[i:], s[i+1:])
 			s[len(s)-1] = nil
 			s = s[:len(s)-1]
+
 			return s
 		}
 	}
+
 	return s
 }
 
-// unused (interface satisfier)
+// unused (interface satisfier).
 func (o *object) Divide(_ int) {}
 
-// Bounds represents a bounding box for an object
+// Bounds represents a bounding box for an object.
 type Bounds struct {
 	Minimum *base.Tuple
 	Maximum *base.Tuple
 }
 
-// DeepCopy performs a deep copy of the object to a new object
+// DeepCopy performs a deep copy of the object to a new object.
 func (b *Bounds) DeepCopy() *Bounds {
 	min := *b.Minimum
 	max := *b.Maximum
+
 	return &Bounds{
 		Minimum: &min,
 		Maximum: &max,
 	}
 }
 
-// use cube intersect method
+// use cube intersect method.
 func (b *Bounds) intersects(r *ray.Ray) bool {
 	// find largest minimum t value and smallest maximum t value for each axis
 	// (t is intersection point)
@@ -188,10 +197,11 @@ func (b *Bounds) intersects(r *ray.Ray) bool {
 
 	tMin := utils.Max(xtMin, ytMin, ztMin)
 	tMax := utils.Min(xtMax, ytMax, ztMax)
+
 	return tMin <= tMax
 }
 
-// returns two non-overlapping bounding boxes
+// returns two non-overlapping bounding boxes.
 func (b *Bounds) split() (*Bounds, *Bounds) {
 	// get the box's largest dimension
 	dx := b.Maximum.GetX() - b.Minimum.GetX()
@@ -222,5 +232,6 @@ func (b *Bounds) split() (*Bounds, *Bounds) {
 	// construct and return the two halves of the bounding box
 	left := &Bounds{Minimum: b.Minimum, Maximum: midMax}
 	right := &Bounds{Minimum: midMin, Maximum: b.Maximum}
+
 	return left, right
 }

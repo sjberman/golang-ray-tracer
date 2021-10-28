@@ -1,10 +1,13 @@
 package schema
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
-// Camera
+// Camera.
 type Camera struct {
-	FieldOfView float64   `json:"field-of-view"`
+	FieldOfView float64   `json:"fieldOfView"`
 	From        []float64 `json:"from"`
 	Height      int       `json:"height"`
 	To          []float64 `json:"to"`
@@ -12,7 +15,7 @@ type Camera struct {
 	Width       int       `json:"width"`
 }
 
-// Csg
+// Csg.
 type Csg struct {
 	LeftChild  ObjectShell  `json:"leftChild"`
 	Material   *Material    `json:"material,omitempty"`
@@ -22,7 +25,7 @@ type Csg struct {
 	Transform  []*Transform `json:"transform,omitempty"`
 }
 
-// File
+// File.
 type File struct {
 	File      string       `json:"file"`
 	Material  *Material    `json:"material,omitempty"`
@@ -30,7 +33,7 @@ type File struct {
 	Transform []*Transform `json:"transform,omitempty"`
 }
 
-// Group
+// Group.
 type Group struct {
 	Children  []ObjectShell `json:"children"`
 	Material  *Material     `json:"material,omitempty"`
@@ -38,13 +41,13 @@ type Group struct {
 	Transform []*Transform  `json:"transform,omitempty"`
 }
 
-// Light
+// Light.
 type Light struct {
 	At        []float64 `json:"at"`
 	Intensity []float64 `json:"intensity"`
 }
 
-// Material
+// Material.
 type Material struct {
 	Ambient         *float64   `json:"ambient,omitempty"`
 	Color           *[]float64 `json:"color,omitempty"`
@@ -58,14 +61,14 @@ type Material struct {
 	Transparency    *float64   `json:"transparency,omitempty"`
 }
 
-// ObjectShell
+// ObjectShell.
 type ObjectShell struct {
 	Material  *Material    `json:"material,omitempty"`
 	Name      string       `json:"name"`
 	Transform []*Transform `json:"transform,omitempty"`
 }
 
-// Pattern
+// Pattern.
 type Pattern struct {
 	Color1    []float64    `json:"color1"`
 	Color2    []float64    `json:"color2"`
@@ -73,7 +76,7 @@ type Pattern struct {
 	Type      string       `json:"type"`
 }
 
-// RayTracerScene
+// RayTracerScene.
 type RayTracerScene struct {
 	Camera *Camera  `json:"camera"`
 	Csgs   []*Csg   `json:"csgs,omitempty"`
@@ -83,7 +86,7 @@ type RayTracerScene struct {
 	Shapes []*Shape `json:"shapes,omitempty"`
 }
 
-// Shape
+// Shape.
 type Shape struct {
 	Closed    *bool        `json:"closed,omitempty"`
 	Inherits  *string      `json:"inherits,omitempty"`
@@ -95,7 +98,7 @@ type Shape struct {
 	Type      string       `json:"type"`
 }
 
-// Transform
+// Transform.
 type Transform struct {
 	Type   string    `json:"type"`
 	Values []float64 `json:"values"`
@@ -104,36 +107,37 @@ type Transform struct {
 func (strct *RayTracerScene) UnmarshalJSON(b []byte) error {
 	var jsonMap map[string]json.RawMessage
 	if err := json.Unmarshal(b, &jsonMap); err != nil {
-		return err
+		return fmt.Errorf("error unmarshaling data: %w", err)
 	}
 	// parse all the defined properties
 	for k, v := range jsonMap {
 		switch k {
 		case "camera":
 			if err := json.Unmarshal([]byte(v), &strct.Camera); err != nil {
-				return err
+				return fmt.Errorf("error unmarshaling camera: %w", err)
 			}
 		case "csgs":
 			if err := json.Unmarshal([]byte(v), &strct.Csgs); err != nil {
-				return err
+				return fmt.Errorf("error unmarshaling csgs: %w", err)
 			}
 		case "files":
 			if err := json.Unmarshal([]byte(v), &strct.Files); err != nil {
-				return err
+				return fmt.Errorf("error unmarshaling files: %w", err)
 			}
 		case "groups":
 			if err := json.Unmarshal([]byte(v), &strct.Groups); err != nil {
-				return err
+				return fmt.Errorf("error unmarshaling groups: %w", err)
 			}
 		case "lights":
 			if err := json.Unmarshal([]byte(v), &strct.Lights); err != nil {
-				return err
+				return fmt.Errorf("error unmarshaling lights: %w", err)
 			}
 		case "shapes":
 			if err := json.Unmarshal([]byte(v), &strct.Shapes); err != nil {
-				return err
+				return fmt.Errorf("error unmarshaling shapes: %w", err)
 			}
 		}
 	}
+
 	return nil
 }

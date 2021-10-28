@@ -11,7 +11,7 @@ const (
 	difference   = "difference"
 )
 
-// Csg is a Constructive Solid Geometry object
+// Csg is a Constructive Solid Geometry object.
 type Csg struct {
 	*object
 	operation   string
@@ -19,7 +19,7 @@ type Csg struct {
 	bounds      *Bounds
 }
 
-// NewCsg returns a new Csg object
+// NewCsg returns a new Csg object.
 func NewCsg(op string, l, r Object) *Csg {
 	csg := &Csg{
 		object:    newObject(),
@@ -30,32 +30,34 @@ func NewCsg(op string, l, r Object) *Csg {
 	l.SetParent(csg)
 	r.SetParent(csg)
 	csg.bounds = calculateBounds([]Object{csg.left, csg.right})
+
 	return csg
 }
 
-// DeepCopy performs a deep copy of the object to a new object
-func (c *Csg) DeepCopy() Object {
-	left := c.left.DeepCopy()
-	right := c.right.DeepCopy()
-	newObj := NewCsg(c.operation, left, right)
+// DeepCopy performs a deep copy of the object to a new object.
+func (csg *Csg) DeepCopy() Object {
+	left := csg.left.DeepCopy()
+	right := csg.right.DeepCopy()
+	newObj := NewCsg(csg.operation, left, right)
 
-	newMaterial := c.Material
+	newMaterial := csg.Material
 	newObj.SetMaterial(&newMaterial)
-	newTransform := c.transform
+	newTransform := csg.transform
 	newObj.SetTransform(&newTransform)
 
-	if c.bounds != nil {
-		newObj.bounds = c.bounds.DeepCopy()
+	if csg.bounds != nil {
+		newObj.bounds = csg.bounds.DeepCopy()
 	}
+
 	return newObj
 }
 
-// Bounds returns the bounding box for the csg of objects
+// Bounds returns the bounding box for the csg of objects.
 func (csg *Csg) Bounds() *Bounds {
 	return csg.bounds
 }
 
-// determines if an intersection is allowed based on the operation
+// determines if an intersection is allowed based on the operation.
 func intersectionAllowed(op string, lhit, inl, inr bool) bool {
 	switch op {
 	case union:
@@ -65,10 +67,11 @@ func intersectionAllowed(op string, lhit, inl, inr bool) bool {
 	case difference:
 		return (lhit && !inr) || (!lhit && inl)
 	}
+
 	return false
 }
 
-// checks if each intersection is allowed and filters
+// checks if each intersection is allowed and filters.
 func (csg *Csg) filterIntersections(ints []*Intersection) []*Intersection {
 	var inl, inr bool
 	result := []*Intersection{}
@@ -86,22 +89,24 @@ func (csg *Csg) filterIntersections(ints []*Intersection) []*Intersection {
 			inr = !inr
 		}
 	}
+
 	return result
 }
 
-// calculates where a ray intersects objects in a csg
+// calculates where a ray intersects objects in a csg.
 func (csg *Csg) Intersect(ray *ray.Ray) []*Intersection {
 	r := csg.transformRay(ray)
 	ints := csg.left.Intersect(r)
 	ints = append(ints, csg.right.Intersect(r)...)
+
 	return csg.filterIntersections(sortIntersections(ints))
 }
 
-// divide a csg into smaller pieces (boxes)
+// divide a csg into smaller pieces (boxes).
 func (csg *Csg) Divide(threshold int) {
 	csg.left.Divide(threshold)
 	csg.right.Divide(threshold)
 }
 
-// unused (interface satisfier)
+// unused (interface satisfier).
 func (csg *Csg) NormalAt(_ *base.Tuple, _ *Intersection) *base.Tuple { return nil }
