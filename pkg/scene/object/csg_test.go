@@ -1,148 +1,166 @@
 package object
 
 import (
-	. "github.com/onsi/ginkgo"
+	"testing"
+
 	. "github.com/onsi/gomega"
+
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
-var _ = Describe("csg tests", func() {
-	It("creates csgs", func() {
-		s := NewSphere()
-		c := NewCube()
-		csg := NewCsg(union, s, c)
-		Expect(csg.transform).To(Equal(base.Identity))
-		Expect(csg.operation).To(Equal(union))
-		Expect(csg.left).To(Equal(s))
-		Expect(csg.right).To(Equal(c))
-		Expect(s.parent).To(Equal(csg))
-		Expect(c.parent).To(Equal(csg))
-	})
+func TestNewCsg(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-	It("determines the rule for a CSG operation", func() {
-		type data struct {
-			op                  string
-			lhit, inl, inr, res bool
-		}
-		testCases := []data{
-			// Union
-			{op: union, lhit: true, inl: true, inr: true, res: false},
-			{op: union, lhit: true, inl: true, inr: false, res: true},
-			{op: union, lhit: true, inl: false, inr: true, res: false},
-			{op: union, lhit: true, inl: false, inr: false, res: true},
-			{op: union, lhit: false, inl: true, inr: true, res: false},
-			{op: union, lhit: false, inl: true, inr: false, res: false},
-			{op: union, lhit: false, inl: false, inr: true, res: true},
-			{op: union, lhit: false, inl: false, inr: false, res: true},
-			// Intersect
-			{op: intersection, lhit: true, inl: true, inr: true, res: true},
-			{op: intersection, lhit: true, inl: true, inr: false, res: false},
-			{op: intersection, lhit: true, inl: false, inr: true, res: true},
-			{op: intersection, lhit: true, inl: false, inr: false, res: false},
-			{op: intersection, lhit: false, inl: true, inr: true, res: true},
-			{op: intersection, lhit: false, inl: true, inr: false, res: true},
-			{op: intersection, lhit: false, inl: false, inr: true, res: false},
-			{op: intersection, lhit: false, inl: false, inr: false, res: false},
-			// Difference
-			{op: difference, lhit: true, inl: true, inr: true, res: false},
-			{op: difference, lhit: true, inl: true, inr: false, res: true},
-			{op: difference, lhit: true, inl: false, inr: true, res: false},
-			{op: difference, lhit: true, inl: false, inr: false, res: true},
-			{op: difference, lhit: false, inl: true, inr: true, res: true},
-			{op: difference, lhit: false, inl: true, inr: false, res: true},
-			{op: difference, lhit: false, inl: false, inr: true, res: false},
-			{op: difference, lhit: false, inl: false, inr: false, res: false},
-		}
-		for _, t := range testCases {
-			res := intersectionAllowed(t.op, t.lhit, t.inl, t.inr)
-			Expect(res).To(Equal(t.res))
-		}
-	})
+	s := NewSphere()
+	c := NewCube()
+	csg := NewCsg(union, s, c)
+	g.Expect(csg.transform).To(Equal(base.Identity))
+	g.Expect(csg.operation).To(Equal(union))
+	g.Expect(csg.left).To(Equal(s))
+	g.Expect(csg.right).To(Equal(c))
+	g.Expect(s.parent).To(Equal(csg))
+	g.Expect(c.parent).To(Equal(csg))
+}
 
-	It("filters a list of intersections", func() {
-		s := NewSphere()
-		c := NewCube()
-		ints := Intersections(
-			NewIntersection(1, s),
-			NewIntersection(2, c),
-			NewIntersection(3, s),
-			NewIntersection(4, c),
-		)
-		csg := NewCsg(union, s, c)
-		res := csg.filterIntersections(ints)
-		Expect(len(res)).To(Equal(2))
-		Expect(res[0]).To(Equal(ints[0]))
-		Expect(res[1]).To(Equal(ints[3]))
+func TestIntersectionAllowed(t *testing.T) {
+	t.Parallel()
 
-		csg = NewCsg(intersection, s, c)
-		res = csg.filterIntersections(ints)
-		Expect(len(res)).To(Equal(2))
-		Expect(res[0]).To(Equal(ints[1]))
-		Expect(res[1]).To(Equal(ints[2]))
+	tests := []struct {
+		op                  string
+		lhit, inl, inr, res bool
+	}{
+		// Union
+		{op: union, lhit: true, inl: true, inr: true, res: false},
+		{op: union, lhit: true, inl: true, inr: false, res: true},
+		{op: union, lhit: true, inl: false, inr: true, res: false},
+		{op: union, lhit: true, inl: false, inr: false, res: true},
+		{op: union, lhit: false, inl: true, inr: true, res: false},
+		{op: union, lhit: false, inl: true, inr: false, res: false},
+		{op: union, lhit: false, inl: false, inr: true, res: true},
+		{op: union, lhit: false, inl: false, inr: false, res: true},
+		// Intersect
+		{op: intersection, lhit: true, inl: true, inr: true, res: true},
+		{op: intersection, lhit: true, inl: true, inr: false, res: false},
+		{op: intersection, lhit: true, inl: false, inr: true, res: true},
+		{op: intersection, lhit: true, inl: false, inr: false, res: false},
+		{op: intersection, lhit: false, inl: true, inr: true, res: true},
+		{op: intersection, lhit: false, inl: true, inr: false, res: true},
+		{op: intersection, lhit: false, inl: false, inr: true, res: false},
+		{op: intersection, lhit: false, inl: false, inr: false, res: false},
+		// Difference
+		{op: difference, lhit: true, inl: true, inr: true, res: false},
+		{op: difference, lhit: true, inl: true, inr: false, res: true},
+		{op: difference, lhit: true, inl: false, inr: true, res: false},
+		{op: difference, lhit: true, inl: false, inr: false, res: true},
+		{op: difference, lhit: false, inl: true, inr: true, res: true},
+		{op: difference, lhit: false, inl: true, inr: false, res: true},
+		{op: difference, lhit: false, inl: false, inr: true, res: false},
+		{op: difference, lhit: false, inl: false, inr: false, res: false},
+	}
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+			g := NewWithT(t)
 
-		csg = NewCsg(difference, s, c)
-		res = csg.filterIntersections(ints)
-		Expect(len(res)).To(Equal(2))
-		Expect(res[0]).To(Equal(ints[0]))
-		Expect(res[1]).To(Equal(ints[1]))
-	})
+			res := intersectionAllowed(test.op, test.lhit, test.inl, test.inr)
+			g.Expect(res).To(Equal(test.res))
+		})
+	}
+}
 
-	It("calculates intersections", func() {
-		// ray misses
-		c := NewCsg(union, NewSphere(), NewCube())
-		r := ray.NewRay(base.NewPoint(0, 2, -5), base.NewVector(0, 0, 1))
-		ints := c.Intersect(r)
-		Expect(len(ints)).To(BeZero())
+func TestFilterIntersections(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-		// ray hits
-		s1 := NewSphere()
-		s2 := NewSphere()
-		s2.SetTransform(base.Translate(0, 0, 0.5))
-		c = NewCsg(union, s1, s2)
-		r = ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
-		ints = c.Intersect(r)
-		Expect(len(ints)).To(Equal(2))
-		Expect(ints[0].Value).To(Equal(4.0))
-		Expect(ints[0].Object).To(Equal(s1))
-		Expect(ints[1].Value).To(Equal(6.5))
-		Expect(ints[1].Object).To(Equal(s2))
-	})
+	s := NewSphere()
+	c := NewCube()
+	ints := Intersections(
+		NewIntersection(1, s),
+		NewIntersection(2, c),
+		NewIntersection(3, s),
+		NewIntersection(4, c),
+	)
+	csg := NewCsg(union, s, c)
+	res := csg.filterIntersections(ints)
+	g.Expect(len(res)).To(Equal(2))
+	g.Expect(res[0]).To(Equal(ints[0]))
+	g.Expect(res[1]).To(Equal(ints[3]))
 
-	It("divides into smaller pieces", func() {
-		s1 := NewSphere()
-		s1.SetTransform(base.Translate(-1.5, 0, 0))
-		s2 := NewSphere()
-		s2.SetTransform(base.Translate(1.5, 0, 0))
-		g1 := NewGroup()
-		g1.Add(s1, s2)
+	csg = NewCsg(intersection, s, c)
+	res = csg.filterIntersections(ints)
+	g.Expect(len(res)).To(Equal(2))
+	g.Expect(res[0]).To(Equal(ints[1]))
+	g.Expect(res[1]).To(Equal(ints[2]))
 
-		s3 := NewSphere()
-		s3.SetTransform(base.Translate(0, 0, -1.5))
-		s4 := NewSphere()
-		s4.SetTransform(base.Translate(0, 0, 1.5))
-		g2 := NewGroup()
-		g2.Add(s3, s4)
+	csg = NewCsg(difference, s, c)
+	res = csg.filterIntersections(ints)
+	g.Expect(len(res)).To(Equal(2))
+	g.Expect(res[0]).To(Equal(ints[0]))
+	g.Expect(res[1]).To(Equal(ints[1]))
+}
 
-		csg := NewCsg(difference, g1, g2)
-		csg.Divide(1)
+func TestCsgIntersect(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-		lgrp, ok := csg.left.(*Group)
-		Expect(ok).To(BeTrue())
-		lgrp1, ok := lgrp.Objects[0].(*Group)
-		Expect(ok).To(BeTrue())
-		lgrp2, ok := lgrp.Objects[1].(*Group)
-		Expect(ok).To(BeTrue())
-		rgrp, ok := csg.right.(*Group)
-		Expect(ok).To(BeTrue())
-		rgrp1, ok := rgrp.Objects[0].(*Group)
-		Expect(ok).To(BeTrue())
-		rgrp2, ok := rgrp.Objects[1].(*Group)
-		Expect(ok).To(BeTrue())
+	// ray misses
+	c := NewCsg(union, NewSphere(), NewCube())
+	r := ray.NewRay(base.NewPoint(0, 2, -5), base.NewVector(0, 0, 1))
+	ints := c.Intersect(r)
+	g.Expect(len(ints)).To(BeZero())
 
-		Expect(lgrp1.Objects[0]).To(Equal(s1))
-		Expect(lgrp2.Objects[0]).To(Equal(s2))
-		Expect(rgrp1.Objects[0]).To(Equal(s3))
-		Expect(rgrp2.Objects[0]).To(Equal(s4))
-	})
-})
+	// ray hits
+	s1 := NewSphere()
+	s2 := NewSphere()
+	s2.SetTransform(base.Translate(0, 0, 0.5))
+	c = NewCsg(union, s1, s2)
+	r = ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1))
+	ints = c.Intersect(r)
+	g.Expect(len(ints)).To(Equal(2))
+	g.Expect(ints[0].Value).To(Equal(4.0))
+	g.Expect(ints[0].Object).To(Equal(s1))
+	g.Expect(ints[1].Value).To(Equal(6.5))
+	g.Expect(ints[1].Object).To(Equal(s2))
+}
+
+func TestCsg_DivideIntoSmallerPieces(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
+
+	s1 := NewSphere()
+	s1.SetTransform(base.Translate(-1.5, 0, 0))
+	s2 := NewSphere()
+	s2.SetTransform(base.Translate(1.5, 0, 0))
+	g1 := NewGroup()
+	g1.Add(s1, s2)
+
+	s3 := NewSphere()
+	s3.SetTransform(base.Translate(0, 0, -1.5))
+	s4 := NewSphere()
+	s4.SetTransform(base.Translate(0, 0, 1.5))
+	g2 := NewGroup()
+	g2.Add(s3, s4)
+
+	csg := NewCsg(difference, g1, g2)
+	csg.Divide(1)
+
+	lgrp, ok := csg.left.(*Group)
+	g.Expect(ok).To(BeTrue())
+	lgrp1, ok := lgrp.Objects[0].(*Group)
+	g.Expect(ok).To(BeTrue())
+	lgrp2, ok := lgrp.Objects[1].(*Group)
+	g.Expect(ok).To(BeTrue())
+	rgrp, ok := csg.right.(*Group)
+	g.Expect(ok).To(BeTrue())
+	rgrp1, ok := rgrp.Objects[0].(*Group)
+	g.Expect(ok).To(BeTrue())
+	rgrp2, ok := rgrp.Objects[1].(*Group)
+	g.Expect(ok).To(BeTrue())
+
+	g.Expect(lgrp1.Objects[0]).To(Equal(s1))
+	g.Expect(lgrp2.Objects[0]).To(Equal(s2))
+	g.Expect(rgrp1.Objects[0]).To(Equal(s3))
+	g.Expect(rgrp2.Objects[0]).To(Equal(s4))
+}

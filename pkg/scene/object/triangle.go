@@ -5,8 +5,8 @@ import (
 	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
+	grtMath "github.com/sjberman/golang-ray-tracer/pkg/math"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
-	"github.com/sjberman/golang-ray-tracer/pkg/utils"
 )
 
 // Triangle is a triangle object.
@@ -74,13 +74,13 @@ func (t *SmoothTriangle) DeepCopy() Object {
 
 // Bounds returns the untransformed bounds of a triangle.
 func (t *Triangle) Bounds() *Bounds {
-	xMin := utils.Min(t.P1.GetX(), t.P2.GetX(), t.P3.GetX())
-	yMin := utils.Min(t.P1.GetY(), t.P2.GetY(), t.P3.GetY())
-	zMin := utils.Min(t.P1.GetZ(), t.P2.GetZ(), t.P3.GetZ())
+	xMin := grtMath.Min(t.P1.GetX(), t.P2.GetX(), t.P3.GetX())
+	yMin := grtMath.Min(t.P1.GetY(), t.P2.GetY(), t.P3.GetY())
+	zMin := grtMath.Min(t.P1.GetZ(), t.P2.GetZ(), t.P3.GetZ())
 
-	xMax := utils.Max(t.P1.GetX(), t.P2.GetX(), t.P3.GetX())
-	yMax := utils.Max(t.P1.GetY(), t.P2.GetY(), t.P3.GetY())
-	zMax := utils.Max(t.P1.GetZ(), t.P2.GetZ(), t.P3.GetZ())
+	xMax := grtMath.Max(t.P1.GetX(), t.P2.GetX(), t.P3.GetX())
+	yMax := grtMath.Max(t.P1.GetY(), t.P2.GetY(), t.P3.GetY())
+	zMax := grtMath.Max(t.P1.GetZ(), t.P2.GetZ(), t.P3.GetZ())
 
 	return &Bounds{
 		Minimum: base.NewPoint(xMin, yMin, zMin),

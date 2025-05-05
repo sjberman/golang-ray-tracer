@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
+	grtMath "github.com/sjberman/golang-ray-tracer/pkg/math"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
-	"github.com/sjberman/golang-ray-tracer/pkg/utils"
 )
 
 // Cube is a cube object.
@@ -51,8 +51,8 @@ func (c *Cube) Intersect(ray *ray.Ray) []*Intersection {
 	}
 	ztMin, ztMax := checkAxis(r.Origin.GetZ(), r.Direction.GetZ(), -1, 1)
 
-	tMin := utils.Max(xtMin, ytMin, ztMin)
-	tMax := utils.Min(xtMax, ytMax, ztMax)
+	tMin := grtMath.Max(xtMin, ytMin, ztMin)
+	tMax := grtMath.Min(xtMax, ytMax, ztMax)
 
 	if tMin > tMax {
 		return []*Intersection{}
@@ -72,10 +72,11 @@ func cubeNormal(objectPoint *base.Tuple, _ Object, _ *Intersection) *base.Tuple 
 	absX := math.Abs(objectPoint.GetX())
 	absY := math.Abs(objectPoint.GetY())
 	absZ := math.Abs(objectPoint.GetZ())
-	maxC := utils.Max(absX, absY, absZ)
-	if maxC == absX {
+	maxC := grtMath.Max(absX, absY, absZ)
+	switch maxC {
+	case absX:
 		return base.NewVector(objectPoint.GetX(), 0, 0)
-	} else if maxC == absY {
+	case absY:
 		return base.NewVector(0, objectPoint.GetY(), 0)
 	}
 

@@ -1,162 +1,271 @@
 package image
 
 import (
-	. "github.com/onsi/ginkgo"
+	"testing"
+
 	. "github.com/onsi/gomega"
+
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 )
 
-var _ = Describe("pattern tests", func() {
-	testNewPattern := func(p Pattern) {
-		Expect(p.GetColors()[0]).To(Equal(White))
-		Expect(p.GetColors()[1]).To(Equal(Black))
-		Expect(p.GetTransform()).To(Equal(&base.Identity))
+func testNewPattern(g *WithT, p Pattern) {
+	g.Expect(p.GetColors()[0]).To(Equal(White))
+	g.Expect(p.GetColors()[1]).To(Equal(Black))
+	g.Expect(p.GetTransform()).To(Equal(&base.Identity))
 
-		t := base.Translate(2, 3, 4)
-		p.SetTransform(t)
-		Expect(p.GetTransform()).To(Equal(t))
+	t := base.Translate(2, 3, 4)
+	p.SetTransform(t)
+	g.Expect(p.GetTransform()).To(Equal(t))
+}
+
+func TestNewPattern(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
+
+	testNewPattern(g, NewPattern(White, Black, nil))
+}
+
+func TestNewStripePattern(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
+
+	testNewPattern(g, NewStripePattern(White, Black))
+}
+
+func TestPatternAt_Stripe(t *testing.T) {
+	t.Parallel()
+
+	sp := NewStripePattern(White, Black)
+
+	tests := []struct {
+		name  string
+		point *base.Tuple
+		color *Color
+	}{
+		{
+			name:  "all zeros",
+			point: base.NewPoint(0, 0, 0),
+			color: White,
+		},
+		{
+			name:  "constant in y; 1",
+			point: base.NewPoint(0, 1, 0),
+			color: White,
+		},
+		{
+			name:  "constant in y; 2",
+			point: base.NewPoint(0, 2, 0),
+			color: White,
+		},
+		{
+			name:  "constant in z; 1",
+			point: base.NewPoint(0, 0, 1),
+			color: White,
+		},
+		{
+			name:  "constant in z; 2",
+			point: base.NewPoint(0, 0, 2),
+			color: White,
+		},
+		{
+			name:  "alternates in x; 0.9",
+			point: base.NewPoint(0.9, 0, 0),
+			color: White,
+		},
+		{
+			name:  "alternates in x; 1",
+			point: base.NewPoint(1, 0, 0),
+			color: Black,
+		},
+		{
+			name:  "alternates in x; -0.1",
+			point: base.NewPoint(-0.1, 0, 0),
+			color: Black,
+		},
+		{
+			name:  "alternates in x; -1",
+			point: base.NewPoint(-1, 0, 0),
+			color: Black,
+		},
+		{
+			name:  "alternates in x; -1.1",
+			point: base.NewPoint(-1.1, 0, 0),
+			color: White,
+		},
 	}
 
-	It("creates patterns", func() {
-		p := NewPattern(White, Black, nil)
-		testNewPattern(p)
-	})
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			g := NewWithT(t)
 
-	Context("stripe patterns", func() {
-		It("creates stripe patterns", func() {
-			sp := NewStripePattern(White, Black)
-			testNewPattern(sp)
+			stripe := sp.PatternAt(test.point)
+			g.Expect(stripe).To(Equal(test.color))
 		})
+	}
+}
 
-		It("returns the stripe color at a point", func() {
-			sp := NewStripePattern(White, Black)
+func TestNewGradientPattern(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-			// constant in y
-			stripe := sp.PatternAt(base.NewPoint(0, 0, 0))
-			Expect(stripe).To(Equal(White))
+	testNewPattern(g, NewGradientPattern(White, Black))
+}
 
-			stripe = sp.PatternAt(base.NewPoint(0, 1, 0))
-			Expect(stripe).To(Equal(White))
+func TestPatternAt_Gradient(t *testing.T) {
+	t.Parallel()
 
-			stripe = sp.PatternAt(base.NewPoint(0, 2, 0))
-			Expect(stripe).To(Equal(White))
+	gp := NewGradientPattern(White, Black)
 
-			// constant in z
-			stripe = sp.PatternAt(base.NewPoint(0, 0, 0))
-			Expect(stripe).To(Equal(White))
+	tests := []struct {
+		name  string
+		point *base.Tuple
+		color *Color
+	}{
+		{
+			name:  "all zeros",
+			point: base.NewPoint(0, 0, 0),
+			color: White,
+		},
+		{
+			name:  "0.25 in x",
+			point: base.NewPoint(0.25, 0, 0),
+			color: NewColor(0.75, 0.75, 0.75),
+		},
+		{
+			name:  "0.5 in x",
+			point: base.NewPoint(0.5, 0, 0),
+			color: NewColor(0.5, 0.5, 0.5),
+		},
+		{
+			name:  "0.75 in x",
+			point: base.NewPoint(0.75, 0, 0),
+			color: NewColor(0.25, 0.25, 0.25),
+		},
+	}
 
-			stripe = sp.PatternAt(base.NewPoint(0, 0, 1))
-			Expect(stripe).To(Equal(White))
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			g := NewWithT(t)
 
-			stripe = sp.PatternAt(base.NewPoint(0, 0, 2))
-			Expect(stripe).To(Equal(White))
-
-			// alternates in x
-			stripe = sp.PatternAt(base.NewPoint(0, 0, 0))
-			Expect(stripe).To(Equal(White))
-
-			stripe = sp.PatternAt(base.NewPoint(0.9, 0, 0))
-			Expect(stripe).To(Equal(White))
-
-			stripe = sp.PatternAt(base.NewPoint(1, 0, 0))
-			Expect(stripe).To(Equal(Black))
-
-			stripe = sp.PatternAt(base.NewPoint(-0.1, 0, 0))
-			Expect(stripe).To(Equal(Black))
-
-			stripe = sp.PatternAt(base.NewPoint(-1, 0, 0))
-			Expect(stripe).To(Equal(Black))
-
-			stripe = sp.PatternAt(base.NewPoint(-1.1, 0, 0))
-			Expect(stripe).To(Equal(White))
+			gradient := gp.PatternAt(test.point)
+			g.Expect(gradient).To(Equal(test.color))
 		})
-	})
+	}
+}
 
-	Context("gradient patterns", func() {
-		It("creates gradient patterns", func() {
-			gp := NewGradientPattern(White, Black)
-			testNewPattern(gp)
+func TestNewRingPattern(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
+
+	testNewPattern(g, NewRingPattern(White, Black))
+}
+
+func TestPatternAt_Ring(t *testing.T) {
+	t.Parallel()
+
+	rp := NewRingPattern(White, Black)
+
+	tests := []struct {
+		name  string
+		point *base.Tuple
+		color *Color
+	}{
+		{
+			name:  "all zeros",
+			point: base.NewPoint(0, 0, 0),
+			color: White,
+		},
+		{
+			name:  "1 in x",
+			point: base.NewPoint(1, 0, 0),
+			color: Black,
+		},
+		{
+			name:  "1 in z",
+			point: base.NewPoint(0, 0, 1),
+			color: Black,
+		},
+		{
+			name:  "sqrt(2)/2",
+			point: base.NewPoint(0.708, 0, 0.708),
+			color: Black,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			g := NewWithT(t)
+
+			ring := rp.PatternAt(test.point)
+			g.Expect(ring).To(Equal(test.color))
 		})
+	}
+}
 
-		It("returns the gradient color at a point", func() {
-			gp := NewGradientPattern(White, Black)
+func TestNewCheckerPattern(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-			gradient := gp.PatternAt(base.NewPoint(0, 0, 0))
-			Expect(gradient).To(Equal(White))
+	testNewPattern(g, NewCheckerPattern(White, Black))
+}
 
-			gradient = gp.PatternAt(base.NewPoint(0.25, 0, 0))
-			Expect(gradient).To(Equal(NewColor(0.75, 0.75, 0.75)))
+func TestPatternAt_Checker(t *testing.T) {
+	t.Parallel()
 
-			gradient = gp.PatternAt(base.NewPoint(0.5, 0, 0))
-			Expect(gradient).To(Equal(NewColor(0.5, 0.5, 0.5)))
+	cp := NewCheckerPattern(White, Black)
 
-			gradient = gp.PatternAt(base.NewPoint(0.75, 0, 0))
-			Expect(gradient).To(Equal(NewColor(0.25, 0.25, 0.25)))
+	tests := []struct {
+		name  string
+		point *base.Tuple
+		color *Color
+	}{
+		{
+			name:  "all zeros",
+			point: base.NewPoint(0, 0, 0),
+			color: White,
+		},
+		{
+			name:  "repeat in x; 0.99",
+			point: base.NewPoint(0.99, 0, 0),
+			color: White,
+		},
+		{
+			name:  "repeat in x; 1.01",
+			point: base.NewPoint(1.01, 0, 0),
+			color: Black,
+		},
+		{
+			name:  "repeat in y; 0.99",
+			point: base.NewPoint(0, 0.99, 0),
+			color: White,
+		},
+		{
+			name:  "repeat in y; 1.01",
+			point: base.NewPoint(0, 1.01, 0),
+			color: Black,
+		},
+		{
+			name:  "repeat in z; 0.99",
+			point: base.NewPoint(0, 0, 0.99),
+			color: White,
+		},
+		{
+			name:  "repeat in z; 1.01",
+			point: base.NewPoint(0, 0, 1.01),
+			color: Black,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			g := NewWithT(t)
+
+			checker := cp.PatternAt(test.point)
+			g.Expect(checker).To(Equal(test.color))
 		})
-	})
-
-	Context("ring patterns", func() {
-		It("creates ring patterns", func() {
-			rp := NewRingPattern(White, Black)
-			testNewPattern(rp)
-		})
-
-		It("returns the ring color at a point", func() {
-			rp := NewRingPattern(White, Black)
-
-			ring := rp.PatternAt(base.NewPoint(0, 0, 0))
-			Expect(ring).To(Equal(White))
-
-			ring = rp.PatternAt(base.NewPoint(1, 0, 0))
-			Expect(ring).To(Equal(Black))
-
-			ring = rp.PatternAt(base.NewPoint(0, 0, 1))
-			Expect(ring).To(Equal(Black))
-
-			// 0.708 is just slightly more than sqrt(2)/2
-			ring = rp.PatternAt(base.NewPoint(0.708, 0, 0.708))
-			Expect(ring).To(Equal(Black))
-		})
-	})
-
-	Context("checker patterns", func() {
-		It("creates checker patterns", func() {
-			cp := NewCheckerPattern(White, Black)
-			testNewPattern(cp)
-		})
-
-		It("returns the checker color at a point", func() {
-			cp := NewCheckerPattern(White, Black)
-
-			// should repeat in x
-			checker := cp.PatternAt(base.NewPoint(0, 0, 0))
-			Expect(checker).To(Equal(White))
-
-			checker = cp.PatternAt(base.NewPoint(0.99, 0, 0))
-			Expect(checker).To(Equal(White))
-
-			checker = cp.PatternAt(base.NewPoint(1.01, 0, 0))
-			Expect(checker).To(Equal(Black))
-
-			// should repeat in y
-			checker = cp.PatternAt(base.NewPoint(0, 0, 0))
-			Expect(checker).To(Equal(White))
-
-			checker = cp.PatternAt(base.NewPoint(0, 0.99, 0))
-			Expect(checker).To(Equal(White))
-
-			checker = cp.PatternAt(base.NewPoint(0, 1.01, 0))
-			Expect(checker).To(Equal(Black))
-
-			// should repeat in z
-			checker = cp.PatternAt(base.NewPoint(0, 0, 0))
-			Expect(checker).To(Equal(White))
-
-			checker = cp.PatternAt(base.NewPoint(0, 0, 0.99))
-			Expect(checker).To(Equal(White))
-
-			checker = cp.PatternAt(base.NewPoint(0, 0, 1.01))
-			Expect(checker).To(Equal(Black))
-		})
-	})
-})
+	}
+}

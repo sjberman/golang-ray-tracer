@@ -5,7 +5,6 @@ import (
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
-	"github.com/sjberman/golang-ray-tracer/pkg/utils"
 )
 
 // Group represents a group of objects.
@@ -83,13 +82,13 @@ func calculateBounds(objects []Object) *Bounds {
 			o.GetTransform().MultiplyTuple(objBounds.Maximum),
 		}
 		for _, p := range points {
-			minX = utils.Min(minX, p.GetX())
-			minY = utils.Min(minY, p.GetY())
-			minZ = utils.Min(minZ, p.GetZ())
+			minX = math.Min(minX, p.GetX())
+			minY = math.Min(minY, p.GetY())
+			minZ = math.Min(minZ, p.GetZ())
 
-			maxX = utils.Max(maxX, p.GetX())
-			maxY = utils.Max(maxY, p.GetY())
-			maxZ = utils.Max(maxZ, p.GetZ())
+			maxX = math.Max(maxX, p.GetX())
+			maxY = math.Max(maxY, p.GetY())
+			maxZ = math.Max(maxZ, p.GetZ())
 		}
 	}
 
@@ -183,4 +182,4 @@ func (g *Group) Intersect(ray *ray.Ray) []*Intersection {
 }
 
 // unused (interface satisfier).
-func (g *Group) NormalAt(_ *base.Tuple, _ *Intersection) *base.Tuple { return nil }
+func (*Group) NormalAt(_ *base.Tuple, _ *Intersection) *base.Tuple { return nil }

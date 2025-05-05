@@ -2,6 +2,7 @@ package scene
 
 import (
 	"math"
+	"slices"
 	"sync"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
@@ -93,6 +94,7 @@ func (w *World) reflectedColor(hd *hitData, remaining int) *image.Color {
 	if remaining < 1 || hd.object.GetMaterial().Reflective == 0 {
 		return image.Black
 	}
+
 	remaining--
 	reflectRay := ray.NewRay(hd.overPoint, hd.reflectv)
 	color := w.ColorAt(reflectRay, remaining)
@@ -105,13 +107,14 @@ func (w *World) refractedColor(hd *hitData, remaining int) *image.Color {
 	if remaining < 1 || hd.object.GetMaterial().Transparency == 0 {
 		return image.Black
 	}
+
 	remaining--
 	// find the ratio of first index of refraction to the second (inversion of Snell's Law)
 	nRatio := hd.n1 / hd.n2
 	// cos(theta_i) is the same as the dot product of the two vectors
 	cosI := hd.eyev.DotProduct(hd.normalv)
 	// find sin(theta_t)^2 via trig identity
-	sin2t := math.Pow(nRatio, 2) * (1 - math.Pow(cosI, 2))
+	sin2t := nRatio * nRatio * (1 - cosI*cosI)
 	if sin2t > 1 {
 		// total internal reflection
 		return image.Black
@@ -181,7 +184,7 @@ func prepareComputations(
 
 		// if intersection's object is already in containers list, then this intersection must
 		// be exiting the object; otherwise, the intersection is entering the object
-		if contains(containers, iSection.Object) {
+		if slices.Contains(containers, iSection.Object) {
 			containers = object.Remove(containers, iSection.Object)
 		} else {
 			containers = append(containers, iSection.Object)
@@ -210,13 +213,13 @@ func schlick(hd *hitData) float64 {
 	// total internal reflection only occurs if n1 > n2
 	if hd.n1 > hd.n2 {
 		n := hd.n1 / hd.n2
-		sin2t := math.Pow(n, 2) * (1 - math.Pow(cos, 2))
+		sin2t := n * n * (1 - cos*cos)
 		if sin2t > 1 {
 			return 1
 		}
 		cos = math.Sqrt(1 - sin2t)
 	}
-	r0 := math.Pow((hd.n1-hd.n2)/(hd.n1+hd.n2), 2)
+	r0 := (hd.n1 - hd.n2) / (hd.n1 + hd.n2) * ((hd.n1 - hd.n2) / (hd.n1 + hd.n2))
 
 	return r0 + (1-r0)*math.Pow(1-cos, 5)
 }
@@ -224,12 +227,14 @@ func schlick(hd *hitData) float64 {
 func Render(c *Camera, w *World) *image.Canvas {
 	canvas := image.NewCanvas(c.hsize, c.vsize)
 
-	for y := 0; y < c.vsize-1; y++ {
+	for y := range c.vsize - 1 {
 		var wg sync.WaitGroup
 		wg.Add(c.hsize - 1)
-		for x := 0; x < c.hsize-1; x++ {
+
+		for x := range c.hsize - 1 {
 			go func(x, y int) {
 				defer wg.Done()
+
 				ray := c.RayForPixel(x, y)
 				color := w.ColorAt(ray, remainingReflections)
 				canvas.WritePixel(x, y, color)
@@ -239,15 +244,4 @@ func Render(c *Camera, w *World) *image.Canvas {
 	}
 
 	return canvas
-}
-
-// returns if an object.Object slice contains an object.
-func contains(s []object.Object, o object.Object) bool {
-	for _, e := range s {
-		if o == e {
-			return true
-		}
-	}
-
-	return false
 }

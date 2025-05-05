@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
-	"github.com/sjberman/golang-ray-tracer/pkg/utils"
+	grtMath "github.com/sjberman/golang-ray-tracer/pkg/math"
 )
 
 // Pattern represents a color pattern.
@@ -74,7 +74,7 @@ func NewStripePattern(color1, color2 *Color) *StripePattern {
 
 // stripeAt returns the stripe color at a specific point.
 func stripeAt(point *base.Tuple, p *PatternObject) *Color {
-	m := utils.Mod(point.GetX(), 2)
+	m := grtMath.Mod(point.GetX(), 2)
 	if m >= 0 && m < 1 {
 		return p.color1
 	}
@@ -118,7 +118,7 @@ func NewRingPattern(color1, color2 *Color) *RingPattern {
 // ringAt returns the ring color at a specific point.
 func ringAt(point *base.Tuple, p *PatternObject) *Color {
 	distance := math.Sqrt(math.Pow(point.GetX(), 2) + math.Pow(point.GetZ(), 2))
-	if utils.Mod(math.Floor(distance), 2) == 0 {
+	if grtMath.Mod(math.Floor(distance), 2) == 0 {
 		return p.color1
 	}
 
@@ -140,7 +140,7 @@ func NewCheckerPattern(color1, color2 *Color) *CheckerPattern {
 // checkerAt returns the checker color at a specific point.
 func checkerAt(point *base.Tuple, p *PatternObject) *Color {
 	sum := math.Floor(point.GetX()) + math.Floor(point.GetY()) + math.Floor(point.GetZ())
-	if base.EqualFloats(utils.Mod(sum, 2), 0) {
+	if base.EqualFloats(grtMath.Mod(sum, 2), 0) {
 		return p.color1
 	}
 

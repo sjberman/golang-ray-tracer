@@ -109,4 +109,4 @@ func (csg *Csg) Divide(threshold int) {
 }
 
 // unused (interface satisfier).
-func (csg *Csg) NormalAt(_ *base.Tuple, _ *Intersection) *base.Tuple { return nil }
+func (*Csg) NormalAt(_ *base.Tuple, _ *Intersection) *base.Tuple { return nil }

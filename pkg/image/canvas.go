@@ -31,14 +31,14 @@ func NewCanvas(width, height int) *Canvas {
 
 // WritePixel sets a Canvas's pixel to a color.
 func (c *Canvas) WritePixel(x, y int, color *Color) {
-	if !(x > c.width-1) && !(y > c.height-1) {
+	if (x <= c.width-1) && (y <= c.height-1) {
 		c.pixels[x][y] = *color
 	}
 }
 
 // PixelAt returns the Color of a Canvas's pixel.
 func (c *Canvas) PixelAt(x, y int) *Color {
-	if !(x > c.width-1) && !(y > c.height-1) {
+	if (x <= c.width-1) && (y <= c.height-1) {
 		return &c.pixels[x][y]
 	}
 

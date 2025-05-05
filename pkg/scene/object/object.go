@@ -3,8 +3,8 @@ package object
 import (
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/image"
+	grtMath "github.com/sjberman/golang-ray-tracer/pkg/math"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
-	"github.com/sjberman/golang-ray-tracer/pkg/utils"
 )
 
 // Object is a generic object in a scene.
@@ -165,7 +165,7 @@ func Remove(s []Object, o Object) []Object {
 }
 
 // unused (interface satisfier).
-func (o *object) Divide(_ int) {}
+func (*object) Divide(_ int) {}
 
 // Bounds represents a bounding box for an object.
 type Bounds struct {
@@ -195,8 +195,8 @@ func (b *Bounds) intersects(r *ray.Ray) bool {
 	}
 	ztMin, ztMax := checkAxis(r.Origin.GetZ(), r.Direction.GetZ(), b.Minimum.GetZ(), b.Maximum.GetZ())
 
-	tMin := utils.Max(xtMin, ytMin, ztMin)
-	tMax := utils.Min(xtMax, ytMax, ztMax)
+	tMin := grtMath.Max(xtMin, ytMin, ztMin)
+	tMax := grtMath.Min(xtMax, ytMax, ztMax)
 
 	return tMin <= tMax
 }
@@ -208,7 +208,7 @@ func (b *Bounds) split() (*Bounds, *Bounds) {
 	dy := b.Maximum.GetY() - b.Minimum.GetY()
 	dz := b.Maximum.GetZ() - b.Minimum.GetZ()
 
-	greatest := utils.Max(dx, dy, dz)
+	greatest := grtMath.Max(dx, dy, dz)
 
 	// variables to help construct the points on the dividing plane
 	x0, y0, z0 := b.Minimum.GetX(), b.Minimum.GetY(), b.Minimum.GetZ()

@@ -1,141 +1,149 @@
 package object
 
 import (
-	"fmt"
 	"math"
+	"testing"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/sjberman/golang-ray-tracer/pkg/base"
 	"github.com/sjberman/golang-ray-tracer/pkg/scene/ray"
 )
 
-var _ = Describe("cylinder tests", func() {
-	It("creates cylinders", func() {
-		c := NewCylinder()
-		testNewObject(c)
-		Expect(c.Minimum).To(Equal(math.Inf(-1)))
-		Expect(c.Maximum).To(Equal(math.Inf(1)))
-		Expect(c.Closed).To(BeFalse())
-		Expect(c.Bounds()).To(Equal(&Bounds{
-			Minimum: base.NewPoint(-1, c.Minimum, -1),
-			Maximum: base.NewPoint(1, c.Maximum, 1),
-		}))
-	})
+func TestNewCylinder(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-	It("calculates a cylinder intersection", func() {
-		// misses
-		c := NewCylinder()
-		r := ray.NewRay(base.NewPoint(1, 0, 0), base.NewVector(0, 1, 0))
+	c := NewCylinder()
+	testNewObject(g, c)
+	g.Expect(c.Minimum).To(Equal(math.Inf(-1)))
+	g.Expect(c.Maximum).To(Equal(math.Inf(1)))
+	g.Expect(c.Closed).To(BeFalse())
+	g.Expect(c.Bounds()).To(Equal(&Bounds{
+		Minimum: base.NewPoint(-1, c.Minimum, -1),
+		Maximum: base.NewPoint(1, c.Maximum, 1),
+	}))
+}
+
+func TestCylinderIntersect(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
+
+	// misses
+	c := NewCylinder()
+	r := ray.NewRay(base.NewPoint(1, 0, 0), base.NewVector(0, 1, 0))
+	ints := c.Intersect(r)
+	g.Expect(len(ints)).To(BeZero())
+
+	r = ray.NewRay(base.NewPoint(0, 0, 0), base.NewVector(0, 1, 0))
+	ints = c.Intersect(r)
+	g.Expect(len(ints)).To(BeZero())
+
+	r = ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(1, 1, 1))
+	ints = c.Intersect(r)
+	g.Expect(len(ints)).To(BeZero())
+
+	// hits
+	tests := []struct {
+		name             string
+		ray              *ray.Ray
+		expVal1, expVal2 float64
+	}{
+		{
+			ray:     ray.NewRay(base.NewPoint(1, 0, -5), base.NewVector(0, 0, 1)),
+			expVal1: 5.0,
+			expVal2: 5.0,
+		},
+		{
+			ray:     ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1)),
+			expVal1: 4.0,
+			expVal2: 6.0,
+		},
+		{
+			ray:     ray.NewRay(base.NewPoint(0.5, 0, -5), base.NewVector(0.1, 1, 1).Normalize()),
+			expVal1: 6.80798191702732,
+			expVal2: 7.088723439378861,
+		},
+	}
+
+	for _, test := range tests {
+		ints := c.Intersect(test.ray)
+		g.Expect(len(ints)).To(Equal(2))
+		g.Expect(ints[0].Value).To(BeNumerically("~", test.expVal1))
+		g.Expect(ints[1].Value).To(BeNumerically("~", test.expVal2))
+	}
+
+	// constrained cylinder
+	c.Minimum = 1
+	c.Maximum = 2
+	rays := []*ray.Ray{
+		ray.NewRay(base.NewPoint(0, 1.5, 0), base.NewVector(0.1, 1, 0).Normalize()),
+		ray.NewRay(base.NewPoint(0, 3, -5), base.NewVector(0, 0, 1)),
+		ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1)),
+		ray.NewRay(base.NewPoint(0, 2, -5), base.NewVector(0, 0, 1)),
+		ray.NewRay(base.NewPoint(0, 1, -5), base.NewVector(0, 0, 1)),
+	}
+
+	for _, r := range rays {
 		ints := c.Intersect(r)
-		Expect(len(ints)).To(BeZero())
+		g.Expect(len(ints)).To(BeZero())
+	}
+	r = ray.NewRay(base.NewPoint(0, 1.5, -2), base.NewVector(0, 0, 1))
+	g.Expect(len(c.Intersect(r))).To(Equal(2))
 
-		r = ray.NewRay(base.NewPoint(0, 0, 0), base.NewVector(0, 1, 0))
-		ints = c.Intersect(r)
-		Expect(len(ints)).To(BeZero())
+	// intersection of caps on a closed cylinder
+	c.Closed = true
+	rays = []*ray.Ray{
+		ray.NewRay(base.NewPoint(0, 3, 0), base.NewVector(0, -1, 0)),
+		ray.NewRay(base.NewPoint(0, 3, -2), base.NewVector(0, -1, 2)),
+		ray.NewRay(base.NewPoint(0, 4, -2), base.NewVector(0, -1, 1)),
+		ray.NewRay(base.NewPoint(0, 0, -2), base.NewVector(0, 1, 2)),
+		ray.NewRay(base.NewPoint(0, -1, -2), base.NewVector(0, 1, 1)),
+	}
 
-		r = ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(1, 1, 1))
-		ints = c.Intersect(r)
-		Expect(len(ints)).To(BeZero())
+	for _, r := range rays {
+		ints := c.Intersect(r)
+		g.Expect(len(ints)).To(Equal(2))
+	}
+}
 
-		// hits
-		testCases := []data{
-			{
-				ray:     ray.NewRay(base.NewPoint(1, 0, -5), base.NewVector(0, 0, 1)),
-				expVal1: 5.0,
-				expVal2: 5.0,
-			},
-			{
-				ray:     ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1)),
-				expVal1: 4.0,
-				expVal2: 6.0,
-			},
-			{
-				ray:     ray.NewRay(base.NewPoint(0.5, 0, -5), base.NewVector(0.1, 1, 1).Normalize()),
-				expVal1: 6.80798191702732,
-				expVal2: 7.088723439378861,
-			},
-		}
+func TestCylinderNormalAt(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-		for _, t := range testCases {
-			ints := c.Intersect(t.ray)
-			Expect(len(ints)).To(Equal(2),
-				fmt.Sprintf("origin: %v, direction: %v", t.ray.Origin, t.ray.Direction))
-			Expect(ints[0].Value).To(Equal(t.expVal1))
-			Expect(ints[1].Value).To(Equal(t.expVal2))
-		}
+	c := NewCylinder()
 
-		// constrained cylinder
-		c.Minimum = 1
-		c.Maximum = 2
-		rays := []*ray.Ray{
-			ray.NewRay(base.NewPoint(0, 1.5, 0), base.NewVector(0.1, 1, 0).Normalize()),
-			ray.NewRay(base.NewPoint(0, 3, -5), base.NewVector(0, 0, 1)),
-			ray.NewRay(base.NewPoint(0, 0, -5), base.NewVector(0, 0, 1)),
-			ray.NewRay(base.NewPoint(0, 2, -5), base.NewVector(0, 0, 1)),
-			ray.NewRay(base.NewPoint(0, 1, -5), base.NewVector(0, 0, 1)),
-		}
+	n := c.NormalAt(base.NewPoint(1, 0, 0), nil)
+	g.Expect(n).To(Equal(base.NewVector(1, 0, 0)))
 
-		for _, r := range rays {
-			ints := c.Intersect(r)
-			Expect(len(ints)).To(BeZero(),
-				fmt.Sprintf("origin: %v, direction: %v", r.Origin, r.Direction))
-		}
-		r = ray.NewRay(base.NewPoint(0, 1.5, -2), base.NewVector(0, 0, 1))
-		Expect(len(c.Intersect(r))).To(Equal(2))
+	n = c.NormalAt(base.NewPoint(0, 5, -1), nil)
+	g.Expect(n).To(Equal(base.NewVector(0, 0, -1)))
 
-		// intersection of caps on a closed cylinder
-		c.Closed = true
-		rays = []*ray.Ray{
-			ray.NewRay(base.NewPoint(0, 3, 0), base.NewVector(0, -1, 0)),
-			ray.NewRay(base.NewPoint(0, 3, -2), base.NewVector(0, -1, 2)),
-			ray.NewRay(base.NewPoint(0, 4, -2), base.NewVector(0, -1, 1)),
-			ray.NewRay(base.NewPoint(0, 0, -2), base.NewVector(0, 1, 2)),
-			ray.NewRay(base.NewPoint(0, -1, -2), base.NewVector(0, 1, 1)),
-		}
+	n = c.NormalAt(base.NewPoint(0, -2, 1), nil)
+	g.Expect(n).To(Equal(base.NewVector(0, 0, 1)))
 
-		for _, r := range rays {
-			ints := c.Intersect(r)
-			Expect(len(ints)).To(Equal(2),
-				fmt.Sprintf("origin: %v, direction: %v", r.Origin, r.Direction))
-		}
-	})
+	n = c.NormalAt(base.NewPoint(-1, 1, 0), nil)
+	g.Expect(n).To(Equal(base.NewVector(-1, 0, 0)))
 
-	It("computes the surface normal", func() {
-		c := NewCylinder()
+	// cylinder caps
+	c.Minimum = 1
+	c.Maximum = 2
+	c.Closed = true
+	n = c.NormalAt(base.NewPoint(0, 1, 0), nil)
+	g.Expect(n).To(Equal(base.NewVector(0, -1, 0)))
 
-		n := c.NormalAt(base.NewPoint(1, 0, 0), nil)
-		Expect(n).To(Equal(base.NewVector(1, 0, 0)))
+	n = c.NormalAt(base.NewPoint(0.5, 1, 0), nil)
+	g.Expect(n).To(Equal(base.NewVector(0, -1, 0)))
 
-		n = c.NormalAt(base.NewPoint(0, 5, -1), nil)
-		Expect(n).To(Equal(base.NewVector(0, 0, -1)))
+	n = c.NormalAt(base.NewPoint(0, 1, 0.5), nil)
+	g.Expect(n).To(Equal(base.NewVector(0, -1, 0)))
 
-		n = c.NormalAt(base.NewPoint(0, -2, 1), nil)
-		Expect(n).To(Equal(base.NewVector(0, 0, 1)))
+	n = c.NormalAt(base.NewPoint(0, 2, 0), nil)
+	g.Expect(n).To(Equal(base.NewVector(0, 1, 0)))
 
-		n = c.NormalAt(base.NewPoint(-1, 1, 0), nil)
-		Expect(n).To(Equal(base.NewVector(-1, 0, 0)))
+	n = c.NormalAt(base.NewPoint(0.5, 2, 0), nil)
+	g.Expect(n).To(Equal(base.NewVector(0, 1, 0)))
 
-		// cylinder caps
-		c.Minimum = 1
-		c.Maximum = 2
-		c.Closed = true
-		n = c.NormalAt(base.NewPoint(0, 1, 0), nil)
-		Expect(n).To(Equal(base.NewVector(0, -1, 0)))
-
-		n = c.NormalAt(base.NewPoint(0.5, 1, 0), nil)
-		Expect(n).To(Equal(base.NewVector(0, -1, 0)))
-
-		n = c.NormalAt(base.NewPoint(0, 1, 0.5), nil)
-		Expect(n).To(Equal(base.NewVector(0, -1, 0)))
-
-		n = c.NormalAt(base.NewPoint(0, 2, 0), nil)
-		Expect(n).To(Equal(base.NewVector(0, 1, 0)))
-
-		n = c.NormalAt(base.NewPoint(0.5, 2, 0), nil)
-		Expect(n).To(Equal(base.NewVector(0, 1, 0)))
-
-		n = c.NormalAt(base.NewPoint(0, 2, 0.5), nil)
-		Expect(n).To(Equal(base.NewVector(0, 1, 0)))
-	})
-})
+	n = c.NormalAt(base.NewPoint(0, 2, 0.5), nil)
+	g.Expect(n).To(Equal(base.NewVector(0, 1, 0)))
+}

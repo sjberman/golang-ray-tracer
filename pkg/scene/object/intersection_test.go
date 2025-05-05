@@ -1,54 +1,62 @@
 package object
 
 import (
-	. "github.com/onsi/ginkgo"
+	"testing"
+
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("intersection tests", func() {
-	It("creates intersections", func() {
-		s := NewSphere()
-		i := NewIntersection(3.5, s)
-		Expect(i.Value).To(Equal(3.5))
-		Expect(i.Object).To(Equal(s))
-	})
+func TestNewIntersection(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-	It("returns a list of intersections", func() {
-		s := NewSphere()
-		i1 := NewIntersection(1, s)
-		i2 := NewIntersection(2, s)
-		ints := Intersections(i1, i2)
-		Expect(len(ints)).To(Equal(2))
-		Expect(ints[0].Value).To(Equal(1.0))
-		Expect(ints[1].Value).To(Equal(2.0))
-	})
+	s := NewSphere()
+	i := NewIntersection(3.5, s)
+	g.Expect(i.Value).To(Equal(3.5))
+	g.Expect(i.Object).To(Equal(s))
+}
 
-	It("identifies a hit", func() {
-		s := NewSphere()
-		i1 := NewIntersection(1, s)
-		i2 := NewIntersection(2, s)
-		ints := Intersections(i1, i2)
-		i := Hit(ints)
-		Expect(i).To(Equal(i1))
+func TestIntersections(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-		i1 = NewIntersection(-1, s)
-		i2 = NewIntersection(1, s)
-		ints = Intersections(i1, i2)
-		i = Hit(ints)
-		Expect(i).To(Equal(i2))
+	s := NewSphere()
+	i1 := NewIntersection(1, s)
+	i2 := NewIntersection(2, s)
+	ints := Intersections(i1, i2)
+	g.Expect(len(ints)).To(Equal(2))
+	g.Expect(ints[0].Value).To(Equal(1.0))
+	g.Expect(ints[1].Value).To(Equal(2.0))
+}
 
-		i1 = NewIntersection(-2, s)
-		i2 = NewIntersection(-1, s)
-		ints = Intersections(i1, i2)
-		i = Hit(ints)
-		Expect(i).To(BeNil())
+func TestHit(t *testing.T) {
+	t.Parallel()
+	g := NewWithT(t)
 
-		i1 = NewIntersection(5, s)
-		i2 = NewIntersection(7, s)
-		i3 := NewIntersection(-3, s)
-		i4 := NewIntersection(2, s)
-		ints = Intersections(i1, i2, i3, i4)
-		i = Hit(ints)
-		Expect(i).To(Equal(i4))
-	})
-})
+	s := NewSphere()
+	i1 := NewIntersection(1, s)
+	i2 := NewIntersection(2, s)
+	ints := Intersections(i1, i2)
+	i := Hit(ints)
+	g.Expect(i).To(Equal(i1))
+
+	i1 = NewIntersection(-1, s)
+	i2 = NewIntersection(1, s)
+	ints = Intersections(i1, i2)
+	i = Hit(ints)
+	g.Expect(i).To(Equal(i2))
+
+	i1 = NewIntersection(-2, s)
+	i2 = NewIntersection(-1, s)
+	ints = Intersections(i1, i2)
+	i = Hit(ints)
+	g.Expect(i).To(BeNil())
+
+	i1 = NewIntersection(5, s)
+	i2 = NewIntersection(7, s)
+	i3 := NewIntersection(-3, s)
+	i4 := NewIntersection(2, s)
+	ints = Intersections(i1, i2, i3, i4)
+	i = Hit(ints)
+	g.Expect(i).To(Equal(i4))
+}

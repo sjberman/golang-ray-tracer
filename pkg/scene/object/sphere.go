@@ -21,7 +21,7 @@ func NewSphere() *Sphere {
 
 // DeepCopy performs a deep copy of the object to a new object.
 func (s *Sphere) DeepCopy() Object {
-	newObj := NewCylinder()
+	newObj := NewSphere()
 	newMaterial := s.Material
 	newObj.SetMaterial(&newMaterial)
 	newTransform := s.transform

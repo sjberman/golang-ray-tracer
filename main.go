@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -73,7 +72,7 @@ func main() {
 	// defer pprof.StopCPUProfile()
 	parseArgs()
 
-	sceneBytes, err := ioutil.ReadFile(*sceneFile)
+	sceneBytes, err := os.ReadFile(*sceneFile)
 	if err != nil {
 		log.Fatalf("error reading scene file: %v\n", err)
 	}
